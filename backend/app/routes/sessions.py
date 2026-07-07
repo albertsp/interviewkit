@@ -8,22 +8,36 @@ from ..constants.gamification import (
 from ..models.session import Session
 from ..models.question import Question
 from ..models.user import User
-from .. import db
+from .. import db, limiter
 from ..services.ai_service import generate_questions, generate_feedback
 
 sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
+
+# Groq free tier (ver AUDIT.md F0-2): 30 RPM / 1.000 RPD / 100K TPD,
+# compartido entre TODOS los usuarios de la app. "groq_global" agrupa
+# ambos endpoints de IA bajo un unico presupuesto para no agotarlo.
+GROQ_GLOBAL_LIMIT = "20 per minute;40 per day"
+GROQ_GLOBAL_SCOPE = "groq_global"
+
+
+def _groq_global_key():
+    return "global"
 
 
 @sessions.route('/', methods=['POST'])
 # Protegemos el endpoint con JWT
 @jwt_required()
+# Limite por usuario: evita que una sola cuenta agote el presupuesto compartido
+@limiter.limit("5 per hour")
+# Limite global: protege el presupuesto real de la cuenta de Groq (free tier)
+@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
 def create_session():
 
     # Extraemos user_id del token
     user_id = get_jwt_identity()
 
     # Obtenemos el body y accedemos a los campos
-    data = request.get_json()
+    data = request.get_json() or {}
     stack = data.get("stack")
     level = data.get("level")
 
@@ -66,32 +80,23 @@ def create_session():
 @sessions.route('/<int:session_id>/questions/<int:question_id>', methods=['PATCH'])
 # Protegemos el endpoint con JWT
 @jwt_required()
+@limiter.limit("15 per hour")
+@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
 def answer_question(session_id, question_id):
     # Extraemos user_id del token
     user_id = get_jwt_identity()
-
-    # Guardamos el body de la peticion
-    data = request.get_json()
-
-    # Buscamos en BD la sesión del usuario
+    data = request.get_json() or {}
     user_sesion = Session.query.filter_by(session_id=session_id, user_id=user_id).first()
-
-    # Si no existe devolvemos error
+    
     if user_sesion is None:
         return jsonify({"msg": "La sesión no existe"}), 404
 
-    # Buscamos la pregunta por id
     user_question = Question.query.filter_by(question_id=question_id, session_id=session_id).first()
 
-    # Si no existe devolvemos error
     if user_question is None:
         return jsonify({"msg": "La pregunta no existe"}), 404
 
-    # Guardamos la respuesta del usuario en la BD
     user_question.answer = data.get("answer")
-    db.session.commit()
-
-    # Generamos el feedback de la respuesta y guardamos en BD
     result = generate_feedback(user_sesion.stack, user_question.question, data.get("answer"))
     user_question.feedback = result["feedback"]
     user_question.result = result["result"]

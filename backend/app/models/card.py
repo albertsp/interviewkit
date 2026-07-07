@@ -11,11 +11,11 @@ class Card(db.Model):
     # Identificador unico de la card
     card_id = db.Column(db.Integer, primary_key=True)
     # FK a la pregunta de la que se genero esta card
-    question_id = db.Column(db.Integer, db.ForeignKey(Question.question_id))
+    question_id = db.Column(db.Integer, db.ForeignKey(Question.question_id), index=True)
     # FK a la sesion a la que pertenece
-    session_id = db.Column(db.Integer, db.ForeignKey(Session.session_id))
+    session_id = db.Column(db.Integer, db.ForeignKey(Session.session_id), index=True)
     # FK al usuario propietario
-    user_id = db.Column(db.Integer, db.ForeignKey(User.user_id))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), index=True)
     # Nombre corto del concepto (titulo de la card)
     concept = db.Column(db.String(120), nullable=False)
     # Definicion tecnica en una frase
@@ -53,5 +53,7 @@ class Card(db.Model):
             "mnemonic": self.mnemonic,
             "code": self.code,
             "code_language": self.code_language,
+            "tags": self.tags or [],
+            "difficulty": self.difficulty,
             "created_at": self.created_at.isoformat()
         }

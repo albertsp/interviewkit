@@ -35,8 +35,8 @@ export default function Faq() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="w-full px-6 py-24 sm:py-32 bg-secondary/30">
-      <div className="max-w-3xl mx-auto">
+    <section id="faq" className="w-full px-6 py-24 sm:py-32 bg-secondary/30">
+      <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +52,7 @@ export default function Faq() {
           </h2>
         </motion.div>
 
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {FAQS.map(({ q, a }, index) => {
             const isOpen = openIndex === index;
             return (

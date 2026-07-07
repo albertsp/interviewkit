@@ -36,8 +36,9 @@ def update_card(card_id):
     if concept:
         card.concept = concept[:120]
 
-    definition = (data.get("definition") or "").strip()
-    card.definition = definition or None
+    if "definition" in data:
+        definition = (data.get("definition") or "").strip()
+        card.definition = definition or None
 
     explanation = (data.get("explanation") or "").strip()
     if explanation:
@@ -47,8 +48,9 @@ def update_card(card_id):
     if use_case:
         card.use_case = use_case
 
-    avoid_when = (data.get("avoid_when") or "").strip()
-    card.avoid_when = avoid_when or None
+    if "avoid_when" in data:
+        avoid_when = (data.get("avoid_when") or "").strip()
+        card.avoid_when = avoid_when or None
 
     mnemonic = (data.get("mnemonic") or "").strip()
     card.mnemonic = mnemonic[:200] if mnemonic else None

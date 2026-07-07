@@ -16,27 +16,19 @@ const duplicated = [...TECHS, ...TECHS];
 
 export default function Techs() {
   return (
-    <section className="w-full py-24 sm:py-32 overflow-hidden">
+    <section id="tecnologias" className="w-full py-10 sm:py-14 overflow-hidden border-y border-border/50">
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-14"
+          className="text-center text-sm text-muted-foreground font-mono mb-6 px-4"
         >
-          <span className="text-primary font-mono text-sm font-medium tracking-wide uppercase mb-4 block">
-            Stacks disponibles
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-            Practica con las tecnologías más demandadas
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-md mx-auto">
-            Frontend, backend o datos — eliges tú.
-          </p>
-        </motion.div>
+          Practica con las tecnologías más demandadas — frontend, backend o datos
+        </motion.p>
 
-        <div className="relative mt-8 [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+        <div className="relative [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
           <motion.div
             className="flex gap-5"
             animate={{ x: ["0%", "-50%"] }}

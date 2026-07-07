@@ -124,7 +124,14 @@ export default function DashboardPage() {
       <div className="min-h-screen px-6 pt-24 pb-12 md:pt-28 md:pb-20">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-destructive text-lg font-medium">{error}</p>
-          <Button variant="outline" className="mt-4" onClick={() => { setError(null); getCards().then(setCards).catch(() => {}) }}>
+          <Button variant="outline" className="mt-4" onClick={() => {
+            setError(null);
+            setLoading(true);
+            getCards()
+              .then(setCards)
+              .catch(() => setError("No se han podido cargar las cards. Inténtalo de nuevo"))
+              .finally(() => setLoading(false))
+          }}>
             Reintentar
           </Button>
         </div>

@@ -168,6 +168,26 @@ class TestGoogleCallback:
             assert resp.status_code == 302
             assert "error=oauth_failed" in resp.location
 
+    def test_callback_userinfo_passes_token_explicitly(self, client, db):
+        """El fallback de userinfo() debe recibir el token para que
+        Authlib lo adjunte en la peticion a Google."""
+        mock_token = {"access_token": "ya29.fake-access-token"}
+        with patch("app.routes.oauth.oauth") as mock_oauth:
+            mock_oauth.google.authorize_access_token.return_value = mock_token
+            mock_oauth.google.userinfo.return_value = {
+                "sub": "google_explicit",
+                "email": "explicit@example.com",
+                "name": "Explicit User",
+            }
+
+            resp = client.get("/auth/google/callback")
+            assert resp.status_code == 302
+
+            mock_oauth.google.userinfo.assert_called_once()
+            # Verificamos que el token se pasa como argumento keyword
+            _, kwargs = mock_oauth.google.userinfo.call_args
+            assert kwargs.get("token") is mock_token
+
     def test_callback_userinfo_missing_sub(self, client, db):
         mock_token = {"userinfo": {"name": "No Sub"}}
         with patch("app.routes.oauth.oauth") as mock_oauth:

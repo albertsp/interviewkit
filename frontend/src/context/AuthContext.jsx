@@ -27,9 +27,14 @@ export function AuthProvider({children}){
     const [stats, setStats] = useState(DEFAULT_STATS)
     const [initialized, setInitialized] = useState(false)
     const refreshingRef = useRef(false)
+    // Marcamos un login en curso para que un 401 transitorio (p. ej. el
+    // refreshStats inicial con token stale) no limpie el token nuevo que
+    // loginFromOAuth acaba de escribir en localStorage.
+    const loggingInRef = useRef(false)
 
     useEffect(() => {
         setOnUnauthorized(() => {
+            if (loggingInRef.current) return
             localStorage.removeItem("user")
             localStorage.removeItem("access_token")
             setUser(null)
@@ -61,10 +66,17 @@ export function AuthProvider({children}){
     }, [])
 
     useEffect(() => {
+        // Solo restauramos sesion si AMBAS claves existen: un "user" sin
+        // access_token es estado residual de un login interrumpido y
+        // dispararia un 401 que limpia el token que loginFromOAuth
+        // todavia no ha terminado de escribir.
         const savedUser = localStorage.getItem("user")
-        if (savedUser) {
+        const savedToken = localStorage.getItem("access_token")
+        if (savedUser && savedToken) {
             setUser(savedUser)
             refreshStats()
+        } else if (savedUser && !savedToken) {
+            localStorage.removeItem("user")
         }
         setInitialized(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,13 +90,17 @@ export function AuthProvider({children}){
         refreshStats()
     }
 
-    async function loginFromOAuth(token){
-        if (token) localStorage.setItem("access_token", token)
-        const profile = await getMyProfile()
-        const name = profile.name || profile.email || "User"
-        localStorage.setItem("user", name)
-        setUser(name)
-        await refreshStats()
+    async function loginFromOAuth(){
+        loggingInRef.current = true
+        try {
+            const profile = await getMyProfile()
+            const name = profile.name || profile.email || "User"
+            localStorage.setItem("user", name)
+            setUser(name)
+            await refreshStats()
+        } finally {
+            loggingInRef.current = false
+        }
     }
 
     function updateUser(newName){

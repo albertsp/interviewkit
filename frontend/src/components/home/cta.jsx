@@ -8,7 +8,7 @@ export default function CTA() {
   const router = useRouter();
 
   return (
-    <section className="w-full px-6 py-24 sm:py-32">
+    <section id="empezar" className="w-full px-6 py-24 sm:py-32">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -35,6 +35,9 @@ export default function CTA() {
             <span>Empezar ahora</span>
             <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-1" />
           </motion.button>
+          <p className="text-xs text-muted-foreground/70 font-mono mt-6">
+            Gratis · Sin tarjeta de crédito · Cancela cuando quieras
+          </p>
         </div>
       </motion.div>
     </section>

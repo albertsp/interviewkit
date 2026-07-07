@@ -11,8 +11,11 @@ node_modules/
 dist/
 .env
 .env.local
-
+.env.production
 # OS
 .DS_Store
 Thumbs.db
 .vercel
+
+# Auditorias/notas de trabajo locales, no se versionan
+AUDIT.md

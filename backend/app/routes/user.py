@@ -68,9 +68,15 @@ def get_my_stats():
         .limit(5)
         .all()
     )
+    recent_session_ids = [sess.session_id for sess in recent_sessions_rows]
+    questions_by_session = {}
+    if recent_session_ids:
+        for q in Question.query.filter(Question.session_id.in_(recent_session_ids)).all():
+            questions_by_session.setdefault(q.session_id, []).append(q)
+
     recent_sessions = []
     for sess in recent_sessions_rows:
-        questions = Question.query.filter_by(session_id=sess.session_id).all()
+        questions = questions_by_session.get(sess.session_id, [])
         total_questions = len(questions)
         correct = sum(1 for q in questions if q.result == "CORRECT")
         partially = sum(1 for q in questions if q.result == "PARTIALLY_CORRECT")

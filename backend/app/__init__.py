@@ -1,16 +1,32 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt_identity
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from authlib.integrations.flask_client import OAuth
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+
+def _rate_limit_key():
+    """Identifica al usuario autenticado para limites por-usuario.
+    Si no hay JWT valido en la request, cae a la IP (no deberia ocurrir
+    en rutas protegidas con @jwt_required, pero evita un 500 si pasa)."""
+    try:
+        identity = get_jwt_identity()
+        if identity:
+            return f"user:{identity}"
+    except Exception:
+        pass
+    return get_remote_address()
 
 
 # Creamos la clase SQLAlchemy y JWTManager para integrar con Flask
 db = SQLAlchemy()
 jwt = JWTManager()
+limiter = Limiter(key_func=_rate_limit_key)
 
 # Funcion para crear la app
 def create_app():
@@ -22,6 +38,16 @@ def create_app():
 
     db.init_app(app)                    # Inicializamos app Flask con la extension SQLAlchemy
     jwt.init_app(app)                   # Inicializamos app Flask con extension JTManager
+
+    # Rate limiting (ver F0-2 en AUDIT.md): activo tambien en tests para que
+    # la suite ejercite el comportamiento real; los tests deben llamar a
+    # limiter.reset() para partir de un estado limpio si lo necesitan.
+    app.config.setdefault("RATELIMIT_ENABLED", True)
+    limiter.init_app(app)
+
+    @app.errorhandler(429)
+    def _rate_limit_exceeded(e):
+        return jsonify({"error": "Has alcanzado el limite de peticiones. Intentalo de nuevo mas tarde."}), 429
 
     from .models.user import User
     from .models.session import Session
