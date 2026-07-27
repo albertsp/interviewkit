@@ -50,7 +50,7 @@ interface CardsSummary{
   total: number;
   top_tags: string[];
 }
-interface StatsResponse{
+export interface StatsResponse{
   results_summary: ResultsSummary;
   stacks_stats: StackStat[];
   recent_sessions: RecentSession[];
@@ -60,6 +60,7 @@ interface StatsResponse{
   xp_to_next_level: number;
   progress_in_level: number;
   xp_per_level: number;
+  sessions_count: number;
 }
 interface SaveCardResponse{
   card_id: number;
