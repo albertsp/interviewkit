@@ -102,6 +102,7 @@ def google_login():
         redirect_uri = url_for("oauth.google_callback", _external=True)
         return oauth.google.authorize_redirect(redirect_uri)
     except Exception:
+        current_app.logger.exception("OAuth google_login failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -111,6 +112,7 @@ def google_callback():
     try:
         token = oauth.google.authorize_access_token()
     except Exception:
+        current_app.logger.exception("OAuth google_callback: authorize_access_token failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -120,6 +122,7 @@ def google_callback():
             try:
                 userinfo = oauth.google.userinfo()
             except Exception:
+                current_app.logger.exception("OAuth google_callback: userinfo fetch failed")
                 frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
                 return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -138,6 +141,7 @@ def google_callback():
 
         return _build_login_response(user)
     except Exception:
+        current_app.logger.exception("OAuth google_callback: post-token processing failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -148,6 +152,7 @@ def github_login():
         redirect_uri = url_for("oauth.github_callback", _external=True)
         return oauth.github.authorize_redirect(redirect_uri)
     except Exception:
+        current_app.logger.exception("OAuth github_login failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -157,6 +162,7 @@ def github_callback():
     try:
         token = oauth.github.authorize_access_token()
     except Exception:
+        current_app.logger.exception("OAuth github_callback: authorize_access_token failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
 
@@ -188,5 +194,6 @@ def github_callback():
 
         return _build_login_response(user)
     except Exception:
+        current_app.logger.exception("OAuth github_callback: post-token processing failed")
         frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
         return redirect(f"{frontend_url}/login?error=oauth_failed")
