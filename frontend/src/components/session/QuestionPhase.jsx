@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import MarkdownContent from "@/components/MarkdownContent";
 import dynamic from "next/dynamic";
@@ -12,13 +12,20 @@ import { Send, Code, AlignLeft } from "lucide-react";
 
 export default function QuestionPhase({
   question,
+  questionType,
   answer,
   error,
   onAnswerChange,
   onSubmit,
 }) {
   // Alterna entre modo texto (textarea) y modo codigo (CodeMirror)
-  const [isCodeMode, setIsCodeMode] = useState(false);
+  // Por defecto arrancamos en el modo que mejor encaja con el tipo de pregunta
+  const [isCodeMode, setIsCodeMode] = useState(questionType === "code");
+
+  // Cada pregunta puede pedir un modo de entrada distinto por defecto
+  useEffect(() => {
+    setIsCodeMode(questionType === "code");
+  }, [question, questionType]);
 
   return (
     <motion.div

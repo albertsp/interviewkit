@@ -2,9 +2,10 @@ import pytest
 from app import limiter
 
 
-FAKE_QUESTIONS = [
-    "q1", "q2", "q3", "q4", "q5",
-]
+FAKE_QUESTIONS = {
+    "theory": ["t1", "t2"],
+    "code": ["q1", "q2", "q3"],
+}
 
 FAKE_FEEDBACK = {
     "result": "CORRECT",
@@ -16,14 +17,17 @@ FAKE_FEEDBACK = {
     },
 }
 
-VALID_PAYLOAD = {"stack": "JavaScript", "level": "Básico"}
+VALID_PAYLOAD = {"stack": "JavaScript", "level": "Básico", "topic": "General / Mixto"}
 
 
 @pytest.fixture(autouse=True)
 def _mock_ai(monkeypatch):
     """Ninguna prueba debe llamar a la API real de Groq."""
-    monkeypatch.setattr("app.routes.sessions.generate_questions", lambda stack, level: list(FAKE_QUESTIONS))
-    monkeypatch.setattr("app.routes.sessions.generate_feedback", lambda stack, question, answer: dict(FAKE_FEEDBACK))
+    monkeypatch.setattr("app.routes.sessions.generate_questions", lambda stack, level, topic: dict(FAKE_QUESTIONS))
+    monkeypatch.setattr(
+        "app.routes.sessions.generate_feedback",
+        lambda stack, question, answer, question_type="code": dict(FAKE_FEEDBACK),
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -44,6 +48,7 @@ class TestCreateSession:
         assert resp.status_code == 201
         data = resp.get_json()
         assert len(data["questions"]) == 5
+        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code", "code"]
 
     def test_create_session_invalid_stack(self, client, auth_headers):
         """Un stack fuera de VALID_STACKS debe rechazarse con 400 antes de llamar a la IA."""

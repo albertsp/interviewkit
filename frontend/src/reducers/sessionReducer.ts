@@ -3,7 +3,7 @@
 type Phase = "answering" | "loading_feedback" | "waiting_action" | "complete";
 export type Result = "CORRECT" | "PARTIALLY_CORRECT" | "INCORRECT";
 type Action = 
-| { type: "INIT_SESSION"; payload: { session_id: number; stack: string; level: string; questions: Question[] } } 
+| { type: "INIT_SESSION"; payload: { session_id: number; stack: string; level: string; topic: string; questions: Question[] } }
 | { type: "ANSWER_CHANGED"; payload: string }
 | { type: "ANSWER_SUBMITTED";}
 | { type: "FEEDBACK_RECEIVED"; payload: { feedback: string; result: Result; card: Card}}
@@ -22,6 +22,7 @@ type Action =
 export interface Question {
   question_id: number;
   question: string;
+  type: "theory" | "code";
   answer: string;
   feedback: null | string;
   result?: Result;
@@ -42,6 +43,7 @@ interface State {
   session_id: number | null;
   stack: string | null;
   level: string | null;
+  topic: string | null;
   questions: Question[];
   currentQuestionIndex: number;
   currentAnswer: string;
@@ -65,6 +67,7 @@ export const initialState: State = {
   session_id: null,
   stack: null,
   level: null,
+  topic: null,
   questions: [],
   currentQuestionIndex: 0,
   currentAnswer: "",
@@ -89,7 +92,7 @@ export function sessionReducer(state: State, action: Action): State {
   switch (action.type) {
     // Inicializa la sesion con los datos devueltos por POST /sessions/
     case "INIT_SESSION": {
-      const { session_id, stack, level, questions } = action.payload;
+      const { session_id, stack, level, topic, questions } = action.payload;
       // Añadimos campos answer y feedback a cada pregunta para seguimiento
       const initializedQuestions = questions.map((q) => ({
         ...q,
@@ -101,6 +104,7 @@ export function sessionReducer(state: State, action: Action): State {
         session_id,
         stack,
         level,
+        topic,
         questions: initializedQuestions,
         currentQuestionIndex: 0,
         currentAnswer: "",

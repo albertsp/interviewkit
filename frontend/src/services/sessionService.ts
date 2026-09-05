@@ -6,7 +6,8 @@ interface CreateSessionResponse{
   session_id: number;
   stack: string;
   level: string;
-  questions: Pick<Question, "question_id" | "question">[];
+  topic: string;
+  questions: Pick<Question, "question_id" | "question" | "type">[];
 
 }
 interface SubmitAnswerResponse{
@@ -66,10 +67,10 @@ interface SaveCardResponse{
   card_id: number;
   concept: string;
 }
-export async function createSession({ stack, level } : {stack: string, level: string }): Promise<CreateSessionResponse> {
+export async function createSession({ stack, level, topic } : {stack: string, level: string, topic: string }): Promise<CreateSessionResponse> {
   const response = await apiFetch("/sessions/", {
     method: "POST",
-    body: JSON.stringify({ stack, level }),
+    body: JSON.stringify({ stack, level, topic }),
   });
   return handleResponse<CreateSessionResponse>(response);
 }

@@ -102,7 +102,7 @@ export default function SessionSetup({ loading, error, onSubmit }) {
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Nueva sesion</h1>
           <p className="text-muted-foreground mt-1">
-            Configura tu entrevista personalizada en tres pasos
+            Configura tu entrevista personalizada en cuatro pasos
           </p>
         </div>
         <StackSelector onSubmit={onSubmit} stacks={stacks} />

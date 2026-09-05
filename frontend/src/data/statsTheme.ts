@@ -11,6 +11,7 @@ export const STACK_COLORS: Record<string, Color> = {
   Python: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", ring: "ring-emerald-500/30", bar: "#3776ab" },
   SQL: { bg: "bg-violet-500/10", text: "text-violet-600 dark:text-violet-400", ring: "ring-violet-500/30", bar: "#336791" },
   "HTML/CSS": { bg: "bg-orange-500/10", text: "text-orange-600 dark:text-orange-400", ring: "ring-orange-500/30", bar: "#e34f26" },
+  Java: { bg: "bg-red-600/10", text: "text-red-700 dark:text-red-400", ring: "ring-red-600/30", bar: "#ea2d2e" },
 };
 
 export const LEVEL_BADGES: Record<string, string> = {
