@@ -136,7 +136,7 @@ def generate_questions(stack, level):
                     "content": f"Generate 5 interview questions for {stack} at {level} level.",
                 }
             ],
-            model="llama-3.3-70b-versatile"
+            model="openai/gpt-oss-120b"
         )
         raw = chat_completion.choices[0].message.content
         return _parse_ai_json(raw)
@@ -163,7 +163,7 @@ def generate_feedback(stack, question, answer):
                     ),
                 },
             ],
-            model="llama-3.3-70b-versatile"
+            model="openai/gpt-oss-120b"
         )
         raw = chat_completion.choices[0].message.content
         parsed = _parse_ai_json(raw)
