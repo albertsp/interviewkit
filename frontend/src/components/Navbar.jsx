@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext"
 const BRAND = "InterviewKit"
 
 function BrandText() {
-  return <span className="text-2xl sm:text-3xl font-bold tracking-tight">{BRAND}</span>
+  return <span className="text-2xl sm:text-3xl font-bold tracking-tight font-display">{BRAND}</span>
 }
 
 function Navbar() {
@@ -43,7 +43,7 @@ function Navbar() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-4 pointer-events-none">
-      <div className="pointer-events-auto flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between px-4 sm:px-6 py-3 rounded-2xl bg-background/70 backdrop-blur-xl border border-border/30 shadow-lg shadow-black/5">
+      <div className="pointer-events-auto flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between px-4 sm:px-6 py-3 rounded-2xl bg-background/60 backdrop-blur-2xl border border-border/40 shadow-lg shadow-black/10">
 
         <motion.button
           onClick={() => router.push("/")}
@@ -74,7 +74,7 @@ function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {user && (
             <div
-              className="hidden sm:flex items-center gap-2 rounded-lg border border-border/50 bg-background px-3 py-1.5 text-sm"
+              className="hidden sm:flex items-center gap-2 rounded-lg border border-border/50 bg-background px-3 py-1.5 text-sm glow-amber"
               title={`${stats.total_xp} XP · ${stats.xp_to_next_level} XP para Nv ${stats.level + 1}`}
             >
               <Star className="size-3.5 text-amber-500 fill-amber-500" />
@@ -153,7 +153,7 @@ function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-20 left-4 right-4 z-40 rounded-2xl bg-background/95 backdrop-blur-xl border border-border/30 shadow-lg p-4 flex flex-col gap-2 pointer-events-auto md:hidden"
+            className="fixed top-20 left-4 right-4 z-40 rounded-2xl bg-background/95 backdrop-blur-2xl border border-border/40 shadow-2xl shadow-black/20 p-4 flex flex-col gap-2 pointer-events-auto md:hidden"
           >
             <div className="flex items-center gap-3 pb-3 border-b border-border/30 mb-1">
               <Avatar className="size-9">

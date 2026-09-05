@@ -16,6 +16,10 @@ const badgeVariants = cva(
           "border-transparent bg-destructive/10 text-destructive dark:bg-destructive/20",
         outline:
           "border-border text-foreground",
+        glow:
+          "border-transparent bg-primary/10 text-primary shadow-[0_0_8px_oklch(0.72_0.19_195/0.3)]",
+        gradient:
+          "border-primary/20 bg-gradient-to-r from-primary/20 to-primary/5 text-primary",
       },
       size: {
         default: "px-2.5 py-0.5",

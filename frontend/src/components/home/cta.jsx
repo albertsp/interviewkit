@@ -20,7 +20,7 @@ export default function CTA() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-primary/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex flex-col items-center text-center px-8 py-16 sm:py-20">
-          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight max-w-lg">
+          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight max-w-lg font-display">
             ¿Listo para tu próxima entrevista?
           </h2>
           <p className="text-muted-foreground text-lg mb-10 max-w-md leading-relaxed">

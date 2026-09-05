@@ -51,7 +51,7 @@ export default function Features() {
           <span className="text-primary font-mono text-sm font-medium tracking-wide uppercase mb-4 block">
             Qué consigues
           </span>
-          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight font-display">
             Todo lo que necesitas para preparar tu entrevista
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
@@ -75,7 +75,7 @@ export default function Features() {
                 <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
                   <Icon className="size-5 text-primary" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight">{title}</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight font-display">{title}</h3>
                 <p className="text-muted-foreground leading-relaxed text-lg">{description}</p>
               </motion.div>
 
@@ -110,7 +110,7 @@ export default function Features() {
                 <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
                   <Icon className="size-5 text-primary" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2 font-display">{title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{description}</p>
               </div>
             </motion.div>

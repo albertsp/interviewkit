@@ -64,14 +64,16 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 overflow-hidden">
+      <div className="absolute inset-0 [background-image:linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] [background-size:64px_64px] opacity-20" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-md"
+        className="relative z-10 w-full max-w-md"
       >
-        <Card className="border-0 ring-1 ring-foreground/10 shadow-sm">
+        <Card className="border-0 ring-1 ring-foreground/10 shadow-2xl shadow-black/20 bg-card/80 backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-6 text-center">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10 mb-2">
               <LogIn className="size-6 text-primary" />

@@ -1,4 +1,4 @@
-import { AuthProvider } from "@/context/AuthContext";
+import Providers from "./providers";
 import "@/index.css";
 
 export const metadata = {
@@ -11,14 +11,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" className="dark font-sans">
       <body className="dark font-sans">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium">
           Saltar al contenido
         </a>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

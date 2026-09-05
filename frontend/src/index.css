@@ -2,13 +2,13 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/syne";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
-
 @theme inline {
-    --font-heading: var(--font-sans);
+    --font-heading: var(--font-display);
+    --font-display: 'Syne Variable', sans-serif;
     --font-sans: 'Geist Variable', sans-serif;
     --font-mono: 'JetBrains Mono Variable', monospace;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -67,8 +67,8 @@
     --accent: oklch(0.15 0.04 195);
     --accent-foreground: oklch(0.72 0.19 195);
     --destructive: oklch(0.58 0.22 25);
-    --border: oklch(0.18 0.01 270);
-    --input: oklch(0.18 0.01 270);
+    --border: oklch(0.22 0.01 270);
+    --input: oklch(0.22 0.01 270);
     --ring: oklch(0.72 0.19 195);
     --chart-1: oklch(0.72 0.19 195);
     --chart-2: oklch(0.65 0.18 155);
@@ -89,13 +89,28 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+  }
+}
+
+@layer utilities {
+  .text-gradient-primary {
+    background: linear-gradient(135deg, oklch(0.72 0.19 195), oklch(0.65 0.18 155));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glow-primary {
+    box-shadow: 0 0 20px oklch(0.72 0.19 195 / 0.15);
+  }
+  .glow-amber {
+    box-shadow: 0 0 12px oklch(0.75 0.15 80 / 0.25);
+  }
 }
 
 @keyframes glow-pulse {
@@ -106,4 +121,14 @@
 @keyframes grid-fade {
     0%, 100% { opacity: 0.03; }
     50% { opacity: 0.07; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
 }

@@ -47,7 +47,7 @@ export default function Faq() {
           <span className="text-primary font-mono text-sm font-medium tracking-wide uppercase mb-4 block">
             FAQ
           </span>
-          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight font-display">
             Preguntas frecuentes
           </h2>
         </motion.div>

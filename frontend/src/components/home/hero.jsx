@@ -76,7 +76,7 @@ export default function Hero() {
         </motion.div>
 
         {/* Heading with typing effect */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-[1.08] mb-6 max-w-5xl tracking-tight">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-[1.08] mb-6 max-w-5xl tracking-tight font-display">
           <span ref={textRef}>{mounted ? "" : HERO_TEXT}</span>
           {isTyping && (
             <motion.span

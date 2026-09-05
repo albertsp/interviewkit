@@ -17,11 +17,12 @@ const ACCOUNT_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer className="border-t border-border bg-secondary/20">
+      <div className="h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
           <div className="col-span-2">
-            <span className="text-2xl font-bold tracking-tight">InterviewKit</span>
+            <span className="text-2xl font-bold tracking-tight font-display">InterviewKit</span>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs leading-relaxed">
               Simula entrevistas técnicas con IA, recibe feedback al instante y repasa con cards personalizadas.
             </p>
@@ -36,7 +37,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-3">
               {PRODUCT_LINKS.map(({ href, label }) => (
                 <li key={href}>
-                  <a href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <a href={href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     {label}
                   </a>
                 </li>
@@ -49,7 +50,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-3">
               {ACCOUNT_LINKS.map(({ href, label }) => (
                 <li key={href}>
-                  <Link href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link href={href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     {label}
                   </Link>
                 </li>
@@ -59,7 +60,7 @@ export default function Footer() {
                   href="https://github.com/albertsp/interview-prep-app"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   <ExternalLink className="size-3.5" />
                   Código en GitHub
