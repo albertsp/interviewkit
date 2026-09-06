@@ -12,6 +12,7 @@ dist/
 .env
 .env.local
 .env.production
+*.tsbuildinfo
 # OS
 .DS_Store
 Thumbs.db

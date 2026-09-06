@@ -1,11 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, BookOpen, Code2 } from "lucide-react";
 
-export default function ProgressIndicator({ currentIndex, total, stack, level }) {
+export default function ProgressIndicator({ currentIndex, total, stack, level, topic, questionType }) {
+  const blockLabel =
+    questionType === "theory"
+      ? { text: "Preguntas teóricas", Icon: BookOpen }
+      : questionType === "code"
+      ? { text: "Preguntas de código", Icon: Code2 }
+      : null;
+
   return (
     <div className="mb-8">
+      {blockLabel && (
+        <div className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary mb-2">
+          <blockLabel.Icon className="size-4" />
+          {blockLabel.text}
+        </div>
+      )}
       <div className="flex items-center justify-center gap-2 text-base text-muted-foreground mb-4">
         <span className="font-semibold text-foreground">
           Pregunta {currentIndex + 1}
@@ -46,6 +59,7 @@ export default function ProgressIndicator({ currentIndex, total, stack, level })
 
       <p className="text-center text-sm text-muted-foreground mt-3">
         {stack} · {level}
+        {topic && topic !== "General / Mixto" ? ` · ${topic}` : ""}
       </p>
     </div>
   );

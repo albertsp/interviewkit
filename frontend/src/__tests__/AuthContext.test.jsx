@@ -36,7 +36,7 @@ function TestConsumer() {
       <button data-testid="logout-btn" onClick={() => auth.logout()}>
         Logout
       </button>
-      <button data-testid="oauth-btn" onClick={() => auth.loginFromOAuth('oauth-jwt-token')}>
+      <button data-testid="oauth-btn" onClick={() => auth.loginFromOAuth()}>
         OAuth Login
       </button>
       <button data-testid="update-btn" onClick={() => auth.updateUser('NewName')}>
@@ -160,7 +160,7 @@ describe('AuthContext', () => {
     expect(mockLogoutUser).toHaveBeenCalled();
   });
 
-  it('loginFromOAuth() stores token and fetches profile', async () => {
+  it('loginFromOAuth() fetches profile and saves user (JWT lives in an httpOnly cookie, not localStorage)', async () => {
     renderWithProvider();
 
     await waitFor(() => {
@@ -172,7 +172,7 @@ describe('AuthContext', () => {
     });
 
     expect(mockGetMyProfile).toHaveBeenCalled();
-    expect(window.localStorage.getItem('access_token')).toBe('oauth-jwt-token');
+    expect(window.localStorage.getItem('access_token')).toBeNull();
     expect(window.localStorage.getItem('user')).toBe('OAuthUser');
     expect(screen.getByTestId('user').textContent).toBe('OAuthUser');
     expect(mockGetMyStats).toHaveBeenCalled();
@@ -283,9 +283,24 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('stats-xp').textContent).toBe('100');
   });
 
-  it('clears stale user in localStorage when no token is present', async () => {
+  it('restores session via profile fetch when user exists without token (OAuth cookie flow)', async () => {
     window.localStorage.setItem('user', 'StaleUser');
-    // sin access_token: estado residual de un login interrumpido
+    // sin access_token: la sesion vive en la cookie httpOnly, se confirma via perfil
+
+    renderWithProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('initialized').textContent).toBe('true');
+    });
+
+    expect(mockGetMyProfile).toHaveBeenCalled();
+    expect(window.localStorage.getItem('user')).toBe('OAuthUser');
+    expect(screen.getByTestId('user').textContent).toBe('OAuthUser');
+  });
+
+  it('clears stale user in localStorage when the profile fetch fails (no valid cookie)', async () => {
+    window.localStorage.setItem('user', 'StaleUser');
+    mockGetMyProfile.mockRejectedValue(new Error('unauthorized'));
 
     renderWithProvider();
 
@@ -298,66 +313,34 @@ describe('AuthContext', () => {
     expect(mockGetMyStats).not.toHaveBeenCalled();
   });
 
-  it('loginFromOAuth() keeps token when 401 fires while login is in progress', async () => {
-    // Hacemos que getMyProfile nunca resuelva, asi loginFromOAuth queda
-    // suspendido con loggingInRef.current = true mientras llega el 401.
+  it('keeps the restored user when a 401 fires while the mount-time profile check is in progress', async () => {
+    // Restauramos una sesion sin token (flujo OAuth via cookie): mientras
+    // getMyProfile esta pendiente, loggingInRef.current queda en true.
     let resolveProfile;
     mockGetMyProfile.mockReturnValue(new Promise((resolve) => { resolveProfile = resolve; }));
+    window.localStorage.setItem('user', 'PreviousUser');
 
     renderWithProvider();
 
+    // Simulamos un 401 externo (p. ej. una llamada paralela que falla)
+    // mientras loggingInRef sigue en true.
     await waitFor(() => {
-      expect(screen.getByTestId('initialized').textContent).toBe('true');
+      expect(mockSetOnUnauthorized).toHaveBeenCalled();
     });
-
-    // Disparamos loginFromOAuth sin await: queda esperando getMyProfile.
-    act(() => {
-      screen.getByTestId('oauth-btn').click();
-    });
-
-    // En este punto el token ya esta en localStorage y loggingInRef es true.
-    expect(window.localStorage.getItem('access_token')).toBe('oauth-jwt-token');
-
-    // Simulamos un 401 externo (p. ej. una llamada paralela que falla).
     const cb = mockSetOnUnauthorized.mock.calls[0][0];
     act(() => { cb(); });
 
-    // El callback debe estar suprimido: el token y el user preservados.
-    expect(window.localStorage.getItem('access_token')).toBe('oauth-jwt-token');
+    // El callback debe estar suprimido: el user previo no se limpia.
+    expect(window.localStorage.getItem('user')).toBe('PreviousUser');
 
-    // Ahora dejamos que el login termine.
+    // Ahora dejamos que la comprobacion de perfil termine.
     await act(async () => {
       resolveProfile({ name: 'OAuthUser', email: 'oauth@test.com' });
     });
 
-    expect(window.localStorage.getItem('access_token')).toBe('oauth-jwt-token');
-    expect(window.localStorage.getItem('user')).toBe('OAuthUser');
-  });
-
-  it('loginFromOAuth() throws when called without token', async () => {
-    function BadConsumer() {
-      const { loginFromOAuth } = useAuth();
-      return (
-        <button
-          data-testid="bad-oauth-btn"
-          onClick={() => { loginFromOAuth().catch(() => {}); }}
-        >
-          Bad
-        </button>
-      );
-    }
-
-    render(
-      <AuthProvider>
-        <BadConsumer />
-      </AuthProvider>
-    );
-
-    await act(async () => {
-      screen.getByTestId('bad-oauth-btn').click();
+    await waitFor(() => {
+      expect(screen.getByTestId('initialized').textContent).toBe('true');
     });
-
-    expect(mockGetMyProfile).not.toHaveBeenCalled();
-    expect(window.localStorage.getItem('access_token')).toBeNull();
+    expect(window.localStorage.getItem('user')).toBe('OAuthUser');
   });
 });

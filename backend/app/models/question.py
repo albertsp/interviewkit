@@ -12,3 +12,5 @@ class Question(db.Model):
     feedback = db.Column(db.Text(), nullable=True)
     # Resultado devuelto por la IA: CORRECT, PARTIALLY_CORRECT, INCORRECT
     result = db.Column(db.String(20), nullable=True)
+    # Tipo de pregunta: "theory" o "code"
+    question_type = db.Column(db.String(10), nullable=False, server_default="code")

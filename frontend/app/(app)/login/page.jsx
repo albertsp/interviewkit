@@ -24,7 +24,7 @@ function LoginForm() {
   const oauthError = searchParams.get("error");
   const [error, setError] = useState(
     oauthError === "oauth_failed"
-      ? "No se pudo completar el inicio de sesion con Google. Intenta de nuevo."
+      ? "No se pudo completar el inicio de sesion. Intenta de nuevo."
       : oauthError === "email_exists"
       ? "Este email ya esta registrado. Inicia sesión"
       : null

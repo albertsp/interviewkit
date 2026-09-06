@@ -12,27 +12,28 @@ const roleIcons = {
   Backend: Server,
 }
 
-// Definición de los 3 pasos del wizard
+// Definición de los 4 pasos del wizard
 const steps = [
   { key: "rol", label: "Rol", question: "¿Cuál es tu rol?" },
   { key: "stack", label: "Tecnología", question: "¿Qué tecnología quieres practicar?" },
+  { key: "topic", label: "Tema", question: "¿En qué tema quieres enfocarte?" },
   { key: "level", label: "Nivel", question: "¿Qué nivel de dificultad prefieres?" },
 ]
 
 function StackSelector({ onSubmit, stacks }) {
   // select: guarda lo elegido en cada paso
-  // step: índice del paso actual (0, 1, 2)
-  const [select, setSelect] = useState({ rol: "", stack: "", level: "" })
+  // step: índice del paso actual (0, 1, 2, 3)
+  const [select, setSelect] = useState({ rol: "", stack: "", topic: "", level: "" })
   const [step, setStep] = useState(0)
 
   // Al seleccionar una opción: guarda y avanza al siguiente paso
   // Si cambias un paso anterior, se limpian los pasos dependientes
   const handleSelect = (type, value) => {
     const newSelect = { ...select, [type]: value }
-    if (type === "rol") { newSelect.stack = ""; newSelect.level = "" }
-    if (type === "stack") { newSelect.level = "" }
+    if (type === "rol") { newSelect.stack = ""; newSelect.topic = ""; newSelect.level = "" }
+    if (type === "stack") { newSelect.topic = ""; newSelect.level = "" }
     setSelect(newSelect)
-    if (step < 2) setStep(step + 1)
+    if (step < 3) setStep(step + 1)
   }
 
   // True si el paso ya tiene un valor elegido
@@ -161,10 +162,10 @@ function StackSelector({ onSubmit, stacks }) {
               </motion.div>
             )}
 
-            {/* Paso 3: elegir nivel (solo si hay tecnología) */}
+            {/* Paso 3: elegir tema (solo si hay tecnología) */}
             {step === 2 && select.stack && (
               <motion.div
-                key="level"
+                key="topic"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -174,6 +175,25 @@ function StackSelector({ onSubmit, stacks }) {
                   <h2 className="text-2xl font-semibold">{steps[2].question}</h2>
                   <p className="text-base text-muted-foreground mt-2">
                     {select.rol} · <span className="font-medium text-foreground">{select.stack}</span>
+                  </p>
+                </div>
+                {renderOptions(stacks.topic?.[select.stack] ?? [], "topic", select.topic)}
+              </motion.div>
+            )}
+
+            {/* Paso 4: elegir nivel (solo si hay tema) */}
+            {step === 3 && select.topic && (
+              <motion.div
+                key="level"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.25 }}
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-semibold">{steps[3].question}</h2>
+                  <p className="text-base text-muted-foreground mt-2">
+                    {select.stack} · <span className="font-medium text-foreground">{select.topic}</span>
                   </p>
                 </div>
                 {renderOptions(stacks.level, "level", select.level)}
