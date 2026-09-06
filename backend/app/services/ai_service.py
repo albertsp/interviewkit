@@ -3,7 +3,7 @@ import json
 import re
 
 THEORY_QUESTIONS_COUNT = 2
-CODE_QUESTIONS_COUNT = 3
+CODE_QUESTIONS_COUNT = 2
 
 SYSTEM_PROMPT_QUESTIONS = f"""
 You are an expert technical interviewer specializing in software engineering recruitment. Your task is to generate exactly {THEORY_QUESTIONS_COUNT} theoretical questions AND {CODE_QUESTIONS_COUNT} code-focused questions for a technical interview.
@@ -134,7 +134,6 @@ FALLBACK_THEORY_QUESTIONS = [
 FALLBACK_CODE_QUESTIONS = [
     "Escribe una función que recorra un array y devuelva un nuevo array transformado.",
     "Describe el patrón más común para manejar errores asíncronos en este stack con un ejemplo de código.",
-    "Escribe una función que haga una petición HTTP y maneje correctamente los errores de red.",
 ]
 
 FALLBACK_QUESTIONS = {
@@ -155,9 +154,11 @@ def _safe_questions(data):
     }
 
 
-def generate_questions(stack, level, topic):
-    """Genera preguntas via IA: {THEORY_QUESTIONS_COUNT} teoricas + {CODE_QUESTIONS_COUNT} de codigo.
-    Devuelve {"theory": [...], "code": [...]}. Nunca lanza excepcion."""
+MAX_QUESTION_ATTEMPTS = 2
+
+
+def _fetch_questions(stack, level, topic):
+    """Una llamada a Groq. Devuelve el JSON parseado (dict) o None si falla."""
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -177,10 +178,26 @@ def generate_questions(stack, level, topic):
             response_format={"type": "json_object"},
         )
         raw = chat_completion.choices[0].message.content
-        parsed = _parse_ai_json(raw)
-        return _safe_questions(parsed)
+        return _parse_ai_json(raw)
     except Exception:
-        return dict(FALLBACK_QUESTIONS)
+        return None
+
+
+def generate_questions(stack, level, topic):
+    """Genera preguntas via IA: {THEORY_QUESTIONS_COUNT} teoricas + {CODE_QUESTIONS_COUNT} de codigo.
+    Reintenta hasta MAX_QUESTION_ATTEMPTS veces si la respuesta no trae ambos
+    bloques completos, para minimizar cuanto el usuario ve el fallback generico.
+    Devuelve {"theory": [...], "code": [...]}. Nunca lanza excepcion."""
+    last_parsed = None
+    for _ in range(MAX_QUESTION_ATTEMPTS):
+        parsed = _fetch_questions(stack, level, topic)
+        last_parsed = parsed
+        if isinstance(parsed, dict):
+            theory = parsed.get("theory")
+            code = parsed.get("code")
+            if isinstance(theory, list) and theory and isinstance(code, list) and code:
+                return {"theory": theory, "code": code}
+    return _safe_questions(last_parsed)
 
 
 def generate_feedback(stack, question, answer, question_type="code"):

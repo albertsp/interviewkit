@@ -11,8 +11,7 @@ import { sql } from "@codemirror/lang-sql";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { closeBrackets } from "@codemirror/autocomplete";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { tags as t } from "@lezer/highlight";
+import { githubDarkInit } from "@uiw/codemirror-theme-github";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 
@@ -46,32 +45,30 @@ function findLanguage(id) {
   return LANGUAGES.find((lang) => lang.id === id) || LANGUAGES[0];
 }
 
-// Paleta de resaltado de sintaxis basada en las variables de color de la app
-// (las mismas --chart-* que usan los graficos de stats), para que el editor
-// se sienta parte del mismo sistema de diseno en vez de un tema importado.
-const syntaxTheme = HighlightStyle.define([
-  { tag: [t.keyword, t.controlKeyword, t.operatorKeyword, t.definitionKeyword, t.moduleKeyword], color: "var(--chart-4)" },
-  { tag: [t.string, t.special(t.string)], color: "var(--chart-2)" },
-  { tag: [t.number, t.bool, t.null], color: "var(--chart-3)" },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: "var(--muted-foreground)", fontStyle: "italic" },
-  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "var(--primary)" },
-  { tag: [t.className, t.typeName], color: "var(--chart-5)" },
-  { tag: [t.propertyName, t.attributeName], color: "var(--chart-1)" },
-  { tag: [t.tagName], color: "var(--chart-4)" },
-  { tag: [t.variableName, t.definition(t.variableName)], color: "var(--foreground)" },
-  { tag: [t.operator, t.punctuation, t.bracket, t.angleBracket], color: "var(--muted-foreground)" },
-  { tag: [t.invalid], color: "var(--destructive)" },
-]);
+// Tema de sintaxis: GitHub Dark (real, probado, buen contraste) en vez de un
+// mapeo casero a colores de charts. Solo se sobreescribe el fondo/caret/
+// seleccion para que encaje con la paleta de la app; los colores de token
+// (keywords, strings, funciones...) son los propios del tema.
+const githubTheme = githubDarkInit({
+  settings: {
+    background: "var(--background)",
+    foreground: "var(--foreground)",
+    caret: "var(--foreground)",
+    selection: "var(--accent)",
+    selectionMatch: "var(--accent)",
+    lineHighlight: "transparent",
+    gutterBackground: "var(--background)",
+    gutterForeground: "var(--muted-foreground)",
+  },
+});
 
-// Estilo visual del editor, integrado con los tokens de color de la app
-// en vez de un tema fijo tipo "Atom One Dark".
+// Layout/marca propios del editor (bordes, foco, tipografia) que el tema
+// de sintaxis no cubre.
 const editorTheme = EditorView.theme({
   "&": {
     borderRadius: "var(--radius-xl, 0.75rem)",
     border: "1px solid var(--border)",
     fontSize: "0.875rem",
-    backgroundColor: "var(--background)",
-    color: "var(--foreground)",
   },
   "&.cm-focused": {
     outline: "none",
@@ -85,13 +82,6 @@ const editorTheme = EditorView.theme({
   ".cm-content": {
     padding: "0.75rem 1rem",
     minHeight: "200px",
-    caretColor: "var(--foreground)",
-  },
-  ".cm-cursor": {
-    borderLeftColor: "var(--foreground)",
-  },
-  ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-    backgroundColor: "var(--accent)",
   },
   ".cm-gutters": {
     display: "none",
@@ -134,8 +124,8 @@ export default function CodeEditor({
         closeBrackets(),
         // Keybindings por defecto + tab para indentar
         keymap.of([...defaultKeymap, indentWithTab]),
-        // Resaltado de sintaxis y tema visual propios de la app
-        syntaxHighlighting(syntaxTheme),
+        // Tema GitHub Dark (sintaxis) + layout/marca propios de la app
+        githubTheme,
         editorTheme,
         // Placeholder en el editor
         placeholderExt(placeholder),

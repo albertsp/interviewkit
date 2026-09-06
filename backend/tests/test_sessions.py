@@ -4,7 +4,7 @@ from app import limiter
 
 FAKE_QUESTIONS = {
     "theory": ["t1", "t2"],
-    "code": ["q1", "q2", "q3"],
+    "code": ["q1", "q2"],
 }
 
 FAKE_FEEDBACK = {
@@ -47,8 +47,8 @@ class TestCreateSession:
         resp = client.post("/sessions/", json=VALID_PAYLOAD, headers=auth_headers)
         assert resp.status_code == 201
         data = resp.get_json()
-        assert len(data["questions"]) == 5
-        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code", "code"]
+        assert len(data["questions"]) == 4
+        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code"]
 
     def test_create_session_invalid_stack(self, client, auth_headers):
         """Un stack fuera de VALID_STACKS debe rechazarse con 400 antes de llamar a la IA."""
