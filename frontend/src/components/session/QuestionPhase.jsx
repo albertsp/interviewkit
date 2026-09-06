@@ -13,6 +13,7 @@ import { Send, Code, AlignLeft } from "lucide-react";
 export default function QuestionPhase({
   question,
   questionType,
+  stack,
   answer,
   error,
   onAnswerChange,
@@ -83,6 +84,7 @@ export default function QuestionPhase({
           onChange={onAnswerChange}
           placeholder="Escribe tu codigo aqui..."
           ariaLabel="Editor de codigo para tu respuesta"
+          stack={stack}
         />
       ) : (
         <textarea

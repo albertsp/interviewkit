@@ -166,6 +166,7 @@ export default function SessionPage() {
             <QuestionPhase
               question={state.questions[state.currentQuestionIndex].question}
               questionType={state.questions[state.currentQuestionIndex].type}
+              stack={state.stack}
               answer={state.currentAnswer}
               error={state.error}
               onAnswerChange={(value) =>
