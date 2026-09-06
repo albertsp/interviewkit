@@ -1,51 +1,98 @@
-// Estado inicial del flujo de sesion
-export const initialState = {
-  // Datos de la sesion
+
+
+type Phase = "answering" | "loading_feedback" | "waiting_action" | "complete";
+export type Result = "CORRECT" | "PARTIALLY_CORRECT" | "INCORRECT";
+type Action = 
+| { type: "INIT_SESSION"; payload: { session_id: number; stack: string; level: string; topic: string; questions: Question[] } }
+| { type: "ANSWER_CHANGED"; payload: string }
+| { type: "ANSWER_SUBMITTED";}
+| { type: "FEEDBACK_RECEIVED"; payload: { feedback: string; result: Result; card: Card}}
+| { type: "UPDATE_CARD"; payload: Partial<Card>}
+| { type: "NEXT_QUESTION";}
+| { type: "CARD_SAVED" ;}
+| { type: "CARD_DISCARDED" ;}
+| { type: "SESSION_ENDED";}
+| { type: "SESSION_COMPLETED"; payload: {xp_earned?: number; total_xp?: number; level?: number; xp_to_next_level?: number; progress_in_level?: number; bonus_applied?: boolean; xp_per_level?: number}}
+| { type: "SET_ERROR"; payload: string | null}
+| { type: "RESET_SESSION";}   
+
+
+
+
+export interface Question {
+  question_id: number;
+  question: string;
+  type: "theory" | "code";
+  answer: string;
+  feedback: null | string;
+  result?: Result;
+}
+export interface Card {
+  concept: string;
+  definition: string;
+  explanation: string;
+  use_case: string;
+  avoid_when: string;
+  mnemonic: string;
+  code: string;
+  code_language: string;
+  tags: string[];
+}
+
+interface State {
+  session_id: number | null;
+  stack: string | null;
+  level: string | null;
+  topic: string | null;
+  questions: Question[];
+  currentQuestionIndex: number;
+  currentAnswer: string;
+  currentPhase: Phase;
+  result: null | Result;
+  feedback: null | string;
+  card: null | Card;
+  originalCard: null | Card;
+  sessionXpEarned: number;
+  sessionTotalXp: number;
+  sessionLevel: number;
+  sessionXpToNextLevel: number;
+  sessionProgressInLevel: number;
+  sessionXpPerLevel: number;
+  sessionBonusApplied: boolean;       
+  sessionCompleteLoaded: boolean;
+  error: null | string; 
+}
+
+export const initialState: State = {
   session_id: null,
   stack: null,
   level: null,
-  // Lista de preguntas con su respuesta y feedback
+  topic: null,
   questions: [],
-  // Indice de la pregunta actual
   currentQuestionIndex: 0,
-  // Respuesta actual que escribe el usuario en el textarea
   currentAnswer: "",
-  // Fase actual del flujo de entrevista
-  currentPhase: "answering", // "answering" | "loading_feedback" | "waiting_action" | "complete"
-  // Resultado devuelto por la IA: CORRECT | PARTIALLY_CORRECT | INCORRECT
+  currentPhase: "answering",
   result: null,
-  // Feedback devuelto por la IA para la respuesta actual
   feedback: null,
-  // Card generada por la IA para la pregunta actual (editable por el usuario)
   card: null,
-  // Snapshot de la card original de la IA, para detectar si el usuario la edito
   originalCard: null,
-  // XP ganado en esta sesion (lo devuelve POST /sessions/<id>/complete)
   sessionXpEarned: 0,
-  // Total XP del usuario tras esta sesion
-  sessionTotalXp: 0,
-  // Nivel del usuario tras esta sesion
+  sessionTotalXp: 0,  
   sessionLevel: 1,
-  // XP que faltan para el siguiente nivel tras esta sesion
   sessionXpToNextLevel: 0,
-  // Progress dentro del nivel actual (XP desde el inicio del nivel)
   sessionProgressInLevel: 0,
-  // XP necesarios por nivel (del backend)
   sessionXpPerLevel: 0,
-  // Si se aplico el bonus por completar todas las preguntas
   sessionBonusApplied: false,
-  // Si el /complete ya se llamo y devolvio datos
-  sessionCompleteLoaded: false,
-  // Mensaje de error para mostrar al usuario
+  sessionCompleteLoaded: false, 
   error: null,
 };
 
 // Reducer que controla todo el flujo de la sesion de entrevista
-export function sessionReducer(state, action) {
+export function sessionReducer(state: State, action: Action): State {
   switch (action.type) {
     // Inicializa la sesion con los datos devueltos por POST /sessions/
     case "INIT_SESSION": {
-      const { session_id, stack, level, questions } = action.payload;
+      const { session_id, stack, level, topic, questions } = action.payload;
       // Añadimos campos answer y feedback a cada pregunta para seguimiento
       const initializedQuestions = questions.map((q) => ({
         ...q,
@@ -57,6 +104,7 @@ export function sessionReducer(state, action) {
         session_id,
         stack,
         level,
+        topic,
         questions: initializedQuestions,
         currentQuestionIndex: 0,
         currentAnswer: "",
@@ -80,7 +128,7 @@ export function sessionReducer(state, action) {
     // El usuario escribe en el textarea de respuesta
     case "ANSWER_CHANGED":
       return { ...state, currentAnswer: action.payload, error: null };
-
+      
     // El usuario pulsa el boton de enviar respuesta
     case "ANSWER_SUBMITTED": {
       // Guardamos la respuesta del usuario en el array de preguntas
@@ -120,6 +168,7 @@ export function sessionReducer(state, action) {
 
     // El usuario edita los campos de la card en el editor inline
     case "UPDATE_CARD":
+      if (!state.card) return state;
       return {
         ...state,
         card: { ...state.card, ...action.payload },

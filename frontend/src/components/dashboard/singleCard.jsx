@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { DeleteCard } from "@/components/dashboard/delete";
 import { ConfirmEdit } from "@/components/dashboard/confirmEdit";
@@ -29,7 +27,7 @@ export function SingleCard({ isSingleCardOpen, setIsSingleCardOpen, selectedCard
     <Dialog open={isSingleCardOpen} onOpenChange={setIsSingleCardOpen}>
       <DeleteCard isDeleteCardOpen={isDeleteCardOpen} setIsDeleteCardOpen={setIsDeleteCardOpen} deleteCard={deleteCard} selectedCard={selectedCard} />
       <ConfirmEdit isConfirmOpen={isConfirmOpen} setIsConfirmOpen={setIsConfirmOpen} onSave={onSave} />
-      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Lightbulb className="size-5 text-primary" />
@@ -42,8 +40,10 @@ export function SingleCard({ isSingleCardOpen, setIsSingleCardOpen, selectedCard
 
         {selectedCard && (
           <>
-            <CardEditor card={selectedCard} onChange={onCardChange} originalCard={originalCard} />
-            <DialogFooter className="gap-2">
+            <div className="flex-1 min-h-0 overflow-y-auto -mx-4 px-4">
+              <CardEditor card={selectedCard} onChange={onCardChange} originalCard={originalCard} />
+            </div>
+            <DialogFooter className="sm:justify-between">
               <Button
                 variant="destructive"
                 className="text-xs font-medium px-3 py-1.5 h-auto shadow-none"
@@ -52,15 +52,11 @@ export function SingleCard({ isSingleCardOpen, setIsSingleCardOpen, selectedCard
               </Button>
               <Button
                 onClick={() => setIsConfirmOpen(true)}
-                size="lg"
                 className="gap-2"
               >
                 <Save className="size-4" />
                 Guardar cambios
               </Button>
-              <DialogClose asChild>
-                <Button variant="outline">Cerrar</Button>
-              </DialogClose>
             </DialogFooter>
           </>
         )}

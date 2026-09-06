@@ -156,6 +156,8 @@ export default function SessionPage() {
           total={state.questions.length}
           stack={state.stack}
           level={state.level}
+          topic={state.topic}
+          questionType={state.questions[state.currentQuestionIndex]?.type}
         />
 
         <AnimatePresence mode="wait">
@@ -163,6 +165,8 @@ export default function SessionPage() {
           {state.currentPhase === "answering" && (
             <QuestionPhase
               question={state.questions[state.currentQuestionIndex].question}
+              questionType={state.questions[state.currentQuestionIndex].type}
+              stack={state.stack}
               answer={state.currentAnswer}
               error={state.error}
               onAnswerChange={(value) =>

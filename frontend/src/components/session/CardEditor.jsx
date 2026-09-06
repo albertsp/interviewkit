@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
@@ -91,6 +92,11 @@ export function CardView({ card, wasEdited }) {
           <h3 className="text-2xl font-bold tracking-tight text-foreground">
             {card.concept || "Sin titulo"}
           </h3>
+          {card.code_language && (
+            <Badge variant="outline" size="sm" className="uppercase tracking-wider border-primary/20 text-primary/80 mt-1.5">
+              {card.code_language}
+            </Badge>
+          )}
           {wasEdited && (
             <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 mt-1.5">
               Editado por ti
@@ -389,9 +395,7 @@ export default function CardEditor({ card, onChange, originalCard }) {
     <Card className="mb-6 border-primary/20 bg-primary/5">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Lightbulb className="size-5 text-primary" />
-            Card de estudio
+          <div className="flex items-center gap-2">
             {isEditing && (
               <motion.span
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -402,7 +406,7 @@ export default function CardEditor({ card, onChange, originalCard }) {
                 Editando
               </motion.span>
             )}
-          </CardTitle>
+          </div>
 
           {/* Toggle VIEW / EDIT */}
           <div className="flex rounded-lg border border-border bg-background p-0.5">

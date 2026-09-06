@@ -33,6 +33,15 @@ class Config:
     JWT_ACCESS_COOKIE_PATH = "/"
     JWT_COOKIE_SAMESITE = "None" if os.getenv("FLASK_ENV") == "production" else "Lax"
 
+    # Cookie de sesion de Flask (usada por Authlib para guardar el state/nonce
+    # del handshake OAuth). Igual que el JWT, en produccion es cross-site
+    # (frontend en Vercel, backend en Fly.io), asi que necesita SameSite=None
+    # + Secure explicitos; los valores por defecto de Flask no bastan y
+    # provocan que el state se pierda en la primera redireccion de vuelta
+    # desde Google/GitHub.
+    SESSION_COOKIE_SAMESITE = "None" if os.getenv("FLASK_ENV") == "production" else "Lax"
+    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV") == "production"
+
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")

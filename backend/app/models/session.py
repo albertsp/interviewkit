@@ -8,6 +8,7 @@ class Session(db.Model):
     session_id = db.Column(db.Integer, primary_key=True)
     stack = db.Column(db.String(80), nullable=False)
     level = db.Column(db.String(20), nullable=False)
+    topic = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer,db.ForeignKey(User.user_id), index=True)
     feedback = db.Column(db.String(250), nullable=True)

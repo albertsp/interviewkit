@@ -3,11 +3,12 @@ import { useEffect, useState, useMemo } from "react"
 import { useAuth } from "@/context/AuthContext";
 import { getCards, updateCard, deleteCardById } from "@/services/cardService";
 
-import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputGroupDemo } from "@/components/dashboard/barrabusqueda";
 import { ToggleGroupDemo } from "@/components/dashboard/botonesFiltro";
 import { SingleCard } from "@/components/dashboard/singleCard";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
 
@@ -155,66 +156,41 @@ export default function DashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SingleCard isSingleCardOpen={isSingleCardOpen} setIsSingleCardOpen={setIsSingleCardOpen} selectedCard={selectedCard} originalCard={originalCard} onCardChange={handleCardChange} onSave={handleSaveCard} deleteCard={handleDeleteCard}/>
 
             {filtered_cards.map((card) => (
-              <div
+              <Card
                 key={card.card_id}
-className="flex flex-col justify-between bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
-               >
-                 <div>
-                   <div className="flex items-start justify-between gap-2 mb-3">
-                     <h2 className="text-xl font-semibold text-foreground capitalize">
-                       {card.concept}
-                     </h2>
-                     {card.code_language && (
-                       <span className="px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full uppercase tracking-wider">
-                         {card.code_language}
-                       </span>
-                     )}
-                   </div>
+                size="sm"
+                className="group cursor-pointer ring-0 border border-border transition-[transform,border-color,box-shadow] duration-200 ease-out hover:scale-[1.02] hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 focus-visible:ring-2 focus-visible:ring-primary/50 outline-none"
+                onClick={() => abrirCard(card)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCard(card); }}}
+                tabIndex={0}
+                role="button"
+                aria-label={`Abrir card: ${card.concept}`}
+              >
+                <CardHeader className="pb-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base group-hover:text-primary transition-colors duration-200">
+                      {card.concept}
+                    </CardTitle>
+                    {card.code_language && (
+                      <Badge variant="outline" size="sm" className="uppercase tracking-wider border-primary/20 text-primary/80 shrink-0">
+                        {card.code_language}
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
 
-                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                     {card.explanation}
-                   </p>
-
-                   {card.use_case && (
-                     <div className="mb-4">
-                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                         Caso de Uso:
-                       </span>
-                       <p className="text-xs bg-muted p-2.5 rounded border border-border text-foreground italic">
-                         &ldquo;{card.use_case}&rdquo;
-                       </p>
-                     </div>
-                   )}
-
-                   {card.code && (
-                     <div className="mb-4">
-                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                         Ejemplo de Codigo:
-                       </span>
-                       <pre className="p-3 bg-foreground rounded-lg overflow-x-auto text-xs text-emerald-400 font-mono" aria-label={`Codigo de ejemplo: ${card.code_language || 'code'}`}>
-                         <code>{card.code}</code>
-                       </pre>
-                     </div>
-                   )}
-                 </div>
-
-                 <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-                   <Button
-                     variant="outline"
-                     className="text-xs font-medium px-3 py-1.5 h-auto shadow-none flex items-center gap-1.5"
-                     onClick={() => {abrirCard(card)}}
-                     aria-label={`Abrir card: ${card.concept}`}
-                   >
-                    Abrir
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-              </div>
+                <CardContent>
+                  {card.explanation && (
+                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                      {card.explanation}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}

@@ -31,7 +31,9 @@ class TestGetOrCreateUser:
             second = _get_or_create_user("google", "abc", "different@example.com", "Different")
             assert second.user_id == first.user_id
 
-    def test_links_to_existing_user_by_email(self, app, db):
+    def test_does_not_auto_link_existing_email_without_prior_oauth_link(self, app, db):
+        """Seguridad: un email ya registrado no se vincula automaticamente a un
+        login OAuth sin un OAuthAccount previo (evita apropiacion de cuentas)."""
         with app.app_context():
             existing = User(name="Existing", email="existing@example.com")
             db.session.add(existing)
@@ -43,14 +45,12 @@ class TestGetOrCreateUser:
                 email="existing@example.com",
                 name="Should Not Change",
             )
-            assert user.user_id == existing.user_id
-            assert user.name == "Existing"
+            assert user is None
 
             link = OAuthAccount.query.filter_by(
                 provider="github", provider_user_id="gh_123"
             ).first()
-            assert link is not None
-            assert link.user_id == existing.user_id
+            assert link is None
 
     def test_handles_orphan_oauth_account(self, app, db):
         with app.app_context():
@@ -107,7 +107,7 @@ class TestGetOrCreateUser:
 
 
 class TestBuildLoginResponse:
-    def test_sets_jwt_cookie_and_token_param(self, app, db):
+    def test_sets_jwt_cookie(self, app, db):
         with app.app_context():
             user = User(name="Test", email="test@example.com")
             db.session.add(user)
@@ -116,17 +116,16 @@ class TestBuildLoginResponse:
             resp = _build_login_response(user)
             assert resp.status_code == 302
             assert "access_token_cookie" in resp.headers.get("Set-Cookie", "")
-            assert "token=" in resp.location
 
-    def test_redirects_to_frontend_with_token(self, app, db):
+    def test_redirects_to_frontend_callback(self, app, db):
+        """El JWT viaja en una cookie httpOnly, no como query param en la URL."""
         with app.app_context():
             user = User(name="Test", email="test@example.com")
             db.session.add(user)
             db.session.commit()
 
             resp = _build_login_response(user)
-            assert "http://localhost:3000/auth/callback" in resp.location
-            assert "token=" in resp.location
+            assert resp.location == "http://localhost:3000/auth/callback"
 
 
 class TestGoogleLogin:
@@ -211,7 +210,6 @@ class TestGoogleCallback:
             resp = client.get("/auth/google/callback")
             assert resp.status_code == 302
             assert "/auth/callback" in resp.location
-            assert "token=" in resp.location
             assert "access_token_cookie" in resp.headers.get("Set-Cookie", "")
 
         with client.application.app_context():
@@ -238,7 +236,6 @@ class TestGoogleCallback:
             resp = client.get("/auth/google/callback")
             assert resp.status_code == 302
             assert "/auth/callback" in resp.location
-            assert "token=" in resp.location
 
         with client.application.app_context():
             user = User.query.filter_by(
@@ -315,7 +312,6 @@ class TestGitHubCallback:
             resp = client.get("/auth/github/callback")
             assert resp.status_code == 302
             assert "/auth/callback" in resp.location
-            assert "token=" in resp.location
             assert "access_token_cookie" in resp.headers.get("Set-Cookie", "")
 
         with client.application.app_context():

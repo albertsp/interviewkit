@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export function headers() {
-  const h = { "Content-Type": "application/json" };
+export function headers(): Record<string, string> {
+  const h: Record<string, string>= { "Content-Type": "application/json" };
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("access_token");
     if (token) {
@@ -11,13 +11,13 @@ export function headers() {
   return h;
 }
 
-let onUnauthorizedCallback = null;
+let onUnauthorizedCallback: (()=>void) | null = null;
 
-export function setOnUnauthorized(cb) {
+export function setOnUnauthorized(cb: (()=>void)) {
   onUnauthorizedCallback = cb;
 }
 
-export async function handleResponse(response) {
+export async function handleResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     return response.json();
   }
@@ -40,7 +40,7 @@ export async function handleResponse(response) {
   throw new Error(errorMsg || `Error ${response.status}: ${response.statusText}`);
 }
 
-export async function apiFetch(url, options = {}) {
+export async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const { headers: customHeaders, ...rest } = options;
   return fetch(`${API_URL}${url}`, {
     ...rest,
