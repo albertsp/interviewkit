@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { phaseVariants } from "@/components/layout/motion-variants";
 import {
   CheckCircle,
   Home,
@@ -32,9 +33,10 @@ export default function SessionComplete({
   return (
     <motion.div
       key="complete"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      variants={phaseVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
       <Card>
         <CardContent className="p-8 md:p-10 flex flex-col items-center text-center gap-6">

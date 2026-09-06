@@ -9,13 +9,13 @@ const MAIN_FEATURES = [
     icon: BookOpen,
     title: "Cards con Q&A explicado",
     description: "Cada pregunta incluye respuesta detallada y explicación. Repasa a tu ritmo con cards guardadas, con ejemplos de código y tags por tema.",
-    screenshot: { src: "/screenshots/dashboard-cards.png", alt: "Dashboard con la grid de cards de estudio guardadas en InterviewKit", label: "interviewkit.app/dashboard" },
+    screenshot: { src: "/screenshots/dashboard-cards.png", alt: "Dashboard con la grid de cards de estudio guardadas en InterviewKit", label: "interviewkit.app/dashboard", width: 2880, height: 2616 },
   },
   {
     icon: BarChart3,
     title: "Sistema de XP y niveles",
     description: "Gana XP con cada sesión. Sube de nivel y trackea tu progreso con estadísticas detalladas: resultados, stacks dominados y sesiones recientes.",
-    screenshot: { src: "/screenshots/stats-overview.png", alt: "Página de estadísticas con nivel, XP y gráficas de progreso en InterviewKit", label: "interviewkit.app/stats" },
+    screenshot: { src: "/screenshots/stats-overview.png", alt: "Página de estadísticas con nivel, XP y gráficas de progreso en InterviewKit", label: "interviewkit.app/stats", width: 2880, height: 3608 },
   },
 ];
 
@@ -86,7 +86,13 @@ export default function Features() {
                 transition={{ duration: 0.6 }}
                 className={index % 2 === 1 ? "lg:order-1" : ""}
               >
-                <BrowserMockup src={screenshot.src} alt={screenshot.alt} label={screenshot.label} />
+                <BrowserMockup
+                  src={screenshot.src}
+                  alt={screenshot.alt}
+                  label={screenshot.label}
+                  width={screenshot.width}
+                  height={screenshot.height}
+                />
               </motion.div>
             </div>
           ))}

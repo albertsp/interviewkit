@@ -7,30 +7,19 @@ import LevelHero from "@/components/stats/LevelHero";
 import StatCards from "@/components/stats/StatCards";
 import RecentSessions from "@/components/stats/RecentSessions";
 import SavedCardsSummary from "@/components/stats/SavedCardsSummary";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { containerVariants, itemVariants } from "@/components/layout/motion-variants";
 
 const ResultsDonut = dynamic(() => import("@/components/stats/ResultsDonut"), { ssr: false });
 const StackBars = dynamic(() => import("@/components/stats/StackBars"), { ssr: false });
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.15 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-};
 
 export default function StatsPage() {
   const { stats } = useAuth();
 
   return (
-    <div className="px-4 sm:px-6 pt-24 pb-10">
+    <PageContainer max="5xl" className="pb-10">
       <motion.div
-        className="max-w-5xl mx-auto space-y-6"
+        className="space-y-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -68,6 +57,6 @@ export default function StatsPage() {
           />
         </motion.div>
       </motion.div>
-    </div>
+    </PageContainer>
   );
 }

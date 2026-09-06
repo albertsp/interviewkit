@@ -414,12 +414,17 @@ export default function CardEditor({ card, onChange, originalCard }) {
               type="button"
               onClick={() => setIsEditing(false)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                !isEditing
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                "relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                !isEditing ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
+              {!isEditing && (
+                <motion.span
+                  layoutId="cardEditorModePill"
+                  className="absolute inset-0 -z-10 rounded-md bg-primary shadow-sm"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
               <Eye className="size-3.5" />
               Ver
             </button>
@@ -427,12 +432,17 @@ export default function CardEditor({ card, onChange, originalCard }) {
               type="button"
               onClick={() => setIsEditing(true)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                isEditing
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                "relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                isEditing ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
+              {isEditing && (
+                <motion.span
+                  layoutId="cardEditorModePill"
+                  className="absolute inset-0 -z-10 rounded-md bg-primary shadow-sm"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
               <Pencil className="size-3.5" />
               Editar
             </button>

@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STACK_COLORS } from "@/data/statsTheme";
 import { Layers } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const STACK_ICONS = {
   JavaScript: "JS",
@@ -45,10 +46,12 @@ export default function StackBars({ stacks }) {
             Distribucion por stack
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Aun no tienes sesiones registradas.
-          </p>
+        <CardContent>
+          <EmptyState
+            icon={Layers}
+            variant="compact"
+            title="Aún no tienes sesiones registradas"
+          />
         </CardContent>
       </Card>
     );

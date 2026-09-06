@@ -88,6 +88,8 @@ export default function HowItWorks() {
             src="/screenshots/session-setup.png"
             alt="Pantalla de configuración de una nueva sesión de entrevista en InterviewKit"
             label="interviewkit.app/session"
+            width={2816}
+            height={1128}
           />
         </motion.div>
       </div>

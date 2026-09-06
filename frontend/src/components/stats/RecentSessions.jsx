@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { STACK_COLORS, LEVEL_BADGES } from "@/data/statsTheme";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function formatDate(dateStr) {
   const date = new Date(dateStr);
@@ -38,13 +39,13 @@ export default function RecentSessions({ sessions }) {
             Actividad reciente
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Aun no tienes sesiones completadas.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Inicia una sesion de entrevista para ver tu actividad aqui.
-          </p>
+        <CardContent>
+          <EmptyState
+            icon={Calendar}
+            variant="compact"
+            title="Aún no tienes sesiones completadas"
+            description="Inicia una sesión de entrevista para ver tu actividad aquí."
+          />
         </CardContent>
       </Card>
     );

@@ -9,6 +9,9 @@ import { ToggleGroupDemo } from "@/components/dashboard/botonesFiltro";
 import { SingleCard } from "@/components/dashboard/singleCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LayoutGrid } from "lucide-react";
 
 export default function DashboardPage() {
 
@@ -105,58 +108,53 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen px-6 pt-24 pb-12 md:pt-28 md:pb-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-10 bg-muted rounded-lg w-64" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 bg-muted rounded-xl" />
-              ))}
-            </div>
+      <PageContainer max="6xl">
+        <div className="animate-pulse space-y-6">
+          <div className="h-10 bg-muted rounded-lg w-64" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 bg-muted rounded-xl" />
+            ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen px-6 pt-24 pb-12 md:pt-28 md:pb-20">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-destructive text-lg font-medium">{error}</p>
-          <Button variant="outline" className="mt-4" onClick={() => {
-            setError(null);
-            setLoading(true);
-            getCards()
-              .then(setCards)
-              .catch(() => setError("No se han podido cargar las cards. Inténtalo de nuevo"))
-              .finally(() => setLoading(false))
-          }}>
-            Reintentar
-          </Button>
-        </div>
-      </div>
+      <PageContainer max="6xl" innerClassName="text-center">
+        <p className="text-destructive text-lg font-medium">{error}</p>
+        <Button variant="outline" className="mt-4" onClick={() => {
+          setError(null);
+          setLoading(true);
+          getCards()
+            .then(setCards)
+            .catch(() => setError("No se han podido cargar las cards. Inténtalo de nuevo"))
+            .finally(() => setLoading(false))
+        }}>
+          Reintentar
+        </Button>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="min-h-screen px-6 pt-24 pb-12 md:pt-28 md:pb-20">
-      <div className="max-w-6xl mx-auto">
+    <PageContainer max="6xl">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-border/50 pb-4 mb-6">
+        <InputGroupDemo setSearchInput={setSearchInput} resultCount={filtered_cards.length} />
+        <ToggleGroupDemo setLanguageFilter={setLanguageFilter} setOrderSort={setOrderSort} />
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-10">
-          <InputGroupDemo setSearchInput={setSearchInput} resultCount={filtered_cards.length} />
-          <ToggleGroupDemo setLanguageFilter={setLanguageFilter} setOrderSort={setOrderSort} />
-        </div>
-
-        {filtered_cards.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">
-              {cards.length === 0 ? "Aun no tienes cards guardadas" : "No se encontraron cards con ese filtro"}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {filtered_cards.length === 0 ? (
+        <EmptyState
+          icon={LayoutGrid}
+          title={cards.length === 0 ? "Aún no tienes cards guardadas" : "No se encontraron cards con ese filtro"}
+          description={cards.length === 0 ? "Crea tu primera sesión de práctica para empezar a generar cards de estudio." : undefined}
+          action={cards.length === 0 ? { label: "Nueva sesión", href: "/session" } : undefined}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SingleCard isSingleCardOpen={isSingleCardOpen} setIsSingleCardOpen={setIsSingleCardOpen} selectedCard={selectedCard} originalCard={originalCard} onCardChange={handleCardChange} onSave={handleSaveCard} deleteCard={handleDeleteCard}/>
 
             {filtered_cards.map((card) => (
@@ -194,8 +192,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+    </PageContainer>
   );
 
 }

@@ -7,6 +7,7 @@ import CardEditor from "@/components/session/CardEditor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmEdit } from "@/components/dashboard/confirmEdit";
+import { phaseVariants, containerVariants, itemVariants } from "@/components/layout/motion-variants";
 import {
   Trash2,
   Save,
@@ -81,40 +82,46 @@ export default function FeedbackPhase({
   return (
     <motion.div
       key="waiting_action"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.25 }}
+      variants={phaseVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
-      {/* Badge grande con el resultado de la IA + XP ganado en esta pregunta */}
-      <div className="mb-4 flex justify-center">
-        <ResultBadge result={result} />
-      </div>
+      <motion.div variants={containerVariants} initial="hidden" animate="visible">
+        {/* Badge grande con el resultado de la IA + XP ganado en esta pregunta */}
+        <motion.div variants={itemVariants} className="mb-4 flex justify-center">
+          <ResultBadge result={result} />
+        </motion.div>
 
-      {/* Seccion de feedback de la IA */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="size-5 text-primary" />
-            Feedback
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pb-6">
-          <MarkdownContent
-            text={feedback}
-            className="text-base text-muted-foreground"
-          />
-        </CardContent>
-      </Card>
+        {/* Seccion de feedback de la IA */}
+        <motion.div variants={itemVariants}>
+          <Card className="mb-6">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="size-5 text-primary" />
+                Feedback
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <MarkdownContent
+                text={feedback}
+                className="text-base text-muted-foreground"
+              />
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      {/* Card de estudio: alterna entre modo Ver y Editar */}
-      {card && (
-        <CardEditor
-          card={card}
-          onChange={onCardChange}
-          originalCard={originalCard}
-        />
-      )}
+        {/* Card de estudio: alterna entre modo Ver y Editar */}
+        {card && (
+          <motion.div variants={itemVariants}>
+            <CardEditor
+              card={card}
+              onChange={onCardChange}
+              originalCard={originalCard}
+            />
+          </motion.div>
+        )}
+      </motion.div>
 
       {/* Botones de accion: descartar o guardar */}
       <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">

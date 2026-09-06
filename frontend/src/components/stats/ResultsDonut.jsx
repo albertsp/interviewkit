@@ -3,6 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { CheckCircle2, AlertTriangle, XCircle, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const RESULT_ITEMS = [
   { key: "correct", label: "Correctas", Icon: CheckCircle2, color: "#22c55e" },
@@ -42,13 +43,13 @@ export default function ResultsDonut({ results }) {
             Resultados
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Aun no tienes respuestas registradas.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Completa una sesion para ver tus estadisticas.
-          </p>
+        <CardContent>
+          <EmptyState
+            icon={BarChart3}
+            variant="compact"
+            title="Aún no tienes respuestas registradas"
+            description="Completa una sesión para ver tus estadísticas."
+          />
         </CardContent>
       </Card>
     );

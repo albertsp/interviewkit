@@ -8,6 +8,7 @@ const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { phaseVariants } from "@/components/layout/motion-variants";
 import { Send, Code, AlignLeft } from "lucide-react";
 
 export default function QuestionPhase({
@@ -31,10 +32,10 @@ export default function QuestionPhase({
   return (
     <motion.div
       key="answering"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.25 }}
+      variants={phaseVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
       <Card className="mb-6">
         <CardContent className="p-8 md:p-10">
@@ -52,12 +53,17 @@ export default function QuestionPhase({
             type="button"
             onClick={() => setIsCodeMode(false)}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-              !isCodeMode
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              "relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              !isCodeMode ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
+            {!isCodeMode && (
+              <motion.span
+                layoutId="questionModePill"
+                className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
             <AlignLeft className="size-3.5" />
             Texto
           </button>
@@ -65,12 +71,17 @@ export default function QuestionPhase({
             type="button"
             onClick={() => setIsCodeMode(true)}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-              isCodeMode
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              "relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              isCodeMode ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
+            {isCodeMode && (
+              <motion.span
+                layoutId="questionModePill"
+                className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
             <Code className="size-3.5" />
             Codigo
           </button>

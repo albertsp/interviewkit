@@ -12,6 +12,7 @@ import {
   completeSession,
 } from "@/services/sessionService";
 
+import { PageContainer } from "@/components/layout/PageContainer";
 import SessionSetup from "@/components/session/SessionSetup";
 import ProgressIndicator from "@/components/session/ProgressIndicator";
 import QuestionPhase from "@/components/session/QuestionPhase";
@@ -149,8 +150,7 @@ export default function SessionPage() {
 
   // Modo sesion activa: renderizado condicional segun la fase
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-3xl">
+    <PageContainer max="3xl">
         <ProgressIndicator
           currentIndex={state.currentQuestionIndex}
           total={state.questions.length}
@@ -213,7 +213,6 @@ export default function SessionPage() {
             />
           )}
         </AnimatePresence>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

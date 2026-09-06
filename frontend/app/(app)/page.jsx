@@ -5,6 +5,7 @@ import HowItWorks from "@/components/home/howitworks";
 import Techs from "@/components/home/techs";
 import Faq from "@/components/home/faq";
 import CTA from "@/components/home/cta";
+import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Features />
       <Faq />
       <CTA />
+      <Footer />
     </div>
   );
 }

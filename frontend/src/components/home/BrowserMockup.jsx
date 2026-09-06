@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export function BrowserMockup({ src, alt, width = 1440, height = 900, label = "interviewkit.app", className = "", priority = false }) {
+export function BrowserMockup({ src, alt, width, height, label = "interviewkit.app", className = "", priority = false }) {
   return (
     <div className={`rounded-xl border border-border bg-card/50 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/20 ${className}`}>
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-secondary/50">

@@ -7,10 +7,11 @@ import { getStacks } from "@/services/stacksService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, RotateCw } from "lucide-react";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 function Spinner({ label }) {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+    <div className="min-h-screen flex flex-col items-center justify-center pt-24 md:pt-28 pb-12">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -74,7 +75,7 @@ export default function SessionSetup({ loading, error, onSubmit }) {
 
   if (stacksError) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-8">
+      <PageContainer max="3xl" innerClassName="flex flex-col items-center">
         <Card className="w-full max-w-md border-0 ring-1 ring-foreground/10 shadow-sm">
           <CardContent className="p-8 md:p-10 flex flex-col items-center text-center gap-4">
             <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -92,30 +93,28 @@ export default function SessionSetup({ loading, error, onSubmit }) {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-8">
-      <div className="w-full">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Nueva sesion</h1>
-          <p className="text-muted-foreground mt-1">
-            Configura tu entrevista personalizada en cuatro pasos
-          </p>
-        </div>
-        <StackSelector onSubmit={onSubmit} stacks={stacks} />
-        {error && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-destructive text-center mt-8"
-          >
-            {error}
-          </motion.p>
-        )}
+    <PageContainer max="3xl">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Nueva sesion</h1>
+        <p className="text-muted-foreground mt-1">
+          Configura tu entrevista personalizada en cuatro pasos
+        </p>
       </div>
-    </div>
+      <StackSelector onSubmit={onSubmit} stacks={stacks} />
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-destructive text-center mt-8"
+        >
+          {error}
+        </motion.p>
+      )}
+    </PageContainer>
   );
 }

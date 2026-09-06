@@ -5,6 +5,8 @@ import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,13 +15,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { LayoutDashboard, Play, LogOut, LogIn, UserPlus, Star, BarChart3, Menu, X, User } from "lucide-react"
+import { LayoutDashboard, Play, LogOut, LogIn, UserPlus, Star, BarChart3, Menu, X, User, SquareTerminal } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
 const BRAND = "InterviewKit"
 
 function BrandText() {
-  return <span className="text-2xl sm:text-3xl font-bold tracking-tight">{BRAND}</span>
+  return (
+    <span className="flex items-center gap-2">
+      <SquareTerminal className="size-6 text-primary" strokeWidth={2} />
+      <span className="text-2xl sm:text-3xl font-bold tracking-tight">{BRAND}</span>
+    </span>
+  )
 }
 
 function Navbar() {
@@ -56,18 +63,33 @@ function Navbar() {
 
         {user && (
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map(({ path, label, icon: Icon }) => (
-              <Button
-                key={path}
-                variant={isActive(path) ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => router.push(path)}
-                className="gap-2 text-sm"
-              >
-                <Icon className="size-4" />
-                {label}
-              </Button>
-            ))}
+            {navLinks.map(({ path, label, icon: Icon }) => {
+              const active = isActive(path)
+              return (
+                <Button
+                  key={path}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(path)}
+                  className={cn(
+                    "relative gap-2 text-sm",
+                    active ? "text-primary hover:bg-transparent" : "text-foreground"
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="navActiveTab"
+                      className="absolute inset-0 rounded-lg bg-primary/10"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Icon className="size-4" />
+                    {label}
+                  </span>
+                </Button>
+              )
+            })}
           </nav>
         )}
 
@@ -82,6 +104,8 @@ function Navbar() {
               <span className="text-muted-foreground tabular-nums">{stats.total_xp} XP</span>
             </div>
           )}
+
+          {user && <Separator orientation="vertical" className="h-6 hidden sm:block" />}
 
           {user ? (
             <>
