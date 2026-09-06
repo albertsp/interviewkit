@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.stacks import VALID_LEVELS, VALID_STACKS
+from ..constants.stacks import VALID_LEVELS, VALID_STACKS, VALID_TOPICS, TOPICS
 from ..constants.gamification import (
     XP_PER_LEVEL, XP_PER_RESULT, XP_COMPLETION_BONUS,
     compute_level, xp_to_next_level,
@@ -40,39 +40,55 @@ def create_session():
     data = request.get_json() or {}
     stack = data.get("stack")
     level = data.get("level")
+    topic = data.get("topic")
 
-    # Validamos que el stack y el nivel pertenece a la lista permitida
+    # Validamos que el stack y el nivel pertenecen a las listas permitidas
     if stack not in VALID_STACKS or level not in VALID_LEVELS:
         return jsonify({"Error": "El stack seleccionado o el nivel no estan permitidos"}), 400
 
+    # El tema es opcional (compatibilidad con clientes que aun no lo envian):
+    # si falta o no es valido para el stack, usamos el catch-all del stack.
+    stack_topics = VALID_TOPICS.get(stack, set())
+    if topic not in stack_topics:
+        topic = TOPICS.get(stack, [None])[0]
+
     # Creamos sesion en BD
-    new_session = Session(user_id=user_id, stack=stack, level=level)
+    new_session = Session(user_id=user_id, stack=stack, level=level, topic=topic)
     db.session.add(new_session)
     db.session.commit()
 
-    # Generamos preguntas
-    questions = generate_questions(stack, level)
+    # Generamos preguntas: bloque teorico + bloque de codigo
+    questions = generate_questions(stack, level, topic)
+    theory_questions = questions.get("theory", [])
+    code_questions = questions.get("code", [])
 
-    if not isinstance(questions, list) or len(questions) == 0:
+    if not theory_questions and not code_questions:
         db.session.delete(new_session)
         db.session.commit()
         return jsonify({"error": "No se pudieron generar las preguntas. Intentalo de nuevo."}), 503
 
-    # Guardamos cada pregunta como registro Question en BD de la session actual
-    for question in questions:
-        db.session.add(Question(question=question, session_id=new_session.session_id))
+    # Guardamos cada pregunta como registro Question en BD de la session actual,
+    # primero el bloque teorico y luego el de codigo
+    for question in theory_questions:
+        db.session.add(Question(question=question, session_id=new_session.session_id, question_type="theory"))
+    for question in code_questions:
+        db.session.add(Question(question=question, session_id=new_session.session_id, question_type="code"))
 
     db.session.commit()
 
-    saved_questions = Question.query.filter_by(session_id=new_session.session_id).all()
+    saved_questions = Question.query.filter_by(session_id=new_session.session_id).order_by(Question.question_id).all()
 
-    questions_data = [{"question_id": q.question_id, "question": q.question} for q in saved_questions]
+    questions_data = [
+        {"question_id": q.question_id, "question": q.question, "type": q.question_type}
+        for q in saved_questions
+    ]
 
     # Devolvemos la sesion con las preguntas
     return jsonify({
         "session_id": new_session.session_id,
         "stack": new_session.stack,
         "level": new_session.level,
+        "topic": new_session.topic,
         "questions": questions_data
     }), 201
 
@@ -97,7 +113,12 @@ def answer_question(session_id, question_id):
         return jsonify({"msg": "La pregunta no existe"}), 404
 
     user_question.answer = data.get("answer")
-    result = generate_feedback(user_sesion.stack, user_question.question, data.get("answer"))
+    db.session.commit()
+
+    # Generamos el feedback de la respuesta y guardamos en BD
+    result = generate_feedback(
+        user_sesion.stack, user_question.question, data.get("answer"), user_question.question_type
+    )
     user_question.feedback = result["feedback"]
     user_question.result = result["result"]
     db.session.commit()

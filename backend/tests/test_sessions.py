@@ -2,9 +2,10 @@ import pytest
 from app import limiter
 
 
-FAKE_QUESTIONS = [
-    "q1", "q2", "q3", "q4", "q5",
-]
+FAKE_QUESTIONS = {
+    "theory": ["t1", "t2"],
+    "code": ["q1", "q2", "q3"],
+}
 
 FAKE_FEEDBACK = {
     "result": "CORRECT",
@@ -16,14 +17,17 @@ FAKE_FEEDBACK = {
     },
 }
 
-VALID_PAYLOAD = {"stack": "JavaScript", "level": "Básico"}
+VALID_PAYLOAD = {"stack": "JavaScript", "level": "Básico", "topic": "General / Mixto"}
 
 
 @pytest.fixture(autouse=True)
 def _mock_ai(monkeypatch):
     """Ninguna prueba debe llamar a la API real de Groq."""
-    monkeypatch.setattr("app.routes.sessions.generate_questions", lambda stack, level: list(FAKE_QUESTIONS))
-    monkeypatch.setattr("app.routes.sessions.generate_feedback", lambda stack, question, answer: dict(FAKE_FEEDBACK))
+    monkeypatch.setattr("app.routes.sessions.generate_questions", lambda stack, level, topic: dict(FAKE_QUESTIONS))
+    monkeypatch.setattr(
+        "app.routes.sessions.generate_feedback",
+        lambda stack, question, answer, question_type="code": dict(FAKE_FEEDBACK),
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -44,11 +48,23 @@ class TestCreateSession:
         assert resp.status_code == 201
         data = resp.get_json()
         assert len(data["questions"]) == 5
+        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code", "code"]
 
     def test_create_session_invalid_stack(self, client, auth_headers):
         """Un stack fuera de VALID_STACKS debe rechazarse con 400 antes de llamar a la IA."""
         resp = client.post("/sessions/", json={"stack": "not-a-stack", "level": "Básico"}, headers=auth_headers)
         assert resp.status_code == 400
+
+    def test_create_session_without_topic_defaults_to_general(self, client, auth_headers):
+        """Compatibilidad: un cliente que no envia 'topic' (build de frontend
+        anterior a esta feature) no debe romperse, cae al tema general del stack."""
+        resp = client.post(
+            "/sessions/",
+            json={"stack": "JavaScript", "level": "Básico"},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        assert resp.get_json()["topic"] == "General / Mixto"
 
     def test_create_session_requires_auth(self, client, db):
         """Sin JWT, el endpoint debe devolver 401 y no crear nada."""
