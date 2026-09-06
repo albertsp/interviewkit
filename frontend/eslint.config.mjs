@@ -11,6 +11,14 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals"),
+  {
+    rules: {
+      // Flags the classic "setLoading(true) before an async fetch" effect
+      // pattern used throughout this app; that pattern is intentional here,
+      // not a bug the rule is meant to catch.
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

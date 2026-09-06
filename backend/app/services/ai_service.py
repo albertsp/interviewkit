@@ -67,7 +67,7 @@ STRICT RULES:
 """
 client = Groq(timeout=20.0)
 
-# Estructura minima de una respuesta valida de la IA para feedback.
+# Minimal shape of a valid AI feedback response, used as a fallback
 EMPTY_CARD = {
     "concept": "",
     "definition": "",
@@ -90,17 +90,17 @@ EMPTY_FEEDBACK = {
 def _parse_ai_json(raw_content):
     content = raw_content.strip()
 
-    # Eliminar bloques de markdown ```json ... ``` o ``` ... ```
+    # Strip ```json ... ``` or ``` ... ``` markdown fences the model may add
     content = re.sub(r"^```(?:json)?\s*", "", content)
     content = re.sub(r"\s*```$", "", content)
 
-    # strict=False permite caracteres de control (saltos de linea, tabs)
-    # dentro de las strings JSON que el modelo pueda generar sin escapar
+    # strict=False tolerates control characters (newlines, tabs) inside JSON
+    # strings that the model may emit unescaped
     return json.loads(content, strict=False)
 
 
 def _safe_card(card_data):
-    """Devuelve un dict de card con todos los campos esperados, rellenando los faltantes."""
+    """Returns a card dict with every expected field, filling in whatever is missing."""
     if not isinstance(card_data, dict):
         return dict(EMPTY_CARD)
     safe = dict(EMPTY_CARD)
@@ -113,7 +113,7 @@ def _safe_card(card_data):
 
 
 def _safe_feedback(data):
-    """Normaliza la respuesta de la IA al formato esperado, con fallbacks."""
+    """Normalizes the AI response to the expected shape, with fallbacks."""
     if not isinstance(data, dict):
         return dict(EMPTY_FEEDBACK)
     result = data.get("result", "").upper()
@@ -143,7 +143,7 @@ FALLBACK_QUESTIONS = {
 
 
 def _safe_questions(data):
-    """Normaliza la respuesta de la IA a {"theory": [...], "code": [...]}, con fallback por bloque."""
+    """Normalizes the AI response to {"theory": [...], "code": [...]}, with a per-block fallback."""
     if not isinstance(data, dict):
         return dict(FALLBACK_QUESTIONS)
     theory = data.get("theory")
@@ -158,7 +158,7 @@ MAX_QUESTION_ATTEMPTS = 2
 
 
 def _fetch_questions(stack, level, topic):
-    """Una llamada a Groq. Devuelve el JSON parseado (dict) o None si falla."""
+    """One call to Groq. Returns the parsed JSON (dict), or None on failure."""
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -184,10 +184,10 @@ def _fetch_questions(stack, level, topic):
 
 
 def generate_questions(stack, level, topic):
-    """Genera preguntas via IA: {THEORY_QUESTIONS_COUNT} teoricas + {CODE_QUESTIONS_COUNT} de codigo.
-    Reintenta hasta MAX_QUESTION_ATTEMPTS veces si la respuesta no trae ambos
-    bloques completos, para minimizar cuanto el usuario ve el fallback generico.
-    Devuelve {"theory": [...], "code": [...]}. Nunca lanza excepcion."""
+    """Generates questions via AI: {THEORY_QUESTIONS_COUNT} theory + {CODE_QUESTIONS_COUNT} code.
+    Retries up to MAX_QUESTION_ATTEMPTS times if the response is missing either
+    block, to minimize how often the user sees the generic fallback questions.
+    Returns {"theory": [...], "code": [...]}. Never raises."""
     last_parsed = None
     for _ in range(MAX_QUESTION_ATTEMPTS):
         parsed = _fetch_questions(stack, level, topic)
@@ -201,7 +201,7 @@ def generate_questions(stack, level, topic):
 
 
 def generate_feedback(stack, question, answer, question_type="code"):
-    """Devuelve un dict con keys: result, feedback, card. Nunca lanza excepcion."""
+    """Returns a dict with keys: result, feedback, card. Never raises."""
     try:
         chat_completion = client.chat.completions.create(
             messages=[

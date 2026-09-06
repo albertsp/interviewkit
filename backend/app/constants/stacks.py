@@ -7,9 +7,9 @@ VALID_STACKS = sorted({stack for stacks in ROLES.values() for stack in stacks})
 
 VALID_LEVELS = ["Básico", "Intermedio", "Avanzado"]
 
-# Temas curados a mano por stack, usados para acotar el contenido de las
-# preguntas generadas por IA. El primer elemento es siempre un catch-all
-# "General / Mixto" que deja que la IA elija libremente dentro del stack.
+# Hand-curated topics per stack, used to scope the content of AI-generated
+# questions. The first entry is always a catch-all "General / Mixto" that
+# lets the AI choose freely within the stack.
 TOPICS = {
     "HTML/CSS": [
         "General / Mixto",

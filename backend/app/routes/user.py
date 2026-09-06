@@ -14,7 +14,7 @@ user = Blueprint('user', __name__, url_prefix='/me')
 @user.route('/stats', methods=['GET'])
 @jwt_required()
 def get_my_stats():
-    """Devuelve las estadisticas completas del usuario autenticado."""
+    """Returns the authenticated user's full stats."""
     user_id = get_jwt_identity()
     user_row = User.query.filter_by(user_id=user_id).first()
     if user_row is None:
@@ -122,7 +122,7 @@ def get_my_stats():
 @user.route('/profile', methods=['GET'])
 @jwt_required()
 def get_my_profile():
-    """Devuelve los datos publicos del perfil del usuario autenticado."""
+    """Returns the authenticated user's public profile data."""
     user_id = get_jwt_identity()
     user_row = User.query.filter_by(user_id=user_id).first()
     if user_row is None:
@@ -146,7 +146,7 @@ def get_my_profile():
 @user.route('/profile', methods=['PATCH'])
 @jwt_required()
 def update_my_profile():
-    """Actualiza los datos del perfil del usuario autenticado."""
+    """Updates the authenticated user's profile data."""
     user_id = get_jwt_identity()
     user_row = User.query.filter_by(user_id=user_id).first()
     if user_row is None:

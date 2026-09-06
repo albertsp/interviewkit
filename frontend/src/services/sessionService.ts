@@ -28,17 +28,17 @@ interface CompleteSessionResponse{
   xp_per_level: number;
   breakdown: {question_id: number; result: Result; xp: number}[];
 }
-interface ResultsSummary{
+export interface ResultsSummary{
   correct: number;
   partially_correct: number;
   incorrect: number;
 }
-interface StackStat{
+export interface StackStat{
   stack: string;
   sessions: number;
   cards: number;
 }
-interface RecentSession{
+export interface RecentSession{
   stack: string;
   level: string;
   created_at: string | null;
@@ -47,7 +47,7 @@ interface RecentSession{
   partially_correct: number;
   incorrect: number;
 }
-interface CardsSummary{
+export interface CardsSummary{
   total: number;
   top_tags: string[];
 }

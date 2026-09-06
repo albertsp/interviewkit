@@ -5,7 +5,6 @@ from ..models.session import Session
 from ..models.question import Question
 from .. import db
 
-# Blueprint para las rutas de cards
 cards = Blueprint('cards', __name__, url_prefix='/cards')
 
 @cards.route('/', methods=['GET'])
@@ -87,7 +86,7 @@ def delete_card(card_id):
 
     return jsonify( {"msg": "Card Eliminada Exitosamente"}), 200
 
-# Mapeo de nivel textual a dificultad numerica
+# Maps the textual level to a numeric difficulty
 LEVEL_TO_DIFFICULTY = {
     "Básico": 1,
     "Intermedio": 2,
@@ -96,30 +95,25 @@ LEVEL_TO_DIFFICULTY = {
 
 
 @cards.route('/', methods=['POST'])
-# Protegemos el endpoint con JWT
 @jwt_required()
 def create_card():
-    # Extraemos user_id del token
     user_id = get_jwt_identity()
-
-    # Obtenemos el body de la peticion
     data = request.get_json() or {}
 
-    # Validamos que la sesion pertenece al usuario autenticado
+    # Ownership check: the session must belong to the authenticated user
     session = Session.query.filter_by(
         session_id=data.get("session_id"), user_id=user_id
     ).first()
     if not session:
         return jsonify({"msg": "La sesion no existe"}), 404
 
-    # Validamos que la pregunta pertenece a la sesion
+    # The question must belong to that same session, not just exist
     question = Question.query.filter_by(
         question_id=data.get("question_id"), session_id=data.get("session_id")
     ).first()
     if not question:
         return jsonify({"msg": "La pregunta no existe"}), 404
 
-    # Validamos campos obligatorios
     concept = (data.get("concept") or "").strip()
     explanation = (data.get("explanation") or "").strip()
     use_case = (data.get("use_case") or "").strip()
@@ -128,7 +122,7 @@ def create_card():
             "msg": "Los campos concept, explanation y use_case son obligatorios"
         }), 400
 
-    # Truncamos a los limites del modelo (defensa en profundidad)
+    # Truncate to the model's limits (defense in depth)
     if len(concept) > 120:
         concept = concept[:120]
     mnemonic = (data.get("mnemonic") or "").strip()[:200] or None
@@ -136,10 +130,9 @@ def create_card():
     if not isinstance(tags, list):
         tags = None
 
-    # Dificultad heredada del nivel de la sesion
+    # Difficulty is inherited from the session's level
     difficulty = LEVEL_TO_DIFFICULTY.get(session.level)
 
-    # Creamos la card en BD
     new_card = Card(
         question_id=data.get("question_id"),
         session_id=data.get("session_id"),
@@ -158,7 +151,6 @@ def create_card():
     db.session.add(new_card)
     db.session.commit()
 
-    # Devolvemos los datos de la card creada
     return jsonify({
         "card_id": new_card.card_id,
         "concept": new_card.concept,

@@ -1,7 +1,7 @@
 
 import { apiFetch, handleResponse } from "./httpClient";
 
-interface CardDTO{
+export interface CardDTO {
   card_id: number;
   question_id: number;
   session_id: number;

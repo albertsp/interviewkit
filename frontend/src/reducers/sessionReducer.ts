@@ -3,7 +3,7 @@
 type Phase = "answering" | "loading_feedback" | "waiting_action" | "complete";
 export type Result = "CORRECT" | "PARTIALLY_CORRECT" | "INCORRECT";
 type Action = 
-| { type: "INIT_SESSION"; payload: { session_id: number; stack: string; level: string; topic: string; questions: Question[] } }
+| { type: "INIT_SESSION"; payload: { session_id: number; stack: string; level: string; topic: string; questions: Pick<Question, "question_id" | "question" | "type">[] } }
 | { type: "ANSWER_CHANGED"; payload: string }
 | { type: "ANSWER_SUBMITTED";}
 | { type: "FEEDBACK_RECEIVED"; payload: { feedback: string; result: Result; card: Card}}

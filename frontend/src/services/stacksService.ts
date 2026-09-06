@@ -1,6 +1,6 @@
 import { API_URL, handleResponse } from "./httpClient";
 
-interface StackResponse {
+export interface StackResponse {
   rol: Record<string, string[]>;
   level: string[];
   topic: Record<string, string[]>;

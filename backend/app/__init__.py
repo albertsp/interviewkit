@@ -11,9 +11,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def _rate_limit_key():
-    """Identifica al usuario autenticado para limites por-usuario.
-    Si no hay JWT valido en la request, cae a la IP (no deberia ocurrir
-    en rutas protegidas con @jwt_required, pero evita un 500 si pasa)."""
+    """Identifies the authenticated user for per-user rate limits.
+    Falls back to IP if there's no valid JWT on the request (shouldn't
+    happen on routes protected with @jwt_required, but avoids a 500 if it does)."""
     try:
         identity = get_jwt_identity()
         if identity:
@@ -23,25 +23,23 @@ def _rate_limit_key():
     return get_remote_address()
 
 
-# Creamos la clase SQLAlchemy y JWTManager para integrar con Flask
 db = SQLAlchemy()
 jwt = JWTManager()
 limiter = Limiter(key_func=_rate_limit_key)
 
-# Funcion para crear la app
 def create_app():
-    app = Flask(__name__)               # Instancia inicial para Flask
-    app.config.from_object(Config)      # Pasamos parametros de configuracion
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-    # Corregir URLs detras de proxy (Fly.io terminateda SSL)
+    # Fix URLs behind a proxy (Fly.io terminates SSL)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
-    db.init_app(app)                    # Inicializamos app Flask con la extension SQLAlchemy
-    jwt.init_app(app)                   # Inicializamos app Flask con extension JTManager
+    db.init_app(app)
+    jwt.init_app(app)
 
-    # Rate limiting (ver F0-2 en AUDIT.md): activo tambien en tests para que
-    # la suite ejercite el comportamiento real; los tests deben llamar a
-    # limiter.reset() para partir de un estado limpio si lo necesitan.
+    # Rate limiting (see F0-2 in AUDIT.md): also enabled during tests so the
+    # suite exercises the real behavior; tests should call limiter.reset()
+    # if they need to start from a clean state.
     app.config.setdefault("RATELIMIT_ENABLED", True)
     limiter.init_app(app)
 
@@ -61,9 +59,9 @@ def create_app():
     from .routes.cards import cards
     from .routes.user import user
 
-    Migrate(app, db)                    # Habilita migraciones de base de datos con Flask
+    Migrate(app, db)
 
-    # OAuth: registrar providers solo si estan configuradas las credenciales
+    # OAuth: only register providers whose credentials are actually configured
     has_oauth_provider = (
         (app.config.get("GOOGLE_CLIENT_ID") and app.config.get("GOOGLE_CLIENT_SECRET"))
         or (app.config.get("GITHUB_CLIENT_ID") and app.config.get("GITHUB_CLIENT_SECRET"))
@@ -92,10 +90,10 @@ def create_app():
                 client_kwargs={"scope": "user:email"},
             )
 
-    
-    # CORS: orígenes permitidos según entorno.
-    # En dev, si CORS_ORIGINS está vacío, usamos localhost:3000 como fallback seguro.
-    # En producción, NO hay fallback: si no defines CORS_ORIGINS, la app falla al arrancar.
+
+    # CORS: allowed origins depend on the environment.
+    # In dev, if CORS_ORIGINS is empty, fall back to localhost:3000.
+    # In production there's no fallback: the app fails to start if CORS_ORIGINS isn't set.
     if Config.FLASK_ENV == "development" and not Config.parse_cors_origins():
         allowed_origins = ["http://localhost:3000"]
     else:
@@ -103,8 +101,8 @@ def create_app():
 
     if not allowed_origins:
         raise RuntimeError(
-            "CORS_ORIGINS es obligatorio en producción. "
-            "Define la variable en tu .env o en los secrets de Fly.io."
+            "CORS_ORIGINS is required in production. "
+            "Set it in your .env or in Fly.io secrets."
         )
 
     CORS(

@@ -13,9 +13,9 @@ from ..services.ai_service import generate_questions, generate_feedback
 
 sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 
-# Groq free tier (ver AUDIT.md F0-2): 30 RPM / 1.000 RPD / 100K TPD,
-# compartido entre TODOS los usuarios de la app. "groq_global" agrupa
-# ambos endpoints de IA bajo un unico presupuesto para no agotarlo.
+# Groq free tier (see AUDIT.md F0-2): 30 RPM / 1,000 RPD / 100K TPD,
+# shared across ALL users of the app. "groq_global" groups both AI
+# endpoints under a single budget so one doesn't drain the other's quota.
 GROQ_GLOBAL_LIMIT = "20 per minute;40 per day"
 GROQ_GLOBAL_SCOPE = "groq_global"
 
@@ -25,39 +25,34 @@ def _groq_global_key():
 
 
 @sessions.route('/', methods=['POST'])
-# Protegemos el endpoint con JWT
 @jwt_required()
-# Limite por usuario: evita que una sola cuenta agote el presupuesto compartido
+# Per-user limit: keeps a single account from draining the shared budget
 @limiter.limit("5 per hour")
-# Limite global: protege el presupuesto real de la cuenta de Groq (free tier)
+# Global limit: protects the actual Groq account budget (free tier)
 @limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
 def create_session():
 
-    # Extraemos user_id del token
     user_id = get_jwt_identity()
 
-    # Obtenemos el body y accedemos a los campos
     data = request.get_json() or {}
     stack = data.get("stack")
     level = data.get("level")
     topic = data.get("topic")
 
-    # Validamos que el stack y el nivel pertenecen a las listas permitidas
     if stack not in VALID_STACKS or level not in VALID_LEVELS:
         return jsonify({"Error": "El stack seleccionado o el nivel no estan permitidos"}), 400
 
-    # El tema es opcional (compatibilidad con clientes que aun no lo envian):
-    # si falta o no es valido para el stack, usamos el catch-all del stack.
+    # Topic is optional for backwards compatibility with clients that don't
+    # send it yet: if missing or invalid for the stack, fall back to its catch-all.
     stack_topics = VALID_TOPICS.get(stack, set())
     if topic not in stack_topics:
         topic = TOPICS.get(stack, [None])[0]
 
-    # Creamos sesion en BD
     new_session = Session(user_id=user_id, stack=stack, level=level, topic=topic)
     db.session.add(new_session)
     db.session.commit()
 
-    # Generamos preguntas: bloque teorico + bloque de codigo
+    # Two question blocks: theory first, then code
     questions = generate_questions(stack, level, topic)
     theory_questions = questions.get("theory", [])
     code_questions = questions.get("code", [])
@@ -67,8 +62,7 @@ def create_session():
         db.session.commit()
         return jsonify({"error": "No se pudieron generar las preguntas. Intentalo de nuevo."}), 503
 
-    # Guardamos cada pregunta como registro Question en BD de la session actual,
-    # primero el bloque teorico y luego el de codigo
+    # Order matters here: theory questions are saved before code questions
     for question in theory_questions:
         db.session.add(Question(question=question, session_id=new_session.session_id, question_type="theory"))
     for question in code_questions:
@@ -83,7 +77,6 @@ def create_session():
         for q in saved_questions
     ]
 
-    # Devolvemos la sesion con las preguntas
     return jsonify({
         "session_id": new_session.session_id,
         "stack": new_session.stack,
@@ -94,16 +87,14 @@ def create_session():
 
 
 @sessions.route('/<int:session_id>/questions/<int:question_id>', methods=['PATCH'])
-# Protegemos el endpoint con JWT
 @jwt_required()
 @limiter.limit("15 per hour")
 @limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
 def answer_question(session_id, question_id):
-    # Extraemos user_id del token
     user_id = get_jwt_identity()
     data = request.get_json() or {}
     user_sesion = Session.query.filter_by(session_id=session_id, user_id=user_id).first()
-    
+
     if user_sesion is None:
         return jsonify({"msg": "La sesión no existe"}), 404
 
@@ -115,7 +106,6 @@ def answer_question(session_id, question_id):
     user_question.answer = data.get("answer")
     db.session.commit()
 
-    # Generamos el feedback de la respuesta y guardamos en BD
     result = generate_feedback(
         user_sesion.stack, user_question.question, data.get("answer"), user_question.question_type
     )
@@ -133,26 +123,23 @@ def answer_question(session_id, question_id):
 
 
 @sessions.route('/<int:session_id>/complete', methods=['POST'])
-# Protegemos el endpoint con JWT
 @jwt_required()
 def complete_session(session_id):
-    """Calcula XP ganado en la sesion, actualiza User y devuelve stats."""
+    """Computes the XP earned in the session, updates the User, and returns stats."""
     user_id = get_jwt_identity()
 
-    # Validamos que la sesion pertenece al usuario
+    # Ownership check: the session must belong to the authenticated user
     user_session = Session.query.filter_by(session_id=session_id, user_id=user_id).first()
     if user_session is None:
         return jsonify({"msg": "La sesion no existe"}), 404
 
-    # Proteccion contra idempotencia: si ya fue completada, no se puede repetir
+    # Idempotency guard: a session can only be completed once
     if user_session.is_completed:
         return jsonify({"msg": "Esta sesion ya fue completada"}), 409
 
-    # Obtenemos todas las preguntas respondidas
     questions = Question.query.filter_by(session_id=session_id).all()
     answered = [q for q in questions if q.result is not None]
 
-    # Calculamos XP por resultado
     breakdown = []
     xp_earned = 0
     for q in answered:
@@ -164,13 +151,12 @@ def complete_session(session_id):
             "xp": xp,
         })
 
-    # Bonus por completar todas las preguntas de la sesion
+    # Bonus for completing every question in the session
     bonus_applied = False
     if len(answered) == len(questions) and len(questions) > 0:
         xp_earned += XP_COMPLETION_BONUS
         bonus_applied = True
 
-    # Actualizamos XP total y nivel del usuario
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
         return jsonify({"msg": "Usuario no encontrado"}), 404
@@ -178,7 +164,7 @@ def complete_session(session_id):
     user.total_xp = (user.total_xp or 0) + xp_earned
     user.level = compute_level(user.total_xp)
 
-    # Marcamos la sesion como completada para evitar duplicar XP
+    # Marked completed to prevent this session from awarding XP again
     user_session.is_completed = True
     db.session.commit()
 

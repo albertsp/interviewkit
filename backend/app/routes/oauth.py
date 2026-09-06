@@ -104,9 +104,9 @@ def google_callback():
         userinfo = token.get("userinfo")
         if not userinfo:
             try:
-                # Pasar el token explicitamente: en algunas versiones de Authlib el
-                # token almacenado tras authorize_access_token no se adjunta solo
-                # en la llamada a userinfo(), y el endpoint responde 401.
+                # Pass the token explicitly: in some Authlib versions the token
+                # stored after authorize_access_token isn't attached automatically
+                # to the userinfo() call, and the endpoint responds with 401.
                 userinfo = oauth.google.userinfo(token=token)
             except Exception as e:
                 current_app.logger.warning("google userinfo fallback failed: %s", e)
