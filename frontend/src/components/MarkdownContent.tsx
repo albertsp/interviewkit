@@ -95,8 +95,8 @@ function CodeSnippet({ code, language }: { code: string; language: string }) {
   const label = LANG_LABELS[language.toLowerCase()] || language || "Code";
 
   return (
-    <div className="rounded-xl overflow-hidden border bg-[#0d1117] shadow-sm">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#161b22] border-b border-white/5">
+    <div className="rounded-xl overflow-hidden border bg-code-bg shadow-sm">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-code-header border-b border-white/5">
         <div className="flex gap-1.5">
           <span className="size-3 rounded-full bg-[#ff5f56]" />
           <span className="size-3 rounded-full bg-[#ffbd2e]" />
@@ -107,7 +107,7 @@ function CodeSnippet({ code, language }: { code: string; language: string }) {
         </span>
       </div>
       <pre className="p-4 overflow-x-auto">
-        <code className="text-sm font-mono leading-relaxed text-[#c9d1d9] whitespace-pre">
+        <code className="text-sm font-mono leading-relaxed text-code-text whitespace-pre">
           {code}
         </code>
       </pre>

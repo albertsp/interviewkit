@@ -71,7 +71,7 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
     sessions: s.sessions,
     cards: s.cards,
     icon: STACK_ICONS[s.stack] || s.stack.slice(0, 2).toUpperCase(),
-    fill: STACK_COLORS[s.stack]?.bar || "#6b7280",
+    fill: STACK_COLORS[s.stack]?.bar || "var(--muted-foreground)",
   }));
 
   return (
@@ -86,9 +86,9 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
         <div className="space-y-3">
           {stacks.map((s) => {
             const colors = STACK_COLORS[s.stack] || {
-              bg: "bg-gray-500/10",
-              text: "text-gray-400",
-              ring: "ring-gray-500/30",
+              bg: "bg-muted",
+              text: "text-muted-foreground",
+              ring: "ring-border",
             };
             const icon = STACK_ICONS[s.stack] || s.stack.slice(0, 2).toUpperCase();
             return (

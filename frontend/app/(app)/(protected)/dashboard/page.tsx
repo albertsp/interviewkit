@@ -10,6 +10,8 @@ import { SingleCard } from "@/components/dashboard/SingleCard";
 import { CardTile } from "@/components/dashboard/CardTile";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { LayoutGrid } from "lucide-react";
 
 export default function DashboardPage() {
@@ -108,13 +110,30 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <PageContainer max="6xl">
-        <div className="animate-pulse space-y-6">
-          <div className="h-10 bg-muted rounded-lg w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-muted rounded-xl" />
-            ))}
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-border/50 pb-4 mb-6">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-40" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} size="sm" className="gap-3 ring-0 border border-border">
+              <CardHeader className="pb-1">
+                <div className="flex items-start justify-between gap-2">
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+              <CardFooter className="justify-between bg-muted/30">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-10" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       </PageContainer>
     )

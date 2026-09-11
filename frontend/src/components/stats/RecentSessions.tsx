@@ -70,11 +70,11 @@ export default function RecentSessions({ sessions }: { sessions: RecentSession[]
       <CardContent className="space-y-3">
         {sessions.slice(0, 5).map((session, i) => {
           const colors = STACK_COLORS[session.stack] || {
-            bg: "bg-gray-500/10",
-            text: "text-gray-400",
-            ring: "ring-gray-500/30",
+            bg: "bg-muted",
+            text: "text-muted-foreground",
+            ring: "ring-border",
           };
-          const levelBadge = LEVEL_BADGES[session.level] || "bg-gray-500/10 text-gray-400 border-gray-500/30";
+          const levelBadge = LEVEL_BADGES[session.level] || "bg-muted text-muted-foreground border-border";
 
           return (
             <motion.div
