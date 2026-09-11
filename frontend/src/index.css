@@ -55,6 +55,44 @@
 }
 
 :root {
+    --background: oklch(0.99 0.003 270);
+    --foreground: oklch(0.18 0.015 270);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.18 0.015 270);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.18 0.015 270);
+    --primary: oklch(0.58 0.17 195);
+    --primary-foreground: oklch(0.99 0.005 195);
+    --secondary: oklch(0.95 0.006 270);
+    --secondary-foreground: oklch(0.25 0.015 270);
+    --muted: oklch(0.96 0.005 270);
+    --muted-foreground: oklch(0.48 0.012 270);
+    --accent: oklch(0.93 0.035 195);
+    --accent-foreground: oklch(0.38 0.15 195);
+    --destructive: oklch(0.55 0.22 25);
+    --border: oklch(0.90 0.008 270);
+    --input: oklch(0.90 0.008 270);
+    --ring: oklch(0.58 0.17 195);
+    --chart-1: oklch(0.60 0.19 195);
+    --chart-2: oklch(0.55 0.18 155);
+    --chart-3: oklch(0.62 0.15 80);
+    --chart-4: oklch(0.52 0.20 300);
+    --chart-5: oklch(0.55 0.15 30);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.97 0.004 270);
+    --sidebar-foreground: oklch(0.20 0.015 270);
+    --sidebar-primary: oklch(0.58 0.17 195);
+    --sidebar-primary-foreground: oklch(0.99 0.005 195);
+    --sidebar-accent: oklch(0.93 0.035 195);
+    --sidebar-accent-foreground: oklch(0.38 0.15 195);
+    --sidebar-border: oklch(0.90 0.008 270);
+    --sidebar-ring: oklch(0.58 0.17 195);
+    --code-bg: #0d1117;
+    --code-header: #161b22;
+    --code-text: #c9d1d9;
+}
+
+.dark {
     --background: oklch(0.07 0.005 270);
     --foreground: oklch(0.98 0 0);
     --card: oklch(0.10 0.005 270);
@@ -78,7 +116,6 @@
     --chart-3: oklch(0.75 0.15 80);
     --chart-4: oklch(0.60 0.20 300);
     --chart-5: oklch(0.65 0.15 30);
-    --radius: 0.625rem;
     --sidebar: oklch(0.08 0.005 270);
     --sidebar-foreground: oklch(0.90 0 0);
     --sidebar-primary: oklch(0.72 0.19 195);
@@ -87,9 +124,6 @@
     --sidebar-accent-foreground: oklch(0.72 0.19 195);
     --sidebar-border: oklch(0.18 0.01 270);
     --sidebar-ring: oklch(0.72 0.19 195);
-    --code-bg: #0d1117;
-    --code-header: #161b22;
-    --code-text: #c9d1d9;
 }
 
 @layer base {

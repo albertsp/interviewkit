@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -100,6 +101,8 @@ function Navbar() {
         )}
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <ThemeToggle />
+
           {user && (
             <div
               className="hidden sm:flex items-center gap-2 rounded-lg border border-border/50 bg-background px-3 py-1.5 text-sm"
