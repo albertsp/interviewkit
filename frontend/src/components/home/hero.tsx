@@ -48,7 +48,7 @@ export default function Hero() {
   }, [mounted]);
 
   return (
-    <section className="relative flex flex-col items-center justify-center px-4 sm:px-6 min-h-screen overflow-hidden">
+    <section className="relative flex flex-col items-center justify-center px-4 sm:px-6 min-h-screen overflow-hidden pt-28 sm:pt-0">
       <div className="absolute inset-0 [background-image:linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] [background-size:64px_64px] opacity-40" />
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/8 rounded-full blur-3xl" />
