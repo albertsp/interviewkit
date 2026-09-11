@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.card import Card
 from ..models.session import Session
 from ..models.question import Question
+from ..services.ai_service import fix_literal_escapes
 from .. import db
 
 cards = Blueprint('cards', __name__, url_prefix='/cards')
@@ -57,7 +58,7 @@ def update_card(card_id):
     if "tags" in data:
         card.tags = data["tags"] if isinstance(data["tags"], list) else None
 
-    code = (data.get("code") or "").strip()
+    code = fix_literal_escapes((data.get("code") or "").strip())
     card.code = code or None
 
     code_language = (data.get("code_language") or "").strip()
@@ -144,7 +145,7 @@ def create_card():
         avoid_when=(data.get("avoid_when") or "").strip() or None,
         mnemonic=mnemonic,
         tags=tags,
-        code=(data.get("code") or "").strip() or None,
+        code=fix_literal_escapes((data.get("code") or "").strip()) or None,
         code_language=(data.get("code_language") or "javascript").strip() or "javascript",
         difficulty=difficulty,
     )
