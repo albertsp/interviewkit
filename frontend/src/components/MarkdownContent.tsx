@@ -11,7 +11,11 @@ interface Block {
 // Splits text into code/text blocks by detecting ```language ... ``` fences
 function parseMarkdownBlocks(text: string): Block[] {
   const blocks: Block[] = [];
-  const regex = /```(\w*)\n([\s\S]*?)```/g;
+  // The language tag is normally followed by a real newline, but the AI
+  // occasionally over-escapes JSON and the fence is followed directly by
+  // the code instead (no newline at all) - match that too so the snippet
+  // still renders instead of falling back to a plain-text block.
+  const regex = /```(\w*)\n?([\s\S]*?)```/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 

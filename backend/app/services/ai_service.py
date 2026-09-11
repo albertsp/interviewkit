@@ -22,8 +22,9 @@ THEORY QUESTIONS ({THEORY_QUESTIONS_COUNT} of them):
 CODE QUESTIONS ({CODE_QUESTIONS_COUNT} of them):
 1. ABSTRACT OR THEORETICAL QUESTIONS ARE FORBIDDEN here: Do not ask definition questions (e.g., do NOT ask "What is a closure?", "What is polymorphism?" or "What is X used for?").
 2. 100% CODE FOCUS: Each question must strictly follow one of these two formats:
-   - "Given this code snippet, what happens / what does it print / what is the error and how do you fix it?" (Include a Markdown code block).
-   - "Write the code / function / component to solve this specific problem."
+   - "Given this code snippet, what happens / what does it print / what is the error and how do you fix it?" (Include a code snippet, see rule 3 below).
+   - "Write the code / function / component to solve this specific problem." (no snippet needed for this variant).
+3. CODE SNIPPET FORMAT: Whenever a question includes a code snippet, it MUST be wrapped in a fenced Markdown code block: three backticks, the language identifier, a newline, the code, a newline, three backticks (e.g. ```python\\ncode here\\n```). Never use a plain line of dashes, asterisks, or any other separator to set the code apart from the question text — only the triple-backtick fence renders as a code block for the candidate. Exactly one fenced block per question, placed right after the introductory sentence.
 
 GENERAL RULES (apply to both blocks):
 1. TOPIC FOCUS: Every question (theory and code) must relate to the given Topic. If the topic is "General / Mixto", cover varied aspects of the stack instead.
