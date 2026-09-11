@@ -14,6 +14,8 @@ export interface CardDTO {
   mnemonic: string | null;
   code: string | null;
   code_language: string | null;
+  tags: string[];
+  difficulty: number | null;
   created_at: string;
 
 }

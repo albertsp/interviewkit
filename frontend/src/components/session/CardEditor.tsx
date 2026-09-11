@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,10 +96,69 @@ function TagChips({ tags, onTagClick }: { tags?: string[] | null; onTagClick?: (
   );
 }
 
-// Read view: shows the card nicely formatted
+type CellAccent = "neutral" | "green" | "red" | "amber";
+
+const CELL_ACCENT_STYLES: Record<CellAccent, { icon: string; label: string }> = {
+  neutral: { icon: "text-muted-foreground", label: "text-muted-foreground" },
+  green: { icon: "text-green-600 dark:text-green-400", label: "text-green-700 dark:text-green-400" },
+  red: { icon: "text-red-600 dark:text-red-400", label: "text-red-700 dark:text-red-400" },
+  amber: { icon: "text-amber-600 dark:text-amber-400", label: "text-amber-700 dark:text-amber-400" },
+};
+
+// One compartment of the bento grid: a self-contained block with its own
+// icon, label and content, so the flashcard reads as distinct chunks of
+// information instead of one long scroll.
+function BentoCell({
+  icon: Icon,
+  label,
+  accent = "neutral",
+  span,
+  children,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  accent?: CellAccent;
+  span?: "full";
+  children: ReactNode;
+}) {
+  const styles = CELL_ACCENT_STYLES[accent];
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-border bg-muted/30 p-4 space-y-1.5",
+        span === "full" && "sm:col-span-2"
+      )}
+    >
+      <p className={cn("text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5", styles.label)}>
+        <Icon className={cn("size-3.5", styles.icon)} />
+        {label}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+export function DifficultyDots({ difficulty }: { difficulty?: number | null }) {
+  if (!difficulty) return null;
+  return (
+    <div className="flex items-center gap-1" title={`Dificultad ${difficulty}/3`} aria-label={`Dificultad ${difficulty} de 3`}>
+      {[1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className={cn(
+            "size-1.5 rounded-full",
+            i <= difficulty ? "bg-primary" : "bg-muted-foreground/25"
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Read view: the flashcard itself, laid out as a bento grid of compartments
 export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: boolean }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div>
         <div className="flex items-start gap-2 flex-wrap">
           <h3 className="text-2xl font-bold tracking-tight text-foreground">
@@ -123,55 +182,42 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
         )}
       </div>
 
-      {card.explanation && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Explicacion
-          </p>
-          <MarkdownContent text={card.explanation} className="text-sm" />
-        </div>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {card.explanation && (
+          <BentoCell icon={Lightbulb} label="Explicacion" span="full">
+            <MarkdownContent text={card.explanation} className="text-sm" />
+          </BentoCell>
+        )}
 
-      {card.use_case && (
-        <div className="rounded-lg border-l-4 border-green-500 bg-green-500/5 p-3 space-y-1">
-          <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider flex items-center gap-1.5">
-            <CheckCircle2 className="size-3.5" />
-            Usar cuando
-          </p>
-          <MarkdownContent text={card.use_case} className="text-sm" />
-        </div>
-      )}
+        {card.use_case && (
+          <BentoCell icon={CheckCircle2} label="Usar cuando" accent="green">
+            <MarkdownContent text={card.use_case} className="text-sm" />
+          </BentoCell>
+        )}
 
-      {card.avoid_when && (
-        <div className="rounded-lg border-l-4 border-red-500 bg-red-500/5 p-3 space-y-1">
-          <p className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
-            <XCircle className="size-3.5" />
-            Evitar cuando
-          </p>
-          <MarkdownContent text={card.avoid_when} className="text-sm" />
-        </div>
-      )}
+        {card.avoid_when && (
+          <BentoCell icon={XCircle} label="Evitar cuando" accent="red">
+            <MarkdownContent text={card.avoid_when} className="text-sm" />
+          </BentoCell>
+        )}
 
-      {card.code && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Ejemplo
-          </p>
-          <CodePreview code={card.code} language={card.code_language || "code"} />
-        </div>
-      )}
-
-      {card.mnemonic && (
-        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 flex gap-2.5">
-          <Lightbulb className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-0.5">
-              Mnemotecnia
-            </p>
+        {card.mnemonic && (
+          <BentoCell
+            icon={Lightbulb}
+            label="Mnemotecnia"
+            accent="amber"
+            // Full-width when it would otherwise sit alone in its row (both
+            // neighbors present, so it starts a new row; or neither present,
+            // so there's no sibling to pair with). Half-width when it can
+            // pair with exactly one of use_case/avoid_when.
+            span={Boolean(card.use_case) === Boolean(card.avoid_when) ? "full" : undefined}
+          >
             <p className="text-sm text-foreground leading-relaxed">{card.mnemonic}</p>
-          </div>
-        </div>
-      )}
+          </BentoCell>
+        )}
+      </div>
+
+      {card.code && <CodePreview code={card.code} language={card.code_language || "code"} />}
 
       <TagChips tags={card.tags} />
     </div>

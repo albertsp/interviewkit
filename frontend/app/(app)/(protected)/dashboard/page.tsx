@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/dashboard/SearchBar";
 import { FilterButtons } from "@/components/dashboard/FilterButtons";
 import { SingleCard } from "@/components/dashboard/SingleCard";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { CardTile } from "@/components/dashboard/CardTile";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LayoutGrid } from "lucide-react";
@@ -158,37 +157,7 @@ export default function DashboardPage() {
             <SingleCard isSingleCardOpen={isSingleCardOpen} setIsSingleCardOpen={setIsSingleCardOpen} selectedCard={selectedCard} originalCard={originalCard} onCardChange={handleCardChange} onSave={handleSaveCard} deleteCard={handleDeleteCard}/>
 
             {filtered_cards.map((card) => (
-              <Card
-                key={card.card_id}
-                size="sm"
-                className="group cursor-pointer ring-0 border border-border transition-[transform,border-color,box-shadow] duration-200 ease-out hover:scale-[1.02] hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 focus-visible:ring-2 focus-visible:ring-primary/50 outline-none"
-                onClick={() => openCard(card)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(card); }}}
-                tabIndex={0}
-                role="button"
-                aria-label={`Abrir card: ${card.concept}`}
-              >
-                <CardHeader className="pb-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base group-hover:text-primary transition-colors duration-200">
-                      {card.concept}
-                    </CardTitle>
-                    {card.code_language && (
-                      <Badge variant="outline" size="sm" className="uppercase tracking-wider border-primary/20 text-primary/80 shrink-0">
-                        {card.code_language}
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  {card.explanation && (
-                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                      {card.explanation}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              <CardTile key={card.card_id} card={card} onOpen={openCard} />
             ))}
           </div>
         )}
