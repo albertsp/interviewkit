@@ -4,10 +4,25 @@ import { AuthProvider } from "@/context/AuthContext";
 import "@/index.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://interviewkit.dev"),
   title: "InterviewKit",
   description: "Practica para tu próxima entrevista técnica",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "InterviewKit",
+    description: "Practica para tu próxima entrevista técnica",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "InterviewKit",
+    description: "Practica para tu próxima entrevista técnica",
   },
 };
 
