@@ -14,6 +14,19 @@ def _get_database_url():
 
 class Config:
     SQLALCHEMY_DATABASE_URI = _get_database_url()
+    # pool_pre_ping: check each pooled connection with a lightweight ping
+    # before reusing it, so a connection the DB server already closed (idle
+    # timeout, managed-Postgres suspend, etc.) gets transparently replaced
+    # instead of surfacing as an OperationalError on the request that draws
+    # it from the pool - which is what caused OAuth login (and any other
+    # first request after a period of inactivity) to fail once and then
+    # succeed on retry once the pool had a fresh connection.
+    # pool_recycle: proactively recycle connections older than this many
+    # seconds, so we don't rely solely on the ping catching everything.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+    }
     SECRET_KEY = os.getenv("SECRET_KEY", os.getenv("JWT_SECRET_KEY", "dev-secret-key"))
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
