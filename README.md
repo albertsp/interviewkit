@@ -1,9 +1,10 @@
 # InterviewKit
 
-> Practica entrevistas técnicas reales con IA — preguntas de código, feedback inmediato y cards para repasar.
+> Practice real technical interviews with AI: code questions, instant feedback, and study cards to review later.
 
-🌐 **[interviewkit.dev](https://interviewkit.dev)** · [Repositorio](https://github.com/albertsp/interview-prep-app)
+🌐 **[interviewkit.dev](https://interviewkit.dev)** · [Repository](https://github.com/albertsp/interviewkit)
 
+[![CI](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml/badge.svg)](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)](https://react.dev)
 [![Flask](https://img.shields.io/badge/Flask-3-000000?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
@@ -12,128 +13,119 @@
 
 ---
 
-## ¿Por qué existe esto?
+## Table of contents
 
-Mientras estudiaba programación y me preparaba para mi primer empleo, me di cuenta de que practicar entrevistas técnicas solo con teoría no funciona. Necesitaba preguntas reales de código, alguien que me dijera exactamente qué había fallado, y una forma de repasar lo aprendido.
-
-No encontré ninguna herramienta que hiciera las tres cosas a la vez sin costar dinero, así que la construí.
-
-**InterviewKit** genera 5 preguntas de código adaptadas a tu stack y nivel, evalúa tus respuestas con IA y guarda cada concepto como una card Q&A para repasar cuando quieras.
+- [Why this exists](#why-this-exists)
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting started](#getting-started)
+- [Environment variables](#environment-variables)
+- [API overview](#api-overview)
+- [Testing and CI](#testing-and-ci)
+- [Project structure](#project-structure)
+- [Deployment](#deployment)
+- [Technical decisions](#technical-decisions)
+- [Challenges and lessons learned](#challenges-and-lessons-learned)
+- [Troubleshooting](#troubleshooting)
+- [Roadmap](#roadmap)
 
 ---
 
-## Funcionalidades
+## Why this exists
+
+While learning to code and preparing for my first job, I realised that practising technical interviews with theory alone doesn't work. I needed real code questions, someone telling me exactly what went wrong, and a way to review what I had learned.
+
+I couldn't find a free tool that did all three, so I built one.
+
+**InterviewKit** generates 5 code questions tailored to your stack and level, evaluates your answers with AI, and saves every concept as a Q&A card you can review whenever you want.
+
+---
+
+## Features
 
 | | |
 |---|---|
 | ![Session setup](frontend/public/screenshots/session-setup.png) | ![Dashboard](frontend/public/screenshots/dashboard-cards.png) |
 | ![Stats](frontend/public/screenshots/stats-overview.png) | ![Card detail](frontend/public/screenshots/card-detail.png) |
 
-- **Simulador de entrevista** — Elige rol (Frontend/Backend), tecnología y nivel. La IA genera 5 preguntas de código adaptadas, no definiciones teóricas.
-- **Feedback real** — Cada respuesta es evaluada con explicación de qué estuvo bien, qué falló y cuál es la solución correcta.
-- **Cards Q&A** — Cada pregunta se convierte en una card de estudio con concepto, definición, ejemplo de código y casos de uso.
-- **Dashboard** — Busca y filtra todas tus cards por tecnología o concepto.
-- **Estadísticas** — Gráficos de resultados por sesión, tags más practicados y progreso en el tiempo.
-- **Sistema de XP y niveles** — Ganas experiencia con cada sesión según la dificultad de tus respuestas.
-- **Autenticación** — Login con Google, GitHub o email/contraseña.
+- **Interview simulator**: choose a role (Frontend/Backend), a technology and a level. The AI generates 5 concrete code questions, not theoretical definitions.
+- **Real feedback**: every answer is evaluated with an explanation of what was right, what failed, and what the correct solution looks like.
+- **Q&A cards**: every question becomes a study card with the concept, a definition, a code example and use cases.
+- **Dashboard**: search and filter all your cards by technology or concept.
+- **Statistics**: charts of results per session, most practised tags and progress over time.
+- **XP and levels**: earn experience in every session based on how well you answer.
+- **Authentication**: sign in with Google, GitHub or email and password.
+- **Light and dark themes**.
 
 ---
 
-## Stack
+## Tech stack
 
-| Capa | Tecnología |
+| Layer | Technology |
 |---|---|
-| Frontend | Next.js 15 + React 19 |
-| Estilos | Tailwind CSS v4 + shadcn/ui |
-| Animaciones | Framer Motion |
-| Backend | Flask 3 (Python) |
-| Base de datos | PostgreSQL 16 + SQLAlchemy |
-| Migraciones | Alembic (Flask-Migrate) |
-| Auth | JWT en httpOnly cookies + OAuth 2.0 (Authlib) |
-| IA | Groq API (Llama 3.3 70B) |
-| Deploy | Vercel (frontend) + Fly.io (backend) |
+| Frontend | Next.js 15 + React 19 + TypeScript |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Animations | Framer Motion |
+| Code editor | CodeMirror |
+| Backend | Flask 3 (Python 3.12) |
+| Database | PostgreSQL 16 + SQLAlchemy |
+| Migrations | Alembic (Flask-Migrate) |
+| Auth | JWT in httpOnly cookies + OAuth 2.0 (Authlib) |
+| Rate limiting | Flask-Limiter |
+| AI | Groq API (`openai/gpt-oss-120b`) |
+| Testing | pytest (backend), Vitest + Testing Library (frontend) |
+| CI | GitHub Actions |
+| Deployment | Vercel (frontend) + Fly.io (backend) |
 
 ---
 
-## Decisiones técnicas
+## Architecture
 
-**¿Por qué Flask y no Django o FastAPI?**
-Flask me daba control total sobre la estructura sin imponer patrones. Para una API REST de este tamaño, Django hubiera sido excesivo y FastAPI habría requerido aprender async desde cero simultáneamente.
-
-**¿Por qué Groq y no OpenAI?**
-Groq tiene un free tier generoso con latencia muy baja (~500ms vs 2-3s de OpenAI). Para un proyecto donde el usuario espera las preguntas en tiempo real, la velocidad importa. El modelo Llama 3.3 70B es suficientemente capaz para generar preguntas técnicas de calidad.
-
-**Rate limiting en dos capas**
-El free tier de Groq tiene un presupuesto compartido para toda la app. Implementé dos límites: por usuario (evita que una cuenta lo agote) y uno global (protege el presupuesto real). Si solo hubiera limitado por usuario, un ataque coordinado podría igualmente agotar la cuota.
-
-**JWT en httpOnly cookies para OAuth**
-El flujo OAuth redirige desde el backend al frontend. En vez de exponer el token en la URL (visible en historial del navegador y logs del servidor), el backend establece directamente una cookie httpOnly. El frontend nunca toca el token — lo envía automáticamente en cada request via `credentials: include`.
-
-**Mitigación de prompt injection**
-Las respuestas de los usuarios van directamente al modelo de IA para evaluación. Envolví el input del usuario con delimitadores `###ANSWER_START###` / `###ANSWER_END###` e incluí instrucciones explícitas en el system prompt para tratar ese bloque como datos, no como instrucciones.
-
----
-
-## Retos y lo que aprendí
-
-**El problema N+1 en las estadísticas**
-La primera versión de `/me/stats` hacía una query por cada sesión para obtener sus preguntas. Con pocos datos no se nota, pero es un bug de rendimiento que escala fatal. Lo detecté analizando las queries generadas por SQLAlchemy y lo resolví con un `JOIN` que trae todo en una sola query. También añadí índices de clave foránea que faltaban.
-
-**OAuth es más complejo de lo que parece**
-Implementar login social con Google y GitHub parecía sencillo hasta que llegué a los detalles: cookies cross-origin requieren `SameSite=None; Secure`, el token JWT no puede viajar en la URL (queda en el historial del navegador), y hay que decidir qué pasa cuando alguien intenta entrar con Google usando un email que ya tiene cuenta con contraseña. Cada decisión tiene implicaciones de seguridad.
-
-**Gestionar el estado global de autenticación en Next.js**
-Coordinar el estado de sesión entre el servidor (cookie httpOnly) y el cliente (React Context) con el App Router de Next.js 15 fue el reto frontend más difícil. El layout protegido tiene que manejar el estado de carga correctamente para no mostrar contenido protegido antes de verificar la sesión.
-
-**Diseñar los prompts de IA**
-La calidad de las preguntas generadas depende completamente del prompt. Las primeras versiones generaban preguntas demasiado teóricas ("¿Qué es un closure?"). Iterar el system prompt para forzar preguntas de código concretas fue un proceso de prueba y error que no esperaba que llevara tanto tiempo.
-
----
-
-## Tests
-
-```bash
-# Backend
-cd backend
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pytest
-
-# Frontend
-cd frontend
-npm test
+```
+┌──────────────────┐   HTTPS + cookies    ┌──────────────────┐     ┌────────────┐
+│  Next.js 15      │ ───────────────────▶ │  Flask REST API  │ ──▶ │ PostgreSQL │
+│  (Vercel)        │ ◀─────────────────── │  (Fly.io)        │     └────────────┘
+└──────────────────┘                      └────────┬─────────┘
+                                                   │
+                                          ┌────────▼─────────┐
+                                          │    Groq API      │
+                                          │ question + eval  │
+                                          └──────────────────┘
 ```
 
-El backend tiene tests de integración para autenticación, modelos, OAuth y el flujo de sesiones. El frontend tiene tests del contexto de autenticación con Vitest.
+1. The frontend calls the API with `credentials: include`, so the JWT travels in an httpOnly cookie and never reaches JavaScript.
+2. The backend generates questions and evaluates answers through Groq, behind per-user and global rate limits.
+3. Every evaluated question is stored and can be turned into a study card.
 
 ---
 
-## Instalación y desarrollo local
+## Getting started
 
-### Prerrequisitos
+### Prerequisites
 
-- Node.js v18+
+- Node.js 20+ (CI runs on Node 22)
 - Python 3.12+
-- Docker Desktop
+- Docker Desktop (for the local PostgreSQL database)
+- A free [Groq API key](https://console.groq.com)
+- Optional: Google and GitHub OAuth apps, only if you want social login locally
 
 ### Setup
 
 ```bash
-git clone https://github.com/albertsp/interview-prep-app.git
-cd interview-prep-app
+git clone https://github.com/albertsp/interviewkit.git
+cd interviewkit
+
+# Database
+docker compose up -d
 
 # Backend
 cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env            # Edita con tus claves
-
-# Base de datos
-cd ..
-docker compose up -d
-
-# Migraciones
-cd backend && flask db upgrade
+cp .env.example .env            # Fill in your keys (see below)
+flask db upgrade
 
 # Frontend
 cd ../frontend
@@ -141,90 +133,205 @@ npm install
 cp .env.example .env            # NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-### Arrancar el proyecto
+### Run the project
 
 ```bash
-# Terminal 1 — Base de datos
-docker compose up -d
-
-# Terminal 2 — Backend
+# Terminal 1: backend
 cd backend && flask run          # http://localhost:5000
 
-# Terminal 3 — Frontend
+# Terminal 2: frontend
 cd frontend && npm run dev       # http://localhost:3000
 ```
 
-### Variables de entorno
-
-**`backend/.env`**
-```
-GROQ_API_KEY=
-JWT_SECRET_KEY=
-DATABASE_URL=postgresql://admin:admin@localhost:5432/interview_prep
-FLASK_ENV=development
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
-CORS_ORIGINS=http://localhost:3000
-FRONTEND_URL=http://localhost:3000
-```
-
-**`frontend/.env`**
-```
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
+The database container started in the setup step keeps running in the background.
 
 ---
 
-## Estructura del proyecto
+## Environment variables
+
+**`backend/.env`**
+
+| Variable | Required | Description |
+|---|---|---|
+| `JWT_SECRET_KEY` | Yes | Secret used to sign JWTs. The app refuses to start without it. |
+| `DATABASE_URL` | Yes | e.g. `postgresql://admin:admin@localhost:5432/interview_prep` (matches `docker-compose.yml`). |
+| `GROQ_API_KEY` | Yes, for AI features | Groq API key used to generate and evaluate questions. |
+| `FLASK_ENV` | No | `development` locally, `production` when deployed. The `/debug` routes are only registered when it is not `production`. |
+| `JWT_ACCESS_TOKEN_EXPIRES_HOURS` | No | Lifetime of the access token. |
+| `CORS_ORIGINS` | Yes | Allowed frontend origins, e.g. `http://localhost:3000`. |
+| `FRONTEND_URL` | Yes | Where OAuth callbacks redirect the user. |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | For Google login | OAuth credentials. |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | For GitHub login | OAuth credentials. |
+
+**`frontend/.env`**
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Base URL of the backend, e.g. `http://localhost:5000`. |
+
+> Never commit real secrets. Use `.env.example` as the template and keep `.env` files out of git.
+
+---
+
+## API overview
+
+All endpoints except `/auth/*`, `/stacks` and the OAuth flow require a valid session cookie.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/auth/register` | Create an account with email and password |
+| `POST` | `/auth/login` | Log in and set the session cookie |
+| `POST` | `/auth/logout` | Clear the session cookie |
+| `GET` | `/auth/google`, `/auth/github` | Start the OAuth flow (callbacks at `/auth/<provider>/callback`) |
+| `GET` | `/stacks/` | Available roles, technologies and levels |
+| `POST` | `/sessions/` | Start a session and generate 5 questions (AI) |
+| `PATCH` | `/sessions/<id>/questions/<qid>` | Submit an answer and get AI feedback |
+| `POST` | `/sessions/<id>/complete` | Complete a session and award XP |
+| `GET` | `/cards/` | List your study cards |
+| `POST` | `/cards/` | Create a card from a question |
+| `PATCH` / `DELETE` | `/cards/<id>` | Edit or delete a card |
+| `GET` | `/me/stats` | Aggregated statistics, XP and level |
+| `GET` / `PATCH` | `/me/profile` | Read or update your profile |
+| `GET` | `/debug/db` | Database diagnostics (non-production only) |
+
+**Rate limits** (AI endpoints): 5 session creations per hour and 15 answer evaluations per hour per user, plus a global shared limit of 20 per minute and 40 per day to protect the Groq free-tier budget.
+
+**XP rules**: 100 XP for a correct answer, 50 for a partially correct one, 10 for an incorrect one, plus a 50 XP completion bonus. Every 500 XP is a level.
+
+---
+
+## Testing and CI
+
+```bash
+# Backend (SQLite in memory, no database or API keys needed)
+cd backend
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pytest
+
+# Backend with coverage
+pytest --cov=app --cov-report=term-missing
+
+# Frontend
+cd frontend
+npm test                         # single run
+npm run test:watch               # watch mode
+```
+
+The backend has tests for authentication, OAuth, models, sessions, cards, user stats and the AI service (with the Groq client mocked). The frontend has tests for the authentication context.
+
+**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and executes the backend and frontend test suites in parallel (Python 3.12 and Node 22, with dependency caching). No secrets are required.
+
+---
+
+## Project structure
 
 ```
-interview-prep-app/
+interviewkit/
+├── .github/workflows/ci.yml           # CI: pytest + npm test
 ├── backend/
 │   ├── app/
-│   │   ├── models/          # User, Session, Question, Card, OAuthAccount
-│   │   ├── routes/          # auth, oauth, sessions, cards, user, stacks
-│   │   ├── services/        # Lógica de negocio e integración con Groq
-│   │   ├── constants/       # Configuración de gamificación
-│   │   ├── __init__.py      # Fábrica de la app Flask + OAuth init
-│   │   └── config.py        # Configuración desde variables de entorno
-│   ├── migrations/
+│   │   ├── models/                    # User, Session, Question, Card, OAuthAccount
+│   │   ├── routes/                    # auth, oauth, sessions, cards, user, stacks, debug
+│   │   ├── services/                  # Business logic and Groq integration
+│   │   ├── constants/                 # Gamification rules and stacks
+│   │   ├── __init__.py                # App factory, rate limiter, OAuth init
+│   │   └── config.py                  # Configuration from environment variables
+│   ├── migrations/                    # Alembic migrations
 │   ├── tests/
+│   ├── Dockerfile
+│   ├── fly.toml
 │   └── requirements.txt
 ├── frontend/
-│   ├── app/
-│   │   └── (app)/
-│   │       ├── page.jsx               # Landing page
-│   │       ├── login/
-│   │       ├── register/
-│   │       ├── auth/callback/         # OAuth callback handler
-│   │       └── (protected)/
-│   │           ├── dashboard/
-│   │           ├── session/
-│   │           ├── stats/
-│   │           └── profile/
+│   ├── app/(app)/
+│   │   ├── page.tsx                   # Landing page
+│   │   ├── login/ · register/
+│   │   ├── auth/callback/             # OAuth callback handler
+│   │   └── (protected)/               # dashboard, session, stats, profile
 │   ├── src/
 │   │   ├── components/
 │   │   ├── context/                   # AuthContext
-│   │   └── services/                  # Llamadas a la API
+│   │   ├── services/                  # API calls
+│   │   └── __tests__/
 │   └── public/
-├── docker-compose.yml
+├── docker-compose.yml                 # Local PostgreSQL
 └── README.md
 ```
 
 ---
 
-## Deploy
+## Deployment
 
-**Backend — Fly.io**
+**Backend: Fly.io**
 
 ```bash
 cd backend && fly deploy
 ```
 
-Las migraciones se ejecutan automáticamente en cada deploy (`release_command` en `fly.toml`). Las variables de entorno se configuran con `fly secrets set`.
+Migrations run automatically on every deploy (`release_command` in `fly.toml`). Set environment variables with `fly secrets set`, and make sure `FLASK_ENV=production`.
 
-**Frontend — Vercel**
+**Frontend: Vercel**
 
-Push a `main` despliega automáticamente. Las variables de entorno se configuran en el dashboard de Vercel.
+A push to `main` deploys automatically. Set `NEXT_PUBLIC_API_URL` in the Vercel dashboard.
+
+Because the frontend and backend live on different domains, the auth cookie is set with `SameSite=None; Secure`, and `CORS_ORIGINS` must list the exact frontend origin.
+
+---
+
+## Technical decisions
+
+**Why Flask and not Django or FastAPI?**
+Flask gave me full control over the structure without imposing patterns. For a REST API of this size Django would have been overkill, and FastAPI would have meant learning async from scratch at the same time.
+
+**Why Groq and not OpenAI?**
+Groq has a generous free tier and very low latency. When the user is waiting for questions in real time, speed matters, and the hosted open-weight model is capable enough to generate quality technical questions.
+
+**Two-layer rate limiting**
+The Groq free tier has one budget shared by the whole app. I implemented two limits: per user (so one account can't drain it) and global (to protect the real budget). With only a per-user limit, a coordinated attack could still exhaust the quota.
+
+**JWT in httpOnly cookies for OAuth**
+The OAuth flow redirects from the backend to the frontend. Instead of exposing the token in the URL (visible in browser history and server logs), the backend sets an httpOnly cookie directly. The frontend never touches the token; the browser sends it on every request via `credentials: include`.
+
+**Prompt injection mitigation**
+User answers go straight to the AI model for evaluation. I wrapped user input in `###ANSWER_START###` / `###ANSWER_END###` delimiters and added explicit instructions to the system prompt to treat that block as data, not as instructions.
+
+---
+
+## Challenges and lessons learned
+
+**The N+1 problem in statistics**
+The first version of `/me/stats` ran one query per session to fetch its questions. It's unnoticeable with little data but scales badly. I found it by inspecting the queries SQLAlchemy generated and fixed it with a single `JOIN`. I also added missing foreign-key indexes.
+
+**OAuth is more complex than it looks**
+Social login with Google and GitHub seemed simple until the details: cross-origin cookies require `SameSite=None; Secure`, the JWT can't travel in the URL, and you have to decide what happens when someone signs in with Google using an email that already has a password account. Every decision has security implications.
+
+**Global auth state in Next.js**
+Coordinating session state between the server (httpOnly cookie) and the client (React Context) with the Next.js 15 App Router was the hardest frontend challenge. The protected layout has to handle the loading state correctly so it never shows protected content before the session is verified.
+
+**Designing the AI prompts**
+The quality of the generated questions depends entirely on the prompt. Early versions produced overly theoretical questions ("What is a closure?"). Iterating on the system prompt to force concrete code questions was trial and error that took much longer than I expected. LLM output also needs defensive parsing (stripping markdown fences, fixing double-escaped newlines in code).
+
+---
+
+## Troubleshooting
+
+| Problem | Likely cause and fix |
+|---|---|
+| `RuntimeError` about `JWT_SECRET_KEY` on startup | The variable is missing in `backend/.env`. |
+| `connection refused` on port 5432 | The database container isn't running: `docker compose up -d`. |
+| Login works but you're immediately logged out | `CORS_ORIGINS` doesn't match the frontend origin, or cookies are blocked cross-origin. Check `SameSite`/`Secure` settings in production. |
+| `429 Too Many Requests` when starting a session | You hit a rate limit (see [API overview](#api-overview)). Wait and retry. |
+| AI requests fail with 401 | `GROQ_API_KEY` is missing or invalid. |
+| `pip install` fails locally | Use Python 3.12 (the version used in the Dockerfile and CI). |
+
+---
+
+## Roadmap
+
+- [ ] Add a `LICENSE` file and a `CONTRIBUTING.md`
+- [ ] More roles and technologies (full-stack, DevOps, data)
+- [ ] Spaced-repetition review mode for study cards
+- [ ] Export cards (Markdown / Anki)
+- [ ] End-to-end tests (Playwright) and broader frontend test coverage
+- [ ] Linting and type-checking in CI (`next lint`, `tsc`, `ruff`)
+- [ ] Error monitoring and structured logging in production
+- [ ] Internationalisation (UI language selection)
