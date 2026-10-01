@@ -19,7 +19,6 @@ os.environ["GROQ_API_KEY"] = "test-groq-api-key"
 import pytest
 from app import create_app, db as _db
 from app.models.user import User
-from app.models.oauth_account import OAuthAccount
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, current_app, request
+from flask import Blueprint, redirect, url_for, current_app
 from flask_jwt_extended import create_access_token, set_access_cookies
 from authlib.integrations.flask_client import OAuth
 from sqlalchemy.exc import IntegrityError
@@ -32,7 +32,7 @@ def _get_or_create_user(provider, provider_user_id, email, name):
         ).first()
 
         if not existing_link:
-            return None;
+            return None
         return user_by_email
 
     new_user = User(name=name, email=email)

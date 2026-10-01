@@ -222,7 +222,7 @@ npm run test:watch               # watch mode
 
 The backend has tests for authentication, OAuth, models, sessions, cards, user stats and the AI service (with the Groq client mocked). The frontend has tests for the authentication context.
 
-**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and executes the backend and frontend test suites in parallel (Python 3.12 and Node 22, with dependency caching). No secrets are required.
+**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push, with the backend and frontend jobs in parallel (Python 3.12 and Node 22, with dependency caching). Backend: `ruff` lint + `pytest`. Frontend: `tsc` type-check + `next lint` + `vitest`. No secrets are required.
 
 ---
 
@@ -335,7 +335,6 @@ The quality of the generated questions depends entirely on the prompt. Early ver
 - [ ] Spaced-repetition review mode for study cards
 - [ ] Export cards (Markdown / Anki)
 - [ ] End-to-end tests (Playwright) and broader frontend test coverage
-- [ ] Linting and type-checking in CI (`next lint`, `tsc`, `ruff`)
 - [ ] Error monitoring and structured logging in production
 - [ ] Internationalisation (UI language selection)
 

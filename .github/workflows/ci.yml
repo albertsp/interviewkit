@@ -27,6 +27,11 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
 
+      - name: Lint (ruff)
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: backend
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -50,6 +55,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Type-check (tsc)
+        run: npx tsc --noEmit
+
+      - name: Lint (next lint)
+        run: npm run lint
 
       - name: Run tests
         run: npm test
