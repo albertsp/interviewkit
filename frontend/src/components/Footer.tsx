@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, Terminal } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 interface NavLink {
   href: string;
@@ -9,10 +10,9 @@ interface NavLink {
 }
 
 const PRODUCT_LINKS: NavLink[] = [
-  { href: "#tecnologias", label: "Tecnologías" },
-  { href: "#como-funciona", label: "Cómo funciona" },
-  { href: "#features", label: "Funcionalidades" },
-  { href: "#faq", label: "Preguntas frecuentes" },
+    { href: "#como-funciona", label: "Cómo funciona" },
+  { href: "#features", label: "Qué te llevas" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 const ACCOUNT_LINKS: NavLink[] = [
@@ -26,21 +26,15 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
           <div className="col-span-2">
-            <span className="text-2xl font-bold tracking-tight">
-              InterviewKit
-            </span>
+            <Logo />
             <p className="mt-3 text-sm text-muted-foreground max-w-xs leading-relaxed">
               Simula entrevistas técnicas con IA, recibe feedback al instante y
               repasa con cards personalizadas.
             </p>
-            <span className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-medium font-mono">
-              <Terminal className="size-3" />
-              Potenciado por IA
-            </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">
+            <h3 className="font-mono text-xs text-muted-foreground mb-4">
               Producto
             </h3>
             <ul className="flex flex-col gap-3">
@@ -58,7 +52,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">
+            <h3 className="font-mono text-xs text-muted-foreground mb-4">
               Cuenta
             </h3>
             <ul className="flex flex-col gap-3">
@@ -89,10 +83,10 @@ export default function Footer() {
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 InterviewKit.
+            &copy; 2026 InterviewKit
           </p>
           <p className="text-sm text-muted-foreground">
-            Hecho con Next.js, Flask y mucho café.
+            Hecho con Next.js y Flask.
           </p>
         </div>
       </div>

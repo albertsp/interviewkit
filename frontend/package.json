@@ -25,6 +25,7 @@
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.43.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/geist": "^5.2.9",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@types/node": "^26.0.0",

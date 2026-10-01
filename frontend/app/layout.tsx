@@ -21,8 +21,8 @@ const THEME_INIT_SCRIPT = `
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://interviewkit.dev"),
-  title: "InterviewKit",
-  description: "Practica para tu próxima entrevista técnica",
+  title: "InterviewKit: practica la entrevista técnica antes de que cuente",
+  description: "Preguntas de código con IA, corrección al instante y cards para repasar.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "InterviewKit",
-    description: "Practica para tu próxima entrevista técnica",
+    title: "InterviewKit: practica la entrevista técnica antes de que cuente",
+    description: "Preguntas de código con IA, corrección al instante y cards para repasar.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "InterviewKit",
-    description: "Practica para tu próxima entrevista técnica",
+    title: "InterviewKit: practica la entrevista técnica antes de que cuente",
+    description: "Preguntas de código con IA, corrección al instante y cards para repasar.",
   },
 };
 

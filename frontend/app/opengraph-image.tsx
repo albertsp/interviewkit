@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
-export const alt = "InterviewKit — Practica para tu próxima entrevista técnica";
+export const alt = "InterviewKit — Practica la entrevista técnica antes de que cuente";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -21,79 +21,50 @@ export default async function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#05070a",
-          backgroundImage:
-            "radial-gradient(circle at 50% 32%, rgba(0,198,201,0.22) 0%, rgba(0,198,201,0) 60%)",
-          position: "relative",
+          justifyContent: "space-between",
+          background: "#f6f1e6",
+          padding: "72px 80px",
+          fontFamily: "Geist",
+          color: "#1d1a16",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            width: 132,
-            height: 132,
-            borderRadius: 28,
-            background: "#0b0f14",
-            border: "2px solid rgba(0,198,201,0.35)",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 40,
-          }}
-        >
-          <svg width="76" height="76" viewBox="0 0 24 24" fill="none">
-            <rect
-              x="3"
-              y="3"
-              width="18"
-              height="18"
-              rx="2"
-              ry="2"
-              stroke="#00c6c9"
-              strokeWidth="2"
-            />
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <svg width="64" height="64" viewBox="0 0 32 32" fill="none">
             <path
-              d="m7 11 2-2-2-2"
-              stroke="#00c6c9"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M11 13h4"
-              stroke="#00c6c9"
-              strokeWidth="2"
+              d="M4.5 17.5c2.2 1.6 4.6 4.6 6.6 8.2C14.6 15.6 20.4 8.4 27.5 4.8"
+              stroke="#c8321c"
+              strokeWidth="4.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
+          <div style={{ display: "flex", fontSize: 44, fontWeight: 700, letterSpacing: -1 }}>
+            InterviewKit
+          </div>
         </div>
 
         <div
           style={{
             display: "flex",
-            fontSize: 88,
+            fontSize: 96,
             fontWeight: 700,
-            color: "#f8f8f8",
-            fontFamily: "Geist",
-            letterSpacing: -2,
+            lineHeight: 1.02,
+            letterSpacing: -3,
+            maxWidth: 980,
           }}
         >
-          Interview<span style={{ color: "#00c6c9" }}>Kit</span>
+          Practica la entrevista técnica antes de que cuente.
         </div>
 
         <div
           style={{
             display: "flex",
-            marginTop: 20,
-            fontSize: 32,
+            fontSize: 30,
             fontWeight: 500,
-            color: "rgba(248,248,248,0.6)",
-            fontFamily: "Geist",
+            color: "#6b6258",
           }}
         >
-          Practica para tu próxima entrevista técnica
+          Preguntas de código con IA, corrección al instante y cards para repasar.
         </div>
       </div>
     ),

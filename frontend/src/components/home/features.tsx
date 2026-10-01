@@ -1,127 +1,75 @@
-"use client";
+import { IndexCard, XpSpecimen } from "./specimens";
 
-import { motion, type Variants } from "framer-motion";
-import { Brain, BookOpen, BarChart3, Sparkles } from "lucide-react";
-import { BrowserMockup } from "./BrowserMockup";
-
-const MAIN_FEATURES = [
+const CORE = [
   {
-    icon: BookOpen,
-    title: "Cards con Q&A explicado",
-    description: "Cada pregunta incluye respuesta detallada y explicación. Repasa a tu ritmo con cards guardadas, con ejemplos de código y tags por tema.",
-    screenshot: { src: "/screenshots/dashboard-cards.png", alt: "Dashboard con la grid de cards de estudio guardadas en InterviewKit", label: "interviewkit.app/dashboard", width: 2880, height: 2616 },
+    title: "Preguntas a tu medida",
+    description:
+      "Rol, tecnología y nivel deciden qué te preguntan. Dos sesiones nunca son iguales.",
   },
   {
-    icon: BarChart3,
-    title: "Sistema de XP y niveles",
-    description: "Gana XP con cada sesión. Sube de nivel y trackea tu progreso con estadísticas detalladas: resultados, stacks dominados y sesiones recientes.",
-    screenshot: { src: "/screenshots/stats-overview.png", alt: "Página de estadísticas con nivel, XP y gráficas de progreso en InterviewKit", label: "interviewkit.app/stats", width: 2880, height: 3608 },
+    title: "Feedback al instante",
+    description:
+      "Qué acertaste, qué falló y cuál es la solución correcta, justo después de responder.",
   },
 ];
-
-const SUPPORT_FEATURES = [
-  {
-    icon: Brain,
-    title: "Entrevistas con IA",
-    description: "Preguntas generadas por IA adaptadas a tu rol, tecnología y nivel. Simula una entrevista real.",
-  },
-  {
-    icon: Sparkles,
-    title: "Feedback instantáneo",
-    description: "Responde cada pregunta y recibe evaluación inmediata. Aprende de tus errores al momento.",
-  },
-];
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
 
 export default function Features() {
   return (
-    <section id="features" className="w-full px-6 py-24 sm:py-32">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-20"
-        >
-          <span className="text-primary font-mono text-sm font-medium tracking-wide uppercase mb-4 block">
-            Qué consigues
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-            Todo lo que necesitas para preparar tu entrevista
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Una herramienta completa, simple y potenciada por inteligencia artificial.
-          </p>
-        </motion.div>
+    <section
+      id="features"
+      className="scroll-mt-20 border-t border-border bg-secondary/60 px-6 py-24 sm:py-32"
+    >
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
+          <div>
+            <p className="mb-4 font-mono text-xs text-muted-foreground">
+              Qué te llevas
+            </p>
+            <h2 className="display text-4xl font-medium leading-[1.05] sm:text-5xl">
+              Lo que practicas hoy, lo repasas mañana.
+            </h2>
+          </div>
 
-        <div className="flex flex-col gap-20 sm:gap-28 mb-20 sm:mb-28">
-          {MAIN_FEATURES.map(({ icon: Icon, title, description, screenshot }, index) => (
-            <div
-              key={title}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center"
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5 }}
-                className={index % 2 === 1 ? "lg:order-2" : ""}
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
-                  <Icon className="size-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight">{title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">{description}</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6 }}
-                className={index % 2 === 1 ? "lg:order-1" : ""}
-              >
-                <BrowserMockup
-                  src={screenshot.src}
-                  alt={screenshot.alt}
-                  label={screenshot.label}
-                  width={screenshot.width}
-                  height={screenshot.height}
-                />
-              </motion.div>
-            </div>
-          ))}
+          <dl className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+            {CORE.map(({ title, description }) => (
+              <div key={title} className="border-t-2 border-foreground pt-4">
+                <dt className="display text-2xl font-medium">{title}</dt>
+                <dd className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  {description}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
-        <motion.div
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
-        >
-          {SUPPORT_FEATURES.map(({ icon: Icon, title, description }) => (
-            <motion.div
-              key={title}
-              variants={item}
-              className="group relative rounded-2xl border border-border bg-card p-6 sm:p-8 hover:border-primary/30 transition-colors duration-300"
-            >
-              <div className="absolute inset-0 rounded-2xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
-                  <Icon className="size-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{description}</p>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="mt-20 grid grid-cols-1 items-start gap-10 lg:mt-28 lg:grid-cols-[1.6fr_1fr] lg:gap-16">
+          <IndexCard />
+          <div className="lg:pt-10">
+            <h3 className="display text-3xl font-medium sm:text-4xl">
+              Cards que no se pierden
+            </h3>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              Cada pregunta se convierte en una card con el concepto, una
+              definición, un ejemplo de código y cuándo usarlo. Filtra por
+              tecnología y repasa a tu ritmo.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-20 grid grid-cols-1 items-center gap-10 lg:mt-28 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+          <div className="lg:order-1">
+            <h3 className="display text-3xl font-medium sm:text-4xl">
+              Un progreso que se ve
+            </h3>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              Ganas XP en cada sesión y subes de nivel. Las estadísticas te
+              dicen en qué stacks aciertas más y dónde te falta práctica.
+            </p>
+          </div>
+          <div className="lg:order-2">
+            <XpSpecimen />
+          </div>
+        </div>
       </div>
     </section>
   );

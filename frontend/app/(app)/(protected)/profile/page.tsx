@@ -59,9 +59,9 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="w-full mt-6">
-                                <div className="h-3 w-full rounded-full bg-amber-500/20 overflow-hidden">
+                                <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
                                     <motion.div
-                                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                                        className="h-full bg-primary rounded-full"
                                         initial={{ width: 0 }}
                                         animate={{ width: `${progressPercent}%` }}
                                         transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}

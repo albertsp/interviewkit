@@ -85,18 +85,18 @@ export default function SessionComplete({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="w-full max-w-sm rounded-xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5"
+              className="w-full max-w-sm rounded-xl border border-border bg-secondary/60 p-5"
             >
               <div className="flex items-center justify-center gap-2 mb-3">
-                <Star className="size-6 text-amber-500 fill-amber-500" />
-                <span className="text-3xl font-bold text-amber-700 dark:text-amber-400">
+                <Star className="size-6 text-primary fill-primary" />
+                <span className="text-3xl font-bold text-foreground">
                   +{xpEarned}
                 </span>
-                <span className="text-base font-semibold text-amber-700/70 dark:text-amber-400/70">
+                <span className="text-base font-semibold text-muted-foreground">
                   XP
                 </span>
                 {bonusApplied && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-white ml-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-highlight text-highlight-foreground ml-1">
                     Bonus
                   </span>
                 )}
@@ -112,9 +112,9 @@ export default function SessionComplete({
                     {progressInLevel} / {xpPerLevel} XP
                   </span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-amber-500/20 overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-amber-500 to-orange-500"
+                    className="h-full bg-primary"
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPct}%` }}
                     transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
