@@ -30,7 +30,7 @@ TOPICS = {
     "React": [
         "General / Mixto",
         "Hooks (useState, useEffect, custom hooks)",
-        "Gestion de estado",
+        "Gestión de estado",
         "Renderizado y performance",
         "Componentes y props",
         "Formularios y eventos",
@@ -46,8 +46,8 @@ TOPICS = {
     "SQL": [
         "General / Mixto",
         "Joins y subqueries",
-        "Indices y performance",
-        "Normalizacion",
+        "Índices y performance",
+        "Normalización",
         "Transacciones",
         "Agregaciones y agrupamiento",
     ],
@@ -56,9 +56,24 @@ TOPICS = {
         "OOP (herencia, interfaces, polimorfismo)",
         "Collections y Generics",
         "Exceptions",
-        "Concurrencia basica (threads, synchronized)",
-        "Spring basico",
+        "Concurrencia básica (threads, synchronized)",
+        "Spring básico",
     ],
 }
 
 VALID_TOPICS = {stack: set(topics) for stack, topics in TOPICS.items()}
+
+# Names these topics had before their accents were fixed. A browser tab opened
+# before that change still sends the old name; mapping it keeps the chosen
+# topic instead of silently falling back to the catch-all.
+LEGACY_TOPIC_ALIASES = {
+    "React": {"Gestion de estado": "Gestión de estado"},
+    "SQL": {
+        "Indices y performance": "Índices y performance",
+        "Normalizacion": "Normalización",
+    },
+    "Java": {
+        "Concurrencia basica (threads, synchronized)": "Concurrencia básica (threads, synchronized)",
+        "Spring basico": "Spring básico",
+    },
+}

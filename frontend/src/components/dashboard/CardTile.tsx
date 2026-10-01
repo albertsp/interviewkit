@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DifficultyDots } from "@/components/session/CardEditor"
+import { InlineText } from "@/components/MarkdownContent"
 import type { CardDTO } from "@/services/cardService"
 
 interface CardTileProps {
@@ -44,7 +45,7 @@ export function CardTile({ card, onOpen, index = 0 }: CardTileProps) {
       <CardContent className="space-y-3">
         {card.explanation && (
           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {card.explanation}
+            <InlineText text={card.explanation} />
           </p>
         )}
 
