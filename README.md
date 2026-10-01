@@ -4,6 +4,7 @@
 
 🌐 **[interviewkit.dev](https://interviewkit.dev)** · [Repository](https://github.com/albertsp/interviewkit)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml/badge.svg)](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)](https://react.dev)
@@ -29,6 +30,7 @@
 - [Challenges and lessons learned](#challenges-and-lessons-learned)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
@@ -327,7 +329,7 @@ The quality of the generated questions depends entirely on the prompt. Early ver
 
 ## Roadmap
 
-- [ ] Add a `LICENSE` file and a `CONTRIBUTING.md`
+- [ ] Add a `CONTRIBUTING.md`
 - [ ] More roles and technologies (full-stack, DevOps, data)
 - [ ] Spaced-repetition review mode for study cards
 - [ ] Export cards (Markdown / Anki)
@@ -335,3 +337,9 @@ The quality of the generated questions depends entirely on the prompt. Early ver
 - [ ] Linting and type-checking in CI (`next lint`, `tsc`, `ruff`)
 - [ ] Error monitoring and structured logging in production
 - [ ] Internationalisation (UI language selection)
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
