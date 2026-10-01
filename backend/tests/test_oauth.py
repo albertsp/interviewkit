@@ -114,17 +114,94 @@ class TestBuildLoginResponse:
             assert resp.status_code == 302
             assert "access_token_cookie" in resp.headers.get("Set-Cookie", "")
 
-    def test_redirects_to_frontend_callback_not_a_bare_token_url(self, app, db):
-        """The JWT travels in an httpOnly cookie, never as a query param in
-        the redirect URL (which would leak it into browser history / logs)."""
+    def test_redirect_carries_exchange_code_not_the_jwt(self, app, db):
+        """The redirect URL must never contain the JWT itself (browser history,
+        logs, Referer). It carries a short-lived, single-purpose exchange code
+        in the URL *fragment*, which browsers do not send to any server."""
         with app.app_context():
             user = User(name="Test", email="test@example.com")
             db.session.add(user)
             db.session.commit()
 
             resp = _build_login_response(user)
-            assert resp.location == "http://localhost:3000/auth/callback"
-            assert "token" not in resp.location
+            assert resp.location.startswith("http://localhost:3000/auth/callback#code=")
+            assert "access_token" not in resp.location
+            cookie = resp.headers.get("Set-Cookie", "")
+            jwt_value = cookie.split("access_token_cookie=")[1].split(";")[0]
+            assert jwt_value not in resp.location
+
+
+def _code_from(resp):
+    return resp.location.split("#code=", 1)[1]
+
+
+class TestOAuthExchange:
+    """Browsers that block third-party cookies (Safari/iOS, Brave, Firefox
+    strict, Chrome incognito) never send the API-domain cookie from the
+    frontend domain, so OAuth login ended on /login?error=oauth_failed while
+    email login (token in localStorage + Authorization header) worked. The
+    frontend now trades the redirect's code for a token it can store."""
+
+    def _make_user(self, db):
+        user = User(name="Exchange User", email="exchange@example.com")
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    def test_valid_code_returns_a_working_token(self, app, client, db):
+        with app.app_context():
+            user = self._make_user(db)
+            code = _code_from(_build_login_response(user))
+
+        resp = client.post("/auth/oauth/exchange", json={"code": code})
+        assert resp.status_code == 200
+        body = resp.get_json()
+        assert body["name"] == "Exchange User"
+        assert body["token"]
+
+        # The token must authenticate API calls through the Authorization
+        # header alone (no cookie), which is how the frontend sends it.
+        client.delete_cookie("access_token_cookie")
+        profile = client.get("/me/profile", headers={"Authorization": f"Bearer {body['token']}"})
+        assert profile.status_code == 200
+        assert profile.get_json()["email"] == "exchange@example.com"
+
+    def test_garbage_code_is_rejected(self, client, db):
+        resp = client.post("/auth/oauth/exchange", json={"code": "not-a-real-code"})
+        assert resp.status_code == 401
+
+    def test_missing_code_is_a_bad_request(self, client, db):
+        assert client.post("/auth/oauth/exchange", json={}).status_code == 400
+        assert client.post("/auth/oauth/exchange").status_code == 400
+
+    def test_expired_code_is_rejected(self, app, client, db):
+        with app.app_context():
+            user = self._make_user(db)
+            code = _code_from(_build_login_response(user))
+
+        with patch("app.routes.oauth.OAUTH_CODE_MAX_AGE_SECONDS", -1):
+            resp = client.post("/auth/oauth/exchange", json={"code": code})
+        assert resp.status_code == 401
+
+    def test_code_for_a_deleted_user_is_rejected(self, app, client, db):
+        with app.app_context():
+            user = self._make_user(db)
+            code = _code_from(_build_login_response(user))
+            db.session.delete(user)
+            db.session.commit()
+
+        assert client.post("/auth/oauth/exchange", json={"code": code}).status_code == 401
+
+    def test_a_jwt_cannot_be_used_as_an_exchange_code(self, app, client, db):
+        """The code is signed with a dedicated salt, so an access token (or
+        any other signed value) is not accepted in its place."""
+        with app.app_context():
+            user = self._make_user(db)
+            resp = _build_login_response(user)
+            cookie = resp.headers.get("Set-Cookie", "")
+            jwt_value = cookie.split("access_token_cookie=")[1].split(";")[0]
+
+        assert client.post("/auth/oauth/exchange", json={"code": jwt_value}).status_code == 401
 
 
 class TestGoogleLogin:

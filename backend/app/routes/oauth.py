@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, url_for, current_app
+from flask import Blueprint, redirect, url_for, current_app, request, jsonify
 from flask_jwt_extended import create_access_token, set_access_cookies
 from authlib.integrations.flask_client import OAuth
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.exc import IntegrityError
 from ..models.user import User
 from ..models.oauth_account import OAuthAccount
@@ -9,6 +10,21 @@ from .. import db
 oauth_bp = Blueprint("oauth", __name__, url_prefix="/auth")
 
 oauth = OAuth()
+
+# After a successful provider login the browser is redirected to the frontend
+# with a short-lived exchange code. The frontend trades it for an access token
+# it can keep in localStorage, exactly like an email/password login.
+#
+# Why not rely on the httpOnly cookie alone: the API lives on another site than
+# the frontend, so browsers that block third-party cookies (Safari/iOS, Brave,
+# Firefox strict, Chrome incognito) never send that cookie back and the OAuth
+# login ended on /login?error=oauth_failed.
+OAUTH_CODE_MAX_AGE_SECONDS = 60
+_OAUTH_CODE_SALT = "oauth-login-exchange"
+
+
+def _code_serializer():
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt=_OAUTH_CODE_SALT)
 
 
 def _get_or_create_user(provider, provider_user_id, email, name):
@@ -76,9 +92,36 @@ def _build_login_response(user):
         identity=str(user.user_id), expires_delta=expires_delta
     )
     frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
-    response = redirect(f"{frontend_url}/auth/callback")
+    # The code goes in the URL fragment: browsers never send fragments to a
+    # server, so it stays out of access logs and Referer headers.
+    code = _code_serializer().dumps({"uid": user.user_id})
+    response = redirect(f"{frontend_url}/auth/callback#code={code}")
+    # Kept for browsers that do accept the cookie.
     set_access_cookies(response, access_token)
     return response
+
+
+@oauth_bp.route("/oauth/exchange", methods=["POST"])
+def exchange_code():
+    data = request.get_json(silent=True) or {}
+    code = data.get("code")
+    if not code or not isinstance(code, str):
+        return jsonify({"error": "Falta el codigo de acceso"}), 400
+
+    try:
+        payload = _code_serializer().loads(code, max_age=OAUTH_CODE_MAX_AGE_SECONDS)
+    except (SignatureExpired, BadSignature):
+        return jsonify({"error": "Codigo invalido o caducado"}), 401
+
+    user = db.session.get(User, payload.get("uid")) if isinstance(payload, dict) else None
+    if user is None:
+        return jsonify({"error": "Codigo invalido o caducado"}), 401
+
+    expires_delta = current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+    access_token = create_access_token(identity=str(user.user_id), expires_delta=expires_delta)
+    response = jsonify({"user_id": user.user_id, "name": user.name, "token": access_token})
+    set_access_cookies(response, access_token)
+    return response, 200
 
 
 @oauth_bp.route("/google")

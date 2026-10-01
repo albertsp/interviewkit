@@ -74,3 +74,17 @@ export async function logoutUser(): Promise<LogoutUserResponse> {
   });
   return handleResponse<LogoutUserResponse>(response);
 }
+
+// Trades the one-time code from the OAuth redirect for an access token. A
+// rejected code is a plain error here (not the global "session expired" flow),
+// because the user has no session yet.
+export async function exchangeOAuthCode(code: string): Promise<LoginUserResponse> {
+  const response = await apiFetch("/auth/oauth/exchange", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+  if (!response.ok) {
+    throw new Error(`No se pudo completar el inicio de sesion (${response.status})`);
+  }
+  return response.json();
+}
