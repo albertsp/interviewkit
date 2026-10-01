@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: "¿Qué tecnologías puedo practicar?",
-    a: "HTML, CSS, JavaScript, React, Python y SQL. Iremos incorporando más.",
+    a: "HTML, CSS, JavaScript, React, Python, Java y SQL. Iremos incorporando más.",
   },
   {
     q: "¿Cómo se generan las preguntas?",

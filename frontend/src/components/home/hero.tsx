@@ -7,7 +7,7 @@ import { CorrectionSheet } from "./specimens";
 
 const H1_WORDS = ["Ensaya", "la", "entrevista", "técnica", "antes", "de", "la", "real."];
 const HIGHLIGHT = "antes";
-const TECHS = ["HTML", "CSS", "JavaScript", "React", "Python", "SQL"];
+const TECHS = ["HTML", "CSS", "JavaScript", "React", "Python", "Java", "SQL"];
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
