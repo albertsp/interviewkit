@@ -8,6 +8,7 @@ import StatCards from "@/components/stats/StatCards";
 import RecentSessions from "@/components/stats/RecentSessions";
 import SavedCardsSummary from "@/components/stats/SavedCardsSummary";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { containerVariants, itemVariants } from "@/components/layout/motion-variants";
 
 const ResultsDonut = dynamic(() => import("@/components/stats/ResultsDonut"), { ssr: false });
@@ -18,6 +19,7 @@ export default function StatsPage() {
 
   return (
     <PageContainer max="5xl" className="pb-10">
+      <PageHeader title="Estadísticas" description="Tu nivel, tus aciertos y en qué stacks practicas más." />
       <motion.div
         className="space-y-6"
         variants={containerVariants}

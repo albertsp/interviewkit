@@ -18,7 +18,7 @@ const STACK_ICONS: Record<string, string> = {
 const CUSTOM_TOOLTIP_STYLE = {
   backgroundColor: "var(--card)",
   border: "1px solid var(--border)",
-  borderRadius: "0.75rem",
+  borderRadius: "0.375rem",
   padding: "0.5rem 0.75rem",
   fontSize: "0.8125rem",
   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
@@ -39,7 +39,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payl
     <div style={CUSTOM_TOOLTIP_STYLE}>
       <p className="font-medium">{d.stack}</p>
       <p className="text-muted-foreground">
-        {d.sessions} {d.sessions === 1 ? "sesion" : "sesiones"} · {d.cards} {d.cards === 1 ? "card" : "cards"}
+        {d.sessions} {d.sessions === 1 ? "sesión" : "sesiones"} · {d.cards} {d.cards === 1 ? "card" : "cards"}
       </p>
     </div>
   );
@@ -50,10 +50,7 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layers className="size-5 text-primary" />
-            Distribucion por stack
-          </CardTitle>
+          <CardTitle>Distribución por stack</CardTitle>
         </CardHeader>
         <CardContent>
           <EmptyState
@@ -77,10 +74,7 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Layers className="size-5 text-primary" />
-          Distribucion por stack
-        </CardTitle>
+        <CardTitle>Distribución por stack</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -100,7 +94,7 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
                 </span>
                 <span className="font-medium w-20 sm:w-24 shrink-0 text-xs sm:text-sm">{s.stack}</span>
                 <span className="text-muted-foreground tabular-nums ml-auto text-xs sm:text-sm">
-                  {s.sessions} {s.sessions === 1 ? "sesion" : "sesiones"} · {s.cards} cards
+                  {s.sessions} {s.sessions === 1 ? "sesión" : "sesiones"} · {s.cards} cards
                 </span>
               </div>
             );
@@ -112,10 +106,10 @@ export default function StackBars({ stacks }: { stacks: StackStat[] }) {
             <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
               <XAxis type="number" hide />
               <YAxis type="category" dataKey="icon" width={36} tickLine={false} axisLine={false} tick={{ fontSize: 11, fontWeight: 600 }} />
-              <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: "none" }} cursor={{ fill: "rgba(255,255,255,0.06)", radius: 4 }} />
-              <Bar dataKey="sessions" radius={[0, 6, 6, 0]} animationBegin={200} animationDuration={600} barSize={24}>
+              <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: "none" }} cursor={{ fill: "var(--muted)" }} />
+              <Bar dataKey="sessions" radius={[0, 2, 2, 0]} animationBegin={200} animationDuration={600} barSize={24}>
                 {chartData.map((entry) => (
-                  <Cell key={entry.stack} fill={entry.fill} />
+                  <Cell key={entry.stack} style={{ fill: entry.fill }} />
                 ))}
               </Bar>
             </BarChart>

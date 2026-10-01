@@ -19,7 +19,7 @@ export function CardTile({ card, onOpen }: CardTileProps) {
   return (
     <Card
       size="sm"
-      className="group cursor-pointer gap-3 ring-0 border border-border transition-[transform,border-color,box-shadow] duration-200 ease-out hover:scale-[1.02] hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 focus-visible:ring-2 focus-visible:ring-primary/50 outline-none"
+      className="group cursor-pointer gap-3 ring-0 border border-border transition-colors duration-150 hover:border-foreground/50 focus-visible:ring-2 focus-visible:ring-ring outline-none"
       onClick={() => onOpen(card)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(card); } }}
       tabIndex={0}
@@ -32,7 +32,7 @@ export function CardTile({ card, onOpen }: CardTileProps) {
             {card.concept}
           </CardTitle>
           {card.code_language && (
-            <Badge variant="outline" size="sm" className="uppercase tracking-wider border-primary/20 text-primary/80 shrink-0">
+            <Badge variant="outline" size="sm" className="font-mono uppercase tracking-wider text-muted-foreground shrink-0">
               {card.code_language}
             </Badge>
           )}
@@ -47,12 +47,7 @@ export function CardTile({ card, onOpen }: CardTileProps) {
         )}
 
         {codePreview && (
-          <div className="rounded-lg overflow-hidden border border-white/5 bg-code-bg">
-            <div className="flex gap-1.5 px-3 py-1.5 bg-code-header border-b border-white/5">
-              <span className="size-2 rounded-full bg-[#ff5f56]" />
-              <span className="size-2 rounded-full bg-[#ffbd2e]" />
-              <span className="size-2 rounded-full bg-[#27c93f]" />
-            </div>
+          <div className="overflow-hidden rounded-sm bg-code-bg">
             <pre className="px-3 py-2 overflow-hidden">
               <code className="text-[11px] font-mono leading-relaxed text-code-text whitespace-pre">
                 {codePreview}

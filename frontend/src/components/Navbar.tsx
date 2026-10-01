@@ -125,7 +125,7 @@ function Navbar() {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="hidden md:flex items-center gap-2 rounded-full outline-none cursor-pointer transition-transform hover:scale-105">
+                  <button className="hidden md:flex items-center gap-2 rounded-full outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring">
                     <Avatar className="size-8">
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                         {initials}

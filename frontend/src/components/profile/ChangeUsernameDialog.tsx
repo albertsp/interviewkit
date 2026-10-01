@@ -46,7 +46,7 @@ export function ChangeUsernameDialog({ isOpenChangeUserName, setIsOpenChangeUser
     <Dialog open={isOpenChangeUserName} onOpenChange={setIsOpenChangeUserName}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Cambiar Nombre de Usuario</DialogTitle>
+          <DialogTitle>Cambiar nombre de usuario</DialogTitle>
           <DialogDescription>
             Escribe tu nuevo nombre de usuario
           </DialogDescription>

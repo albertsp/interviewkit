@@ -7,7 +7,7 @@ type BadgeProps = React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants>;
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-full border text-xs font-medium whitespace-nowrap transition-colors shrink-0 gap-1 [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center rounded-sm border text-xs font-medium whitespace-nowrap transition-colors shrink-0 gap-1 [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -16,7 +16,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive/10 text-destructive dark:bg-destructive/20",
         outline: "border-border text-foreground",
-        tag: "border-transparent bg-primary/10 text-primary",
+        tag: "border-border bg-secondary font-mono text-secondary-foreground",
       },
       size: {
         default: "px-2.5 py-0.5",

@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { phaseVariants } from "@/components/layout/motion-variants";
+import { LogoMark } from "@/components/Logo";
 import {
-  CheckCircle,
   Home,
   RotateCcw,
   Star,
@@ -55,22 +55,16 @@ export default function SessionComplete({
       <Card>
         <CardContent className="p-8 md:p-10 flex flex-col items-center text-center gap-6">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 15,
-              delay: 0.1,
-            }}
-            className="size-20 rounded-full bg-primary/10 flex items-center justify-center"
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
           >
-            <CheckCircle className="size-10 text-primary" />
+            <LogoMark className="size-16" />
           </motion.div>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Sesion completada
+            <h2 className="display text-4xl font-medium mb-2">
+              Sesión completada
             </h2>
             <p className="text-base text-muted-foreground">
               Has completado las {totalQuestions} preguntas de{" "}
@@ -79,24 +73,24 @@ export default function SessionComplete({
           </div>
 
           {loading ? (
-            <div className="w-full max-w-sm h-24 rounded-xl bg-muted animate-pulse" />
+            <div className="w-full max-w-sm h-24 rounded-md bg-muted animate-pulse" />
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="w-full max-w-sm rounded-xl border border-border bg-secondary/60 p-5"
+              className="w-full max-w-sm rounded-md border border-border bg-secondary/60 p-5"
             >
               <div className="flex items-center justify-center gap-2 mb-3">
                 <Star className="size-6 text-primary fill-primary" />
-                <span className="text-3xl font-bold text-foreground">
+                <span className="display text-4xl font-medium text-foreground">
                   +{xpEarned}
                 </span>
                 <span className="text-base font-semibold text-muted-foreground">
                   XP
                 </span>
                 {bonusApplied && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-highlight text-highlight-foreground ml-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm bg-highlight text-highlight-foreground ml-1">
                     Bonus
                   </span>
                 )}
@@ -112,7 +106,7 @@ export default function SessionComplete({
                     {progressInLevel} / {xpPerLevel} XP
                   </span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div className="h-2 w-full bg-muted overflow-hidden">
                   <motion.div
                     className="h-full bg-primary"
                     initial={{ width: 0 }}
@@ -150,7 +144,7 @@ export default function SessionComplete({
               className="gap-2 w-full sm:w-auto"
             >
               <RotateCcw className="size-5" />
-              Nueva sesion
+              Nueva sesión
             </Button>
           </div>
         </CardContent>

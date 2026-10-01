@@ -1,21 +1,21 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { CheckCircle2, AlertTriangle, XCircle, BarChart3 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ResultsSummary } from "@/services/sessionService";
 
 const RESULT_ITEMS = [
-  { key: "correct", label: "Correctas", Icon: CheckCircle2, color: "#22c55e" },
-  { key: "partially_correct", label: "Parciales", Icon: AlertTriangle, color: "#f59e0b" },
-  { key: "incorrect", label: "Incorrectas", Icon: XCircle, color: "#ef4444" },
+  { key: "correct", label: "Correctas", color: "var(--chart-2)" },
+  { key: "partially_correct", label: "Parciales", color: "var(--chart-3)" },
+  { key: "incorrect", label: "Incorrectas", color: "var(--chart-1)" },
 ] as const;
 
 const CUSTOM_TOOLTIP_STYLE = {
   backgroundColor: "var(--card)",
   border: "1px solid var(--border)",
-  borderRadius: "0.75rem",
+  borderRadius: "0.375rem",
   padding: "0.5rem 0.75rem",
   fontSize: "0.8125rem",
   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
@@ -44,10 +44,7 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="size-5 text-primary" />
-            Resultados
-          </CardTitle>
+          <CardTitle>Resultados</CardTitle>
         </CardHeader>
         <CardContent>
           <EmptyState
@@ -64,18 +61,15 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
   const accuracyRate = Math.round((correct / total) * 100);
 
   const pieData = [
-    { name: "Correctas", value: correct, color: "#22c55e" },
-    { name: "Parciales", value: partially_correct, color: "#f59e0b" },
-    { name: "Incorrectas", value: incorrect, color: "#ef4444" },
+    { name: "Correctas", value: correct, color: "var(--chart-2)" },
+    { name: "Parciales", value: partially_correct, color: "var(--chart-3)" },
+    { name: "Incorrectas", value: incorrect, color: "var(--chart-1)" },
   ];
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="size-5 text-primary" />
-          Resultados
-        </CardTitle>
+        <CardTitle>Resultados</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
         <div className="relative w-full max-w-[220px] aspect-square">
@@ -93,14 +87,14 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
                 animationDuration={800}
               >
                 {pieData.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} stroke="none" />
+                  <Cell key={entry.name} style={{ fill: entry.color }} stroke="none" />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-3xl font-bold tracking-tight">{accuracyRate}%</span>
+            <span className="display text-4xl font-medium">{accuracyRate}%</span>
             <span className="text-xs text-muted-foreground">aciertos</span>
           </div>
         </div>
@@ -112,7 +106,7 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
             return (
               <div key={item.key} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="size-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <div className="size-3 shrink-0" style={{ backgroundColor: item.color }} />
                   <span className="text-muted-foreground">{item.label}</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium tabular-nums">

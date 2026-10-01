@@ -40,20 +40,20 @@ export function GitHubButton() {
   );
 }
 
-export function OAuthDivider({ label = "o continua con email" }: { label?: string }) {
+export function OAuthDivider({ label = "o con tu email" }: { label?: string }) {
   return (
     <div className="relative">
       <div className="absolute inset-0 flex items-center">
         <span className="w-full border-t" />
       </div>
-      <div className="relative flex justify-center text-xs uppercase">
+      <div className="relative flex justify-center text-xs">
         <span className="bg-card px-2 text-muted-foreground">{label}</span>
       </div>
     </div>
   );
 }
 
-export function OAuthButtons({ dividerLabel = "o continua con email" }: { dividerLabel?: string }) {
+export function OAuthButtons({ dividerLabel = "o con tu email" }: { dividerLabel?: string }) {
   return (
     <div className="space-y-3">
       <GoogleButton />

@@ -61,18 +61,16 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
               type="button"
               onClick={() => handleSelect(type, item)}
               className={cn(
-                "relative flex flex-col items-center gap-3 sm:gap-4 rounded-2xl border-2 p-5 sm:p-8 transition-all duration-200",
-                "hover:border-primary/50 hover:bg-accent",
-                selected ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-background"
+                "relative flex flex-col items-start gap-3 rounded-md border p-5 text-left transition-colors duration-150 sm:p-6",
+                "hover:border-foreground/60 hover:bg-secondary",
+                selected ? "border-foreground bg-secondary" : "border-border bg-background"
               )}
             >
               {selected && (
-                <span className="absolute top-3 right-3 sm:top-4 sm:right-4 size-5 sm:size-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                  <Check className="size-3 sm:size-4" />
-                </span>
+                <Check aria-hidden="true" className="absolute top-3 right-3 size-5 text-primary" strokeWidth={3} />
               )}
-              {Icon && <Icon className={cn("size-8 sm:size-10 transition-colors", selected ? "text-primary" : "text-muted-foreground")} />}
-              <span className={cn("text-base sm:text-lg font-medium transition-colors", selected && "text-primary")}>
+              {Icon && <Icon className={cn("size-8 transition-colors", selected ? "text-primary" : "text-muted-foreground")} strokeWidth={1.5} />}
+              <span className="display text-xl font-medium sm:text-2xl">
                 {item}
               </span>
             </button>
@@ -85,46 +83,42 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
   return (
     <div className="w-full max-w-2xl mx-auto">
 
-      <nav className="flex items-center justify-center mb-8">
-        {steps.map((s, idx) => (
-          <div key={s.key} className="flex items-center">
-            {idx > 0 && (
-              <div
-                className={cn(
-                  "w-8 sm:w-16 h-1 mx-2 sm:mx-3 rounded-full transition-colors duration-500",
-                  isCompleted(idx - 1) ? "bg-primary" : "bg-border"
-                )}
-              />
-            )}
+      <nav aria-label="Pasos de la sesión" className="mb-8 grid grid-cols-4 gap-2 sm:gap-3">
+        {steps.map((s, idx) => {
+          const done = isCompleted(idx)
+          const current = step === idx
+          const reachable = done || idx === 0
+          return (
             <button
+              key={s.key}
               type="button"
-              onClick={() => { if (isCompleted(idx) || idx === 0) setStep(idx) }}
-              disabled={!isCompleted(idx) && idx !== 0}
-              className="flex flex-col items-center gap-2"
+              onClick={() => { if (reachable) setStep(idx) }}
+              disabled={!reachable}
+              aria-current={current ? "step" : undefined}
+              className="group text-left disabled:cursor-not-allowed"
             >
               <span
                 className={cn(
-                  "flex items-center justify-center size-10 sm:size-14 rounded-full text-sm sm:text-lg font-bold transition-all duration-300",
-                  isCompleted(idx) && "bg-primary text-primary-foreground",
-                  step === idx && !isCompleted(idx) && "bg-primary text-primary-foreground ring-4 ring-primary/20",
-                  step !== idx && !isCompleted(idx) && "bg-muted text-muted-foreground"
+                  "block h-1.5 transition-colors duration-300",
+                  current && "bg-foreground",
+                  done && !current && "bg-primary",
+                  !done && !current && "bg-border"
                 )}
-              >
-                {isCompleted(idx) ? <Check className="size-4 sm:size-6" /> : idx + 1}
-              </span>
+              />
               <span
                 className={cn(
-                  "text-sm font-medium transition-colors duration-300",
-                  step === idx && "text-foreground",
-                  isCompleted(idx) && step !== idx && "text-primary",
-                  !isCompleted(idx) && step !== idx && "text-muted-foreground"
+                  "mt-2 flex items-baseline gap-1.5 font-mono text-xs transition-colors",
+                  current && "text-foreground",
+                  done && !current && "text-primary",
+                  !done && !current && "text-muted-foreground"
                 )}
               >
-                {s.label}
+                <span>{idx + 1}</span>
+                <span className="hidden sm:inline">{s.label}</span>
               </span>
             </button>
-          </div>
-        ))}
+          )
+        })}
       </nav>
 
       <Card>
@@ -138,9 +132,9 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-semibold">{steps[0].question}</h2>
-                  <p className="text-base text-muted-foreground mt-2">Elige el área que más te interese</p>
+                <div className="mb-8">
+                  <h2 className="display text-3xl font-medium">{steps[0].question}</h2>
+                  <p className="mt-2 text-base text-muted-foreground">Elige el área que más te interese</p>
                 </div>
                 {renderOptions(Object.keys(stacks.rol), "rol", select.rol, roleIcons)}
               </motion.div>
@@ -154,9 +148,9 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-semibold">{steps[1].question}</h2>
-                  <p className="text-base text-muted-foreground mt-2">
+                <div className="mb-8">
+                  <h2 className="display text-3xl font-medium">{steps[1].question}</h2>
+                  <p className="mt-2 text-base text-muted-foreground">
                     Rol: <span className="font-medium text-foreground">{select.rol}</span>
                   </p>
                 </div>
@@ -172,9 +166,9 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-semibold">{steps[2].question}</h2>
-                  <p className="text-base text-muted-foreground mt-2">
+                <div className="mb-8">
+                  <h2 className="display text-3xl font-medium">{steps[2].question}</h2>
+                  <p className="mt-2 text-base text-muted-foreground">
                     {select.rol} · <span className="font-medium text-foreground">{select.stack}</span>
                   </p>
                 </div>
@@ -190,9 +184,9 @@ function StackSelector({ onSubmit, stacks }: StackSelectorProps) {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-semibold">{steps[3].question}</h2>
-                  <p className="text-base text-muted-foreground mt-2">
+                <div className="mb-8">
+                  <h2 className="display text-3xl font-medium">{steps[3].question}</h2>
+                  <p className="mt-2 text-base text-muted-foreground">
                     {select.stack} · <span className="font-medium text-foreground">{select.topic}</span>
                   </p>
                 </div>
