@@ -23,7 +23,7 @@ export default function ProgressIndicator({ currentIndex, total, stack, level, t
   return (
     <div className="mb-8">
       <div className="mb-3 flex items-baseline justify-between gap-4">
-        <p className="display text-2xl font-medium">
+        <p className="display text-2xl font-extrabold">
           Pregunta {currentIndex + 1}{" "}
           <span className="text-muted-foreground">de {total}</span>
         </p>
@@ -42,15 +42,15 @@ export default function ProgressIndicator({ currentIndex, total, stack, level, t
         className="flex gap-1.5"
       >
         {Array.from({ length: total }).map((_, idx) => (
-          <div
-            key={idx}
-            className={cn(
-              "h-1.5 flex-1 transition-colors duration-300",
-              idx < currentIndex && "bg-primary",
-              idx === currentIndex && "bg-foreground",
-              idx > currentIndex && "bg-border"
-            )}
-          />
+          <div key={idx} className="h-1.5 flex-1 overflow-hidden bg-border">
+            <div
+              className={cn(
+                "h-full origin-left transition-transform duration-500 ease-out",
+                idx < currentIndex ? "bg-primary" : "bg-foreground",
+                idx <= currentIndex ? "scale-x-100" : "scale-x-0"
+              )}
+            />
+          </div>
         ))}
       </div>
 

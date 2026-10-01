@@ -27,7 +27,7 @@ export default function SavedCardsSummary({ total, topTags }: SavedCardsSummaryP
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p>
-          <span className="display text-5xl font-medium tabular-nums">{total}</span>
+          <span className="display text-5xl font-extrabold tabular-nums">{total}</span>
           <span className="ml-2 text-sm text-muted-foreground">
             {total === 1 ? "card guardada" : "cards guardadas"}
           </span>

@@ -59,7 +59,7 @@ export default function RegisterPage() {
   return (
     <AuthShell
       title="Crea tu cuenta"
-      description="Gratis y en menos de un minuto. Sin tarjeta."
+      description="Gratis y sin tarjeta. Empieza a practicar en menos de un minuto."
       footer={
         <>
           ¿Ya tienes cuenta?{" "}

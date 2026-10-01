@@ -30,13 +30,13 @@ export default function StatCards({ stats, sessionsCount }: StatCardsProps) {
   const extended: StatsWithSessionsCount = { ...stats, sessions_count: sessionsCount };
 
   return (
-    <dl className="grid grid-cols-2 border-t border-border lg:grid-cols-4">
+    <dl className="grid grid-cols-2 border-t-2 border-foreground lg:grid-cols-4">
       {STATS.map(({ key, label, value }) => (
         <div
           key={key}
           className="border-b border-r border-border p-4 sm:p-6 even:border-r-0 lg:border-b-0 lg:even:border-r lg:last:border-r-0"
         >
-          <dd className="display text-4xl font-medium tabular-nums sm:text-5xl">
+          <dd className="display text-4xl font-black tabular-nums sm:text-5xl">
             {value(extended)}
           </dd>
           <dt className="mt-1 font-mono text-xs text-muted-foreground">{label}</dt>

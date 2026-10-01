@@ -95,9 +95,9 @@ type CellAccent = "neutral" | "green" | "red" | "amber";
 
 const CELL_ACCENT_STYLES: Record<CellAccent, { icon: string; label: string }> = {
   neutral: { icon: "text-muted-foreground", label: "text-muted-foreground" },
-  green: { icon: "text-green-600 dark:text-green-400", label: "text-green-700 dark:text-green-400" },
-  red: { icon: "text-primary", label: "text-primary" },
-  amber: { icon: "text-amber-600 dark:text-amber-400", label: "text-amber-700 dark:text-amber-400" },
+  green: { icon: "text-success", label: "text-success" },
+  red: { icon: "text-destructive", label: "text-destructive" },
+  amber: { icon: "text-warning", label: "text-foreground" },
 };
 
 // One compartment of the bento grid: a self-contained block with its own
@@ -156,7 +156,7 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
     <div className="space-y-4">
       <div>
         <div className="flex items-start gap-2 flex-wrap">
-          <h3 className="display text-3xl font-medium text-foreground">
+          <h3 className="display text-3xl font-extrabold text-foreground">
             {card.concept || "Sin título"}
           </h3>
           {card.code_language && (
@@ -171,7 +171,7 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
           )}
         </div>
         {card.definition && (
-          <p className="text-base text-muted-foreground italic mt-1.5 leading-relaxed">
+          <p className="text-base text-muted-foreground mt-1.5 leading-relaxed">
             {card.definition}
           </p>
         )}
@@ -290,7 +290,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-success uppercase tracking-wider flex items-center gap-1.5">
           <CheckCircle2 className="size-3.5" />
           Usar cuando
         </Label>
@@ -309,7 +309,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-destructive uppercase tracking-wider flex items-center gap-1.5">
           <XCircle className="size-3.5" />
           Evitar cuando
           <span className="text-muted-foreground/60 normal-case font-normal ml-1">
@@ -360,7 +360,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
           <Lightbulb className="size-3.5" />
           Mnemotecnia
           <span className="text-muted-foreground/60 normal-case font-normal ml-1">

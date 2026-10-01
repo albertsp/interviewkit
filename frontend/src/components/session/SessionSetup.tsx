@@ -20,7 +20,7 @@ function Spinner({ label }: { label: string }) {
         className="flex flex-col items-center gap-4"
       >
         <LogoMark className="size-12 animate-pulse" />
-        <p role="status" className="display text-2xl text-muted-foreground">{label}</p>
+        <p role="status" className="display text-2xl text-muted-foreground font-extrabold">{label}</p>
       </motion.div>
     </div>
   );
@@ -68,7 +68,7 @@ export default function SessionSetup({ loading, error, onSubmit }: SessionSetupP
         <Card className="w-full max-w-md">
           <CardContent className="p-8 md:p-10 flex flex-col items-center text-center gap-4">
             <div>
-              <h2 className="display text-2xl font-medium mb-1">
+              <h2 className="display text-2xl font-extrabold mb-1">
                 No se pudieron cargar las opciones
               </h2>
               <p className="text-sm text-muted-foreground">{stacksError}</p>

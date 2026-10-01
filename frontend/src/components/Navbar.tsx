@@ -22,7 +22,7 @@ import { useAuth } from "@/context/AuthContext"
 
 const VISITOR_LINKS = [
   { href: "/#como-funciona", label: "Cómo funciona" },
-  { href: "/#features", label: "Qué te llevas" },
+  { href: "/#features", label: "Qué incluye" },
   { href: "/#faq", label: "FAQ" },
 ]
 
@@ -52,7 +52,7 @@ function Navbar() {
   const profileLink: NavLink = { path: "/profile", label: "Perfil", icon: User }
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
+    <header className="fixed top-0 inset-x-0 z-50 border-b-2 border-foreground bg-background">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
 
         <button
@@ -66,7 +66,7 @@ function Navbar() {
         {!user && (
           <nav aria-label="Secciones" className="hidden md:flex items-center gap-7 text-sm">
             {VISITOR_LINKS.map(({ href, label }) => (
-              <a key={href} href={href} className="text-muted-foreground transition-colors hover:text-foreground">
+              <a key={href} href={href} className="link-underline text-muted-foreground transition-colors duration-150 hover:text-foreground">
                 {label}
               </a>
             ))}
@@ -91,7 +91,7 @@ function Navbar() {
                   {active && (
                     <motion.span
                       layoutId="navActiveTab"
-                      className="absolute inset-0 rounded-lg bg-primary/10"
+                      className="absolute inset-0 bg-accent"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}

@@ -16,10 +16,10 @@ export default function LevelHero({ level, progressInLevel, xpPerLevel, xpToNext
   return (
     <section
       aria-label="Tu nivel actual"
-      className="rounded-lg border border-border bg-secondary/60 p-6 sm:p-10"
+      className="border border-foreground bg-card p-6 shadow-[6px_6px_0_var(--primary)] sm:p-10"
     >
       <p className="font-mono text-xs text-muted-foreground">Tu nivel actual</p>
-      <p className="display mt-3 text-7xl font-medium leading-none sm:text-8xl">
+      <p className="display mt-3 text-7xl font-black leading-none sm:text-8xl">
         Nv <span className="mark-highlight">{level}</span>
       </p>
 

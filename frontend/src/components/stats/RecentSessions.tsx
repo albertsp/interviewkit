@@ -30,9 +30,9 @@ function MiniBar({ correct, partially_correct, incorrect, total }: MiniBarProps)
 
   return (
     <div className="flex h-1.5 w-full overflow-hidden bg-muted">
-      <div className="bg-chart-2" style={{ width: `${cPct}%` }} />
-      <div className="bg-chart-3" style={{ width: `${pPct}%` }} />
-      <div className="bg-chart-1" style={{ width: `${iPct}%` }} />
+      <div className="bg-success" style={{ width: `${cPct}%` }} />
+      <div className="bg-warning" style={{ width: `${pPct}%` }} />
+      <div className="bg-destructive" style={{ width: `${iPct}%` }} />
     </div>
   );
 }

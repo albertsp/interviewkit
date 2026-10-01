@@ -6,11 +6,12 @@ import type { CardDTO } from "@/services/cardService"
 interface CardTileProps {
   card: CardDTO
   onOpen: (card: CardDTO) => void
+  index?: number
 }
 
 // Preview tile for the dashboard grid: a compact bento-style peek at the
 // full flashcard (title, code snippet, tags, difficulty) that opens SingleCard.
-export function CardTile({ card, onOpen }: CardTileProps) {
+export function CardTile({ card, onOpen, index = 0 }: CardTileProps) {
   const codePreview = card.code ? card.code.split("\n").slice(0, 3).join("\n") : null
   const tags = card.tags || []
   const visibleTags = tags.slice(0, 2)
@@ -19,7 +20,8 @@ export function CardTile({ card, onOpen }: CardTileProps) {
   return (
     <Card
       size="sm"
-      className="group cursor-pointer gap-3 ring-0 border border-border transition-colors duration-150 hover:border-foreground/50 focus-visible:ring-2 focus-visible:ring-ring outline-none"
+      className="group animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both cursor-pointer gap-3 ring-0 border border-border duration-300 ease-out transition-[transform,box-shadow,border-color] hover:-translate-x-px hover:-translate-y-px hover:border-foreground hover:shadow-[4px_4px_0_var(--primary)] active:translate-x-0 active:translate-y-0 active:shadow-none focus-visible:ring-2 focus-visible:ring-ring outline-none"
+      style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
       onClick={() => onOpen(card)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(card); } }}
       tabIndex={0}

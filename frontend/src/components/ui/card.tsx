@@ -44,7 +44,7 @@ function CardTitle({
     <div
       data-slot="card-title"
       className={cn(
-        "font-heading text-lg leading-snug font-medium group-data-[size=sm]/card:text-base",
+        "font-heading text-lg leading-snug font-extrabold tracking-tight group-data-[size=sm]/card:text-base",
         className
       )}
       {...props} />

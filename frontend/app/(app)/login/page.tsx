@@ -67,7 +67,7 @@ function LoginForm() {
   return (
     <AuthShell
       title="Inicia sesión"
-      description="Accede para seguir practicando donde lo dejaste."
+      description="Accede para continuar con tus sesiones."
       footer={
         <>
           ¿No tienes cuenta?{" "}

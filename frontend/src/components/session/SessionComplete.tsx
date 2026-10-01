@@ -63,7 +63,7 @@ export default function SessionComplete({
           </motion.div>
 
           <div>
-            <h2 className="display text-4xl font-medium mb-2">
+            <h2 className="display text-4xl font-extrabold mb-2">
               Sesión completada
             </h2>
             <p className="text-base text-muted-foreground">
@@ -83,7 +83,7 @@ export default function SessionComplete({
             >
               <div className="flex items-center justify-center gap-2 mb-3">
                 <Star className="size-6 text-primary fill-primary" />
-                <span className="display text-4xl font-medium text-foreground">
+                <span className="display text-4xl font-extrabold text-foreground">
                   +{xpEarned}
                 </span>
                 <span className="text-base font-semibold text-muted-foreground">

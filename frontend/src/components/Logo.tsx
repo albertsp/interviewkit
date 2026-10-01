@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
-// The brand mark is a red-pen tick, the same stroke a teacher uses to mark an
-// answer as correct. Keep it in sync with public/favicon.svg.
+// The brand mark is a cobalt square with a slash: the same "/" that splits
+// Interview/Kit in the wordmark. Keep in sync with public/favicon.svg.
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
@@ -10,12 +10,12 @@ export function LogoMark({ className }: { className?: string }) {
       aria-hidden="true"
       className={cn("size-6 text-primary", className)}
     >
+      <rect width="32" height="32" fill="currentColor" />
       <path
-        d="M4.5 17.5c2.2 1.6 4.6 4.6 6.6 8.2C14.6 15.6 20.4 8.4 27.5 4.8"
-        stroke="currentColor"
-        strokeWidth="4.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M12 25 L20.5 7"
+        stroke="var(--primary-foreground)"
+        strokeWidth="4.4"
+        strokeLinecap="butt"
       />
     </svg>
   );
@@ -23,11 +23,13 @@ export function LogoMark({ className }: { className?: string }) {
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark />
-      <span className="display text-xl font-semibold leading-none sm:text-2xl">
-        Interview<span className="italic font-normal">Kit</span>
-      </span>
+    <span
+      className={cn(
+        "display text-[1.4rem] font-black leading-none tracking-[-0.06em] sm:text-2xl",
+        className
+      )}
+    >
+      Interview<span className="text-primary">/</span>Kit
     </span>
   );
 }

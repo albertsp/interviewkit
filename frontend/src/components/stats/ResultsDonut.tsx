@@ -7,9 +7,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import type { ResultsSummary } from "@/services/sessionService";
 
 const RESULT_ITEMS = [
-  { key: "correct", label: "Correctas", color: "var(--chart-2)" },
-  { key: "partially_correct", label: "Parciales", color: "var(--chart-3)" },
-  { key: "incorrect", label: "Incorrectas", color: "var(--chart-1)" },
+  { key: "correct", label: "Correctas", color: "var(--success)" },
+  { key: "partially_correct", label: "Parciales", color: "var(--warning)" },
+  { key: "incorrect", label: "Incorrectas", color: "var(--destructive)" },
 ] as const;
 
 const CUSTOM_TOOLTIP_STYLE = {
@@ -61,9 +61,9 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
   const accuracyRate = Math.round((correct / total) * 100);
 
   const pieData = [
-    { name: "Correctas", value: correct, color: "var(--chart-2)" },
-    { name: "Parciales", value: partially_correct, color: "var(--chart-3)" },
-    { name: "Incorrectas", value: incorrect, color: "var(--chart-1)" },
+    { name: "Correctas", value: correct, color: "var(--success)" },
+    { name: "Parciales", value: partially_correct, color: "var(--warning)" },
+    { name: "Incorrectas", value: incorrect, color: "var(--destructive)" },
   ];
 
   return (
@@ -94,7 +94,7 @@ export default function ResultsDonut({ results }: { results: ResultsSummary }) {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="display text-4xl font-medium">{accuracyRate}%</span>
+            <span className="display text-4xl font-extrabold">{accuracyRate}%</span>
             <span className="text-xs text-muted-foreground">aciertos</span>
           </div>
         </div>

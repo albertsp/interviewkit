@@ -194,8 +194,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SingleCard isSingleCardOpen={isSingleCardOpen} setIsSingleCardOpen={setIsSingleCardOpen} selectedCard={selectedCard} originalCard={originalCard} onCardChange={handleCardChange} onSave={handleSaveCard} deleteCard={handleDeleteCard}/>
 
-            {filtered_cards.map((card) => (
-              <CardTile key={card.card_id} card={card} onOpen={openCard} />
+            {filtered_cards.map((card, i) => (
+              <CardTile key={card.card_id} card={card} onOpen={openCard} index={i} />
             ))}
           </div>
         )}

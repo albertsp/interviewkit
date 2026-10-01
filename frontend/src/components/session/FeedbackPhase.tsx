@@ -33,22 +33,22 @@ const RESULT_CONFIG: Record<Result, ResultConfig> = {
   CORRECT: {
     label: "Correcto",
     icon: CheckCircle2,
-    classes: "bg-green-500/10 text-green-700 border-green-500/30 dark:text-green-400",
-    iconClasses: "text-green-600 dark:text-green-400",
+    classes: "bg-success/10 text-success border-success/40",
+    iconClasses: "text-success",
     xp: 100,
   },
   PARTIALLY_CORRECT: {
     label: "Parcial",
     icon: AlertTriangle,
-    classes: "bg-amber-500/10 text-amber-700 border-amber-500/30 dark:text-amber-400",
-    iconClasses: "text-amber-600 dark:text-amber-400",
+    classes: "bg-warning/15 text-foreground border-warning/60",
+    iconClasses: "text-warning",
     xp: 50,
   },
   INCORRECT: {
     label: "Incorrecto",
     icon: XCircle,
-    classes: "bg-primary/10 text-primary border-primary/40",
-    iconClasses: "text-primary",
+    classes: "bg-destructive/10 text-destructive border-destructive/40",
+    iconClasses: "text-destructive",
     xp: 10,
   },
 };
@@ -112,7 +112,7 @@ export default function FeedbackPhase({
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="mb-6 border-l-2 border-l-primary">
+          <Card className="mb-6 border-l-[3px] border-l-primary">
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">
                 Corrección

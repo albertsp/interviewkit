@@ -41,14 +41,14 @@ export default function ProfilePage() {
                         <CardContent className="flex flex-col items-center pt-8 pb-6 px-6">
                             <div className="relative">
                                 <Avatar className="h-28 w-28 border border-border">
-                                    <AvatarFallback className="display text-3xl font-medium bg-secondary text-foreground">
+                                    <AvatarFallback className="display text-3xl font-extrabold bg-secondary text-foreground">
                                         {user?.split(' ').map(n => n[0]).join('') || "U"}
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
 
                             <div className="flex items-center gap-2 mt-4">
-                                <p className="display text-2xl font-medium text-foreground">
+                                <p className="display text-2xl font-extrabold text-foreground">
                                     {user || "Usuario"}
                                 </p>
                                 <button onClick={() => setIsOpenChangeUserName(true)} className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" aria-label="Editar nombre de usuario">

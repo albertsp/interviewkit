@@ -81,7 +81,7 @@ const editorTheme = EditorView.theme({
     boxShadow: "0 0 0 3px var(--ring)",
   },
   ".cm-scroller": {
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+    fontFamily: "'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace",
     lineHeight: "1.6",
   },
   ".cm-content": {

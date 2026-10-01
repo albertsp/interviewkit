@@ -1,21 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/jetbrains-mono";
-@import "@fontsource-variable/fraunces/opsz.css";
-@import "@fontsource-variable/fraunces/opsz-italic.css";
+@import "@fontsource-variable/schibsted-grotesk";
+@import "@fontsource/dm-mono/400.css";
+@import "@fontsource/dm-mono/500.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
-
 @theme inline {
-    --font-display: 'Fraunces Variable', Georgia, serif;
-    --font-heading: var(--font-display);
-    --color-highlight: var(--highlight);
-    --color-highlight-foreground: var(--highlight-foreground);
-    --font-sans: 'Geist Variable', sans-serif;
-    --font-mono: 'JetBrains Mono Variable', monospace;
+    --font-sans: 'Schibsted Grotesk Variable', system-ui, sans-serif;
+    --font-heading: var(--font-sans);
+    --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -32,7 +26,12 @@
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
+    --color-rule: var(--rule);
     --color-destructive: var(--destructive);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-highlight: var(--highlight);
+    --color-highlight-foreground: var(--highlight-foreground);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
     --color-muted-foreground: var(--muted-foreground);
@@ -57,101 +56,132 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 :root {
-    /* Paper & ink: warm cream page, near-black ink, one red-pen accent. */
-    --background: oklch(0.972 0.014 85);
-    --foreground: oklch(0.2 0.018 60);
-    --card: oklch(0.99 0.008 85);
-    --card-foreground: oklch(0.2 0.018 60);
-    --popover: oklch(0.99 0.008 85);
-    --popover-foreground: oklch(0.2 0.018 60);
-    --primary: oklch(0.54 0.2 28);
-    --primary-foreground: oklch(0.985 0.01 85);
-    --secondary: oklch(0.94 0.016 85);
-    --secondary-foreground: oklch(0.25 0.018 60);
-    --muted: oklch(0.945 0.014 85);
-    --muted-foreground: oklch(0.45 0.02 65);
-    --accent: oklch(0.93 0.025 70);
-    --accent-foreground: oklch(0.3 0.04 40);
-    --highlight: oklch(0.9 0.16 95);
-    --highlight-foreground: oklch(0.2 0.018 60);
-    --destructive: oklch(0.5 0.2 25);
-    --border: oklch(0.87 0.016 80);
-    --input: oklch(0.87 0.016 80);
-    --ring: oklch(0.54 0.2 28);
-    --chart-1: oklch(0.54 0.2 28);
-    --chart-2: oklch(0.52 0.12 155);
-    --chart-3: oklch(0.7 0.15 80);
-    --chart-4: oklch(0.42 0.09 255);
-    --chart-5: oklch(0.55 0.03 65);
-    --radius: 0.375rem;
-    --sidebar: oklch(0.955 0.015 85);
-    --sidebar-foreground: oklch(0.2 0.018 60);
-    --sidebar-primary: oklch(0.54 0.2 28);
-    --sidebar-primary-foreground: oklch(0.985 0.01 85);
-    --sidebar-accent: oklch(0.93 0.025 70);
-    --sidebar-accent-foreground: oklch(0.3 0.04 40);
-    --sidebar-border: oklch(0.87 0.016 80);
-    --sidebar-ring: oklch(0.54 0.2 28);
-    --code-bg: #1b1814;
-    --code-header: #26221c;
-    --code-text: #e8e1d3;
+    /* Swiss system: white page, black ink, one cobalt. Square corners. */
+    --background: oklch(0.985 0.003 100);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.48 0.26 268);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.955 0.004 100);
+    --secondary-foreground: oklch(0.2 0 0);
+    --muted: oklch(0.955 0.004 100);
+    --muted-foreground: oklch(0.46 0.006 100);
+    --accent: oklch(0.95 0.03 268);
+    --accent-foreground: oklch(0.32 0.16 268);
+    --highlight: var(--primary);
+    --highlight-foreground: oklch(1 0 0);
+    --destructive: oklch(0.55 0.22 27);
+    --success: oklch(0.52 0.13 155);
+    --warning: oklch(0.72 0.15 75);
+    --border: oklch(0.86 0.004 100);
+    --input: oklch(0.78 0.005 100);
+    --rule: oklch(0.145 0 0);
+    --ring: oklch(0.48 0.26 268);
+    --chart-1: oklch(0.48 0.26 268);
+    --chart-2: oklch(0.52 0.13 155);
+    --chart-3: oklch(0.72 0.15 75);
+    --chart-4: oklch(0.55 0.22 27);
+    --chart-5: oklch(0.55 0.006 100);
+    --radius: 0rem;
+    --sidebar: oklch(0.97 0.003 100);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.48 0.26 268);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(0.95 0.03 268);
+    --sidebar-accent-foreground: oklch(0.32 0.16 268);
+    --sidebar-border: oklch(0.86 0.004 100);
+    --sidebar-ring: oklch(0.48 0.26 268);
+    --code-bg: #0a0a0a;
+    --code-header: #171717;
+    --code-text: #f1f1ec;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    interpolate-size: allow-keywords;
 }
 
 .dark {
-    /* Ink board: warm charcoal, never blue-black. */
-    --background: oklch(0.175 0.012 60);
-    --foreground: oklch(0.95 0.014 85);
-    --card: oklch(0.21 0.012 60);
-    --card-foreground: oklch(0.95 0.014 85);
-    --popover: oklch(0.21 0.012 60);
-    --popover-foreground: oklch(0.95 0.014 85);
-    --primary: oklch(0.7 0.18 30);
-    --primary-foreground: oklch(0.18 0.012 60);
-    --secondary: oklch(0.25 0.012 60);
-    --secondary-foreground: oklch(0.92 0.014 85);
-    --muted: oklch(0.25 0.012 60);
-    --muted-foreground: oklch(0.72 0.02 80);
-    --accent: oklch(0.27 0.02 50);
-    --accent-foreground: oklch(0.9 0.04 60);
-    --highlight: oklch(0.86 0.16 95);
-    --highlight-foreground: oklch(0.2 0.018 60);
-    --destructive: oklch(0.65 0.2 25);
-    --border: oklch(0.32 0.014 60);
-    --input: oklch(0.32 0.014 60);
-    --ring: oklch(0.7 0.18 30);
-    --chart-1: oklch(0.7 0.18 30);
-    --chart-2: oklch(0.7 0.13 155);
-    --chart-3: oklch(0.8 0.15 85);
-    --chart-4: oklch(0.7 0.1 255);
-    --chart-5: oklch(0.7 0.03 75);
-    --sidebar: oklch(0.19 0.012 60);
-    --sidebar-foreground: oklch(0.92 0.014 85);
-    --sidebar-primary: oklch(0.7 0.18 30);
-    --sidebar-primary-foreground: oklch(0.18 0.012 60);
-    --sidebar-accent: oklch(0.27 0.02 50);
-    --sidebar-accent-foreground: oklch(0.9 0.04 60);
-    --sidebar-border: oklch(0.32 0.014 60);
-    --sidebar-ring: oklch(0.7 0.18 30);
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.96 0.004 100);
+    --card: oklch(0.19 0 0);
+    --card-foreground: oklch(0.96 0.004 100);
+    --popover: oklch(0.19 0 0);
+    --popover-foreground: oklch(0.96 0.004 100);
+    --primary: oklch(0.68 0.19 268);
+    --primary-foreground: oklch(0.13 0 0);
+    --secondary: oklch(0.22 0 0);
+    --secondary-foreground: oklch(0.94 0.004 100);
+    --muted: oklch(0.22 0 0);
+    --muted-foreground: oklch(0.72 0.004 100);
+    --accent: oklch(0.27 0.06 268);
+    --accent-foreground: oklch(0.88 0.06 268);
+    --highlight: var(--primary);
+    --highlight-foreground: oklch(0.13 0 0);
+    --destructive: oklch(0.66 0.21 27);
+    --success: oklch(0.7 0.15 155);
+    --warning: oklch(0.8 0.15 80);
+    --border: oklch(0.3 0 0);
+    --input: oklch(0.38 0 0);
+    --rule: oklch(0.96 0.004 100);
+    --ring: oklch(0.68 0.19 268);
+    --chart-1: oklch(0.68 0.19 268);
+    --chart-2: oklch(0.7 0.15 155);
+    --chart-3: oklch(0.8 0.15 80);
+    --chart-4: oklch(0.66 0.21 27);
+    --chart-5: oklch(0.7 0.004 100);
+    --sidebar: oklch(0.17 0 0);
+    --sidebar-foreground: oklch(0.94 0.004 100);
+    --sidebar-primary: oklch(0.68 0.19 268);
+    --sidebar-primary-foreground: oklch(0.13 0 0);
+    --sidebar-accent: oklch(0.27 0.06 268);
+    --sidebar-accent-foreground: oklch(0.88 0.06 268);
+    --sidebar-border: oklch(0.3 0 0);
+    --sidebar-ring: oklch(0.68 0.19 268);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
 }
 
-/* Hand-drawn emphasis used by the brand: a marker swipe and a red-pen underline. */
+/* ---------- Brand utilities ---------- */
+
+/* Headline voice: heavy, tight Schibsted Grotesk. */
+@utility display {
+    font-family: var(--font-heading);
+    letter-spacing: -0.045em;
+}
+
+/* Cobalt block behind a word. Static version for emphasis inside the app. */
 @utility mark-highlight {
-    background-image: linear-gradient(transparent 10%, var(--highlight) 10%, var(--highlight) 94%, transparent 94%);
+    background: var(--highlight);
     color: var(--highlight-foreground);
     padding-inline: 0.12em;
     margin-inline: -0.12em;
@@ -159,16 +189,115 @@
     box-decoration-break: clone;
 }
 
-@utility display {
-    font-family: var(--font-display);
-    font-variation-settings: "opsz" 144;
-    letter-spacing: -0.01em;
+/* Same block, but it sweeps in from the left once on load (hero only). */
+@utility mark-sweep {
+    background-image: linear-gradient(var(--highlight), var(--highlight));
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    padding-inline: 0.12em;
+    margin-inline: -0.12em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    animation: sweep 700ms var(--ease-out) 650ms forwards;
+}
+
+/* Wavy correction underline that draws itself, in cobalt. */
+@utility squiggle {
+    position: relative;
+    display: inline-block;
+    &::after {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: -0.32em;
+        height: 0.34em;
+        background: var(--primary);
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath d='M0 3 Q2 0 4 2 T8 2' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 8px 4px;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath d='M0 3 Q2 0 4 2 T8 2' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 8px 4px;
+        clip-path: inset(0 100% 0 0);
+        animation: draw 600ms var(--ease-out) var(--d, 1.4s) forwards;
+    }
+}
+
+/* Entrance: fade + small rise. Delay comes from --d. */
+@utility rise {
+    animation: rise 560ms var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+}
+
+/* Word-by-word headline reveal (masked slide-up). */
+@utility word {
+    display: inline-block;
+    overflow-x: visible;
+    overflow-y: clip;
+    vertical-align: top;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+}
+@utility word-inner {
+    display: inline-block;
+    animation: word-up 760ms var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+}
+
+/* Underline that grows from the left on hover. */
+@utility link-underline {
+    position: relative;
+    &::after {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: -0.2em;
+        height: 2px;
+        background: currentColor;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 220ms var(--ease-out);
+    }
+    &:hover::after, &[aria-current="page"]::after { transform: scaleX(1); }
+}
+
+@keyframes grow-y {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+@keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes word-up {
+    from { transform: translateY(105%); }
+    to { transform: translateY(0); }
+}
+@keyframes sweep {
+    0%, 40% { background-size: 0% 100%; color: var(--foreground); }
+    100% { background-size: 100% 100%; color: var(--highlight-foreground); }
+}
+@keyframes draw {
+    to { clip-path: inset(0 0 0 0); }
+}
+@keyframes pop {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* FAQ / <details>: animate the height where the browser supports it. */
+details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size 260ms var(--ease-out), content-visibility 260ms allow-discrete;
+}
+details[open]::details-content {
+    block-size: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+    .mark-sweep { background-size: 100% 100%; color: var(--highlight-foreground); }
+    .squiggle::after { clip-path: inset(0 0 0 0); }
 }

@@ -15,7 +15,7 @@ export default function FeedbackLoading() {
       role="status"
     >
       <LogoMark className="mx-auto mb-8 size-16 animate-pulse" />
-      <p className="display text-3xl font-medium">Corrigiendo tu respuesta…</p>
+      <p className="display text-3xl font-extrabold">Corrigiendo tu respuesta…</p>
       <p className="mt-3 text-base text-muted-foreground">
         Puede tardar unos segundos.
       </p>

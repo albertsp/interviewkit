@@ -17,7 +17,7 @@ interface PageContainerProps {
 export function PageContainer({ children, max = "6xl", className, innerClassName }: PageContainerProps) {
   return (
     <div className={cn("min-h-screen px-4 sm:px-6 pt-24 md:pt-28 pb-12 md:pb-16", className)}>
-      <div className={cn("mx-auto", MAX_WIDTH[max] ?? MAX_WIDTH["6xl"], innerClassName)}>
+      <div className={cn("mx-auto animate-in fade-in-0 slide-in-from-bottom-1 duration-300 ease-out", MAX_WIDTH[max] ?? MAX_WIDTH["6xl"], innerClassName)}>
         {children}
       </div>
     </div>
