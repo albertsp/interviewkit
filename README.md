@@ -32,6 +32,7 @@
 - [Challenges and lessons learned](#challenges-and-lessons-learned)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -331,13 +332,18 @@ The quality of the generated questions depends entirely on the prompt. Early ver
 
 ## Roadmap
 
-- [ ] Add a `CONTRIBUTING.md`
 - [ ] More roles and technologies (full-stack, DevOps, data)
 - [ ] Spaced-repetition review mode for study cards
 - [ ] Export cards (Markdown / Anki)
 - [ ] End-to-end tests (Playwright) and broader frontend test coverage
 - [ ] Error monitoring and structured logging in production
 - [ ] Internationalisation (UI language selection)
+
+---
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the setup, the checks that must pass and the commit conventions.
 
 ---
 
