@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { exchangeOAuthCode } from "@/services/authService";
 
 function OAuthCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginFromOAuth } = useAuth();
+  const { login, loginFromOAuth } = useAuth();
+  // Strict Mode runs effects twice in development; the code is read (and
+  // removed from the address bar) on the first run only.
+  const startedRef = useRef(false);
 
   useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     const error = searchParams.get("error");
 
     if (error) {
@@ -17,7 +24,17 @@ function OAuthCallbackHandler() {
       return;
     }
 
-    loginFromOAuth()
+    // The backend sends a one-time code in the URL fragment. Trading it for a
+    // token (kept in localStorage, like an email login) works in browsers that
+    // block third-party cookies, where the API-domain cookie never arrives.
+    const code = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("code");
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+
+    const signIn = code
+      ? exchangeOAuthCode(code).then(({ name, token }) => login(name, token))
+      : loginFromOAuth();
+
+    signIn
       .then(() => {
         router.replace("/session");
       })
