@@ -12,6 +12,9 @@ os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id"
 os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret"
 os.environ["GITHUB_CLIENT_ID"] = "test-github-client-id"
 os.environ["GITHUB_CLIENT_SECRET"] = "test-github-client-secret"
+# ai_service builds the Groq client at import time; tests mock every call,
+# so a dummy key is enough (and avoids depending on a local .env file).
+os.environ["GROQ_API_KEY"] = "test-groq-api-key"
 
 import pytest
 from app import create_app, db as _db
