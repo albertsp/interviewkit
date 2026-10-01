@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.stacks import VALID_LEVELS, VALID_STACKS, VALID_TOPICS, TOPICS
+from ..constants.stacks import VALID_LEVELS, VALID_STACKS, VALID_TOPICS, TOPICS, LEGACY_TOPIC_ALIASES
 from ..constants.gamification import (
     XP_PER_LEVEL, XP_PER_RESULT, XP_COMPLETION_BONUS,
     compute_level, xp_to_next_level,
@@ -44,6 +44,7 @@ def create_session():
 
     # Topic is optional for backwards compatibility with clients that don't
     # send it yet: if missing or invalid for the stack, fall back to its catch-all.
+    topic = LEGACY_TOPIC_ALIASES.get(stack, {}).get(topic, topic)
     stack_topics = VALID_TOPICS.get(stack, set())
     if topic not in stack_topics:
         topic = TOPICS.get(stack, [None])[0]

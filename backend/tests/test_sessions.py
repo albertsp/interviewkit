@@ -99,6 +99,46 @@ class TestCreateSession:
         assert resp.status_code == 201
         assert resp.get_json()["topic"] == "General / Mixto"
 
+    def test_create_session_accepts_the_accented_topic_name(self, client, auth_headers, monkeypatch):
+        seen = {}
+        monkeypatch.setattr(
+            "app.routes.sessions.generate_questions",
+            lambda stack, level, topic: seen.update(topic=topic) or dict(FAKE_QUESTIONS),
+        )
+        resp = client.post(
+            "/sessions/",
+            json={"stack": "React", "level": "Básico", "topic": "Gestión de estado"},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        assert resp.get_json()["topic"] == "Gestión de estado"
+        assert seen["topic"] == "Gestión de estado"
+
+    @pytest.mark.parametrize("stack, old_name, new_name", [
+        ("React", "Gestion de estado", "Gestión de estado"),
+        ("SQL", "Indices y performance", "Índices y performance"),
+        ("SQL", "Normalizacion", "Normalización"),
+        ("Java", "Concurrencia basica (threads, synchronized)", "Concurrencia básica (threads, synchronized)"),
+        ("Java", "Spring basico", "Spring básico"),
+    ])
+    def test_create_session_maps_the_old_unaccented_topic_names(self, client, auth_headers, monkeypatch, stack, old_name, new_name):
+        """Topic names were corrected to carry their accents. A browser tab
+        opened before the change still sends the old name; it must map to the
+        right topic instead of silently falling back to 'General / Mixto'."""
+        seen = {}
+        monkeypatch.setattr(
+            "app.routes.sessions.generate_questions",
+            lambda stack, level, topic: seen.update(topic=topic) or dict(FAKE_QUESTIONS),
+        )
+        resp = client.post(
+            "/sessions/",
+            json={"stack": stack, "level": "Básico", "topic": old_name},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        assert resp.get_json()["topic"] == new_name
+        assert seen["topic"] == new_name
+
     def test_create_session_requires_auth(self, client, db):
         resp = client.post("/sessions/", json=VALID_PAYLOAD)
         assert resp.status_code == 401

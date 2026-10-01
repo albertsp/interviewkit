@@ -93,7 +93,7 @@ export default function MarkdownContent({ text, className }: MarkdownContentProp
 
 // Renders `inline code` and **bold** inside a text block; anything else stays
 // plain text, so unexpected AI output can never inject markup.
-function InlineText({ text }: { text: string }) {
+export function InlineText({ text }: { text: string }) {
   const parts = text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g);
   return (
     <>

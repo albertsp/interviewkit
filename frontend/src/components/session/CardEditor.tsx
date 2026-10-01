@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
-import MarkdownContent from "@/components/MarkdownContent";
+import MarkdownContent, { InlineText } from "@/components/MarkdownContent";
 import {
   Eye,
   Pencil,
@@ -172,7 +172,7 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
         </div>
         {card.definition && (
           <p className="text-base text-muted-foreground mt-1.5 leading-relaxed">
-            {card.definition}
+            <InlineText text={card.definition} />
           </p>
         )}
       </div>
@@ -207,7 +207,7 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
             // pair with exactly one of use_case/avoid_when.
             span={Boolean(card.use_case) === Boolean(card.avoid_when) ? "full" : undefined}
           >
-            <p className="text-sm text-foreground leading-relaxed">{card.mnemonic}</p>
+            <p className="text-sm text-foreground leading-relaxed"><InlineText text={card.mnemonic} /></p>
           </BentoCell>
         )}
       </div>
