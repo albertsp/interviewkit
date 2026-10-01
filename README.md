@@ -106,7 +106,7 @@ I couldn't find a free tool that did all three, so I built one.
 
 ### Prerequisites
 
-- Node.js 20+ (CI runs on Node 22)
+- Node.js 22 (see `frontend/.nvmrc`; with nvm or fnm, run `nvm use` inside `frontend/`)
 - Python 3.12+
 - Docker Desktop (for the local PostgreSQL database)
 - A free [Groq API key](https://console.groq.com)
