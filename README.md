@@ -7,6 +7,7 @@
 [![Live demo](https://img.shields.io/badge/Live_demo-interviewkit.dev-2ea44f?style=flat&logo=vercel&logoColor=white)](https://interviewkit.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml/badge.svg)](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/albertsp/interviewkit/graph/badge.svg)](https://codecov.io/gh/albertsp/interviewkit)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)](https://react.dev)
 [![Flask](https://img.shields.io/badge/Flask-3-000000?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
@@ -222,7 +223,7 @@ npm run test:watch               # watch mode
 
 The backend has tests for authentication, OAuth, models, sessions, cards, user stats and the AI service (with the Groq client mocked). The frontend has tests for the authentication context.
 
-**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push, with the backend and frontend jobs in parallel (Python 3.12 and Node 22, with dependency caching). Backend: `ruff` lint + `pytest`. Frontend: `tsc` type-check + `next lint` + `vitest`. No secrets are required.
+**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push, with the backend and frontend jobs in parallel (Python 3.12 and Node 22, with dependency caching). Backend: `ruff` lint + `pytest` with coverage (minimum 85%, reported to Codecov). Frontend: `tsc` type-check + `next lint` + `vitest`. No secrets are required.
 
 ---
 
