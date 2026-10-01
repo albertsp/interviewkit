@@ -14,6 +14,10 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
+<p align="center">
+  <img src="frontend/public/screenshots/landing.png" alt="InterviewKit landing page: headline, a sample AI correction of a React question, and the supported technologies" width="900">
+</p>
+
 ---
 
 ## Table of contents
@@ -51,8 +55,8 @@ I couldn't find a free tool that did all three, so I built one.
 
 | | |
 |---|---|
-| ![Session setup](frontend/public/screenshots/session-setup.png) | ![Dashboard](frontend/public/screenshots/dashboard-cards.png) |
-| ![Stats](frontend/public/screenshots/stats-overview.png) | ![Card detail](frontend/public/screenshots/card-detail.png) |
+| ![Session setup: choose role, technology, topic and level](frontend/public/screenshots/session-setup.png) | ![Dashboard with the saved study cards, search and technology filters](frontend/public/screenshots/dashboard-cards.png) |
+| ![Stats: level, XP, results, stacks and recent sessions](frontend/public/screenshots/stats-overview.png) | ![A study card with explanation, when to use it, when to avoid it, and a code example](frontend/public/screenshots/card-detail.png) |
 
 - **Interview simulator**: choose a role (Frontend/Backend), a technology and a level. The AI generates 5 concrete code questions, not theoretical definitions.
 - **Real feedback**: every answer is evaluated with an explanation of what was right, what failed, and what the correct solution looks like.
