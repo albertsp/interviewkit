@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { CheckCircle, BookOpen, Code2 } from "lucide-react";
+import { BookOpen, Code2 } from "lucide-react";
 
 interface ProgressIndicatorProps {
   currentIndex: number;
@@ -23,64 +22,44 @@ export default function ProgressIndicator({ currentIndex, total, stack, level, t
 
   return (
     <div className="mb-8">
-      {blockLabel && (
-        <div className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary mb-2">
-          <blockLabel.Icon className="size-4" />
-          {blockLabel.text}
-        </div>
-      )}
-      <div className="flex items-center justify-center gap-2 text-base text-muted-foreground mb-4">
-        <span className="font-semibold text-foreground">
-          Pregunta {currentIndex + 1}
-        </span>
-        <span>de</span>
-        <span className="font-semibold">{total}</span>
+      <div className="mb-3 flex items-baseline justify-between gap-4">
+        <p className="display text-2xl font-extrabold">
+          Pregunta {currentIndex + 1}{" "}
+          <span className="text-muted-foreground">de {total}</span>
+        </p>
+        <p className="text-right font-mono text-xs text-muted-foreground">
+          {stack} · {level}
+          {topic && topic !== "General / Mixto" ? ` · ${topic}` : ""}
+        </p>
       </div>
 
-      <div className="flex items-center justify-center">
+      <div
+        role="progressbar"
+        aria-label="Progreso de la sesión"
+        aria-valuemin={1}
+        aria-valuemax={total}
+        aria-valuenow={currentIndex + 1}
+        className="flex gap-1.5"
+      >
         {Array.from({ length: total }).map((_, idx) => (
-          <div key={idx} className="flex items-center">
-            {idx > 0 && (
-              <div className="relative w-16 h-1 mx-3 rounded-full bg-border overflow-hidden">
-                {idx <= currentIndex && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-primary"
-                    style={{ originX: 0 }}
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                  />
-                )}
-              </div>
-            )}
+          <div key={idx} className="h-1.5 flex-1 overflow-hidden bg-border">
             <div
               className={cn(
-                "relative flex items-center justify-center size-10 rounded-full text-sm font-bold transition-colors duration-300",
-                idx <= currentIndex && "bg-primary text-primary-foreground",
-                idx > currentIndex && "bg-muted text-muted-foreground"
+                "h-full origin-left transition-transform duration-500 ease-out",
+                idx < currentIndex ? "bg-primary" : "bg-foreground",
+                idx <= currentIndex ? "scale-x-100" : "scale-x-0"
               )}
-            >
-              {idx === currentIndex && (
-                <motion.div
-                  layoutId="progressActiveRing"
-                  className="absolute inset-0 rounded-full ring-4 ring-primary/20"
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                />
-              )}
-              {idx < currentIndex ? (
-                <CheckCircle className="size-5" />
-              ) : (
-                idx + 1
-              )}
-            </div>
+            />
           </div>
         ))}
       </div>
 
-      <p className="text-center text-sm text-muted-foreground mt-3">
-        {stack} · {level}
-        {topic && topic !== "General / Mixto" ? ` · ${topic}` : ""}
-      </p>
+      {blockLabel && (
+        <p className="mt-3 flex items-center gap-1.5 font-mono text-xs text-primary">
+          <blockLabel.Icon className="size-3.5" />
+          {blockLabel.text}
+        </p>
+      )}
     </div>
   );
 }

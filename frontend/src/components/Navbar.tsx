@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { Logo } from "@/components/Logo"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -16,19 +17,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { LayoutDashboard, Play, LogOut, LogIn, UserPlus, Star, BarChart3, Menu, X, User, SquareTerminal, type LucideIcon } from "lucide-react"
+import { LayoutDashboard, Play, LogOut, Star, BarChart3, Menu, X, User, type LucideIcon } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
-const BRAND = "InterviewKit"
-
-function BrandText() {
-  return (
-    <span className="flex items-center gap-2">
-      <SquareTerminal className="size-6 text-primary" strokeWidth={2} />
-      <span className="text-2xl sm:text-3xl font-bold tracking-tight">{BRAND}</span>
-    </span>
-  )
-}
+const VISITOR_LINKS = [
+  { href: "/#como-funciona", label: "Cómo funciona" },
+  { href: "/#features", label: "Qué incluye" },
+  { href: "/#faq", label: "FAQ" },
+]
 
 interface NavLink {
   path: string
@@ -49,24 +45,33 @@ function Navbar() {
     [
       { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { path: "/stats", label: "Stats", icon: BarChart3 },
-      { path: "/session", label: "Nueva sesion", icon: Play },
+      { path: "/session", label: "Nueva sesión", icon: Play },
     ]
   ) : []
 
   const profileLink: NavLink = { path: "/profile", label: "Perfil", icon: User }
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-4 pointer-events-none">
-      <div className="pointer-events-auto flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between px-4 sm:px-6 py-3 rounded-2xl bg-background/70 backdrop-blur-xl border border-border/30 shadow-lg shadow-black/5">
+    <header className="fixed top-0 inset-x-0 z-50 border-b-2 border-foreground bg-background">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
 
-        <motion.button
+        <button
           onClick={() => router.push("/")}
-          className="outline-none cursor-pointer select-none shrink-0"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          aria-label="InterviewKit, ir al inicio"
+          className="shrink-0 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <BrandText />
-        </motion.button>
+          <Logo />
+        </button>
+
+        {!user && (
+          <nav aria-label="Secciones" className="hidden md:flex items-center gap-7 text-sm">
+            {VISITOR_LINKS.map(({ href, label }) => (
+              <a key={href} href={href} className="link-underline text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                {label}
+              </a>
+            ))}
+          </nav>
+        )}
 
         {user && (
           <nav className="hidden md:flex items-center gap-1">
@@ -86,7 +91,7 @@ function Navbar() {
                   {active && (
                     <motion.span
                       layoutId="navActiveTab"
-                      className="absolute inset-0 rounded-lg bg-primary/10"
+                      className="absolute inset-0 bg-accent"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -108,7 +113,7 @@ function Navbar() {
               className="hidden sm:flex items-center gap-2 rounded-lg border border-border/50 bg-background px-3 py-1.5 text-sm"
               title={`${stats.total_xp} XP · ${stats.xp_to_next_level} XP para Nv ${stats.level + 1}`}
             >
-              <Star className="size-3.5 text-amber-500 fill-amber-500" />
+              <Star className="size-3.5 text-primary fill-primary" />
               <span className="font-semibold tabular-nums">Nv {stats.level}</span>
               <span className="text-muted-foreground tabular-nums">{stats.total_xp} XP</span>
             </div>
@@ -120,7 +125,7 @@ function Navbar() {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="hidden md:flex items-center gap-2 rounded-full outline-none cursor-pointer transition-transform hover:scale-105">
+                  <button className="hidden md:flex items-center gap-2 rounded-full outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring">
                     <Avatar className="size-8">
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                         {initials}
@@ -149,7 +154,7 @@ function Navbar() {
                     variant="destructive"
                   >
                     <LogOut className="mr-2 size-4" />
-                    Cerrar sesion
+                    Cerrar sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -158,20 +163,18 @@ function Navbar() {
                 className="flex md:hidden items-center justify-center size-9 rounded-lg hover:bg-muted transition-colors cursor-pointer"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-expanded={mobileMenuOpen}
-                aria-label={mobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
+                aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
               >
                 {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
               </button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={() => router.push("/login")} className="gap-1.5 text-xs sm:text-sm sm:gap-2">
-                <LogIn className="size-4" />
-                <span className="hidden sm:inline">Iniciar sesion</span>
+              <Button variant="ghost" size="lg" onClick={() => router.push("/login")} className="text-sm">
+                Iniciar sesión
               </Button>
-              <Button size="sm" onClick={() => router.push("/register")} className="gap-1.5 text-xs sm:text-sm sm:gap-2">
-                <UserPlus className="size-4" />
-                <span className="hidden sm:inline">Registrarse</span>
+              <Button size="lg" onClick={() => router.push("/register")} className="text-sm font-semibold">
+                Empezar
               </Button>
             </>
           )}
@@ -186,7 +189,7 @@ function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-20 left-4 right-4 z-40 rounded-2xl bg-background/95 backdrop-blur-xl border border-border/30 shadow-lg p-4 flex flex-col gap-2 pointer-events-auto md:hidden"
+            className="fixed top-[4.5rem] left-4 right-4 z-40 rounded-lg bg-background border border-border shadow-lg p-4 flex flex-col gap-2 pointer-events-auto md:hidden"
           >
             <div className="flex items-center gap-3 pb-3 border-b border-border/30 mb-1">
               <Avatar className="size-9">
@@ -225,7 +228,7 @@ function Navbar() {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
             >
               <LogOut className="size-4" />
-              Cerrar sesion
+              Cerrar sesión
             </button>
           </motion.div>
         )}

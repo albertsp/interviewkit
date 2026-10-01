@@ -8,11 +8,13 @@ import { SearchBar } from "@/components/dashboard/SearchBar";
 import { FilterButtons } from "@/components/dashboard/FilterButtons";
 import { SingleCard } from "@/components/dashboard/SingleCard";
 import { CardTile } from "@/components/dashboard/CardTile";
+import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Plus } from "lucide-react";
 
 export default function DashboardPage() {
 
@@ -110,7 +112,8 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <PageContainer max="6xl">
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-border/50 pb-4 mb-6">
+        <PageHeader title="Tus cards" description="Cargando tus cards…" />
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-8 w-40" />
         </div>
@@ -159,7 +162,23 @@ export default function DashboardPage() {
 
   return (
     <PageContainer max="6xl">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-border/50 pb-4 mb-6">
+      <PageHeader
+        title="Tus cards"
+        description={
+          cards.length === 0
+            ? "Aquí aparecerán los conceptos de tus sesiones."
+            : `${cards.length} ${cards.length === 1 ? "concepto guardado" : "conceptos guardados"} para repasar.`
+        }
+        actions={
+          <Button asChild size="lg" className="gap-2">
+            <Link href="/session">
+              <Plus className="size-4" />
+              Nueva sesión
+            </Link>
+          </Button>
+        }
+      />
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
         <SearchBar setSearchInput={setSearchInput} resultCount={filtered_cards.length} />
         <FilterButtons setLanguageFilter={setLanguageFilter} setOrderSort={setOrderSort} />
       </div>
@@ -175,8 +194,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SingleCard isSingleCardOpen={isSingleCardOpen} setIsSingleCardOpen={setIsSingleCardOpen} selectedCard={selectedCard} originalCard={originalCard} onCardChange={handleCardChange} onSave={handleSaveCard} deleteCard={handleDeleteCard}/>
 
-            {filtered_cards.map((card) => (
-              <CardTile key={card.card_id} card={card} onOpen={openCard} />
+            {filtered_cards.map((card, i) => (
+              <CardTile key={card.card_id} card={card} onOpen={openCard} index={i} />
             ))}
           </div>
         )}

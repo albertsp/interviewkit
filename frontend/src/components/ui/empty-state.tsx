@@ -25,25 +25,22 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center gap-3",
-        compact ? "py-8 px-4" : "py-16 px-6",
+        "flex flex-col items-center justify-center gap-3 border border-dashed border-border text-center",
+        compact ? "px-4 py-8" : "px-6 py-16",
         className
       )}
     >
-      <div
-        className={cn(
-          "rounded-full bg-muted flex items-center justify-center",
-          compact ? "size-10" : "size-14"
-        )}
-      >
-        <Icon className={cn("text-muted-foreground", compact ? "size-5" : "size-6")} />
-      </div>
+      <Icon
+        aria-hidden="true"
+        className={cn("text-muted-foreground", compact ? "size-5" : "size-7")}
+        strokeWidth={1.5}
+      />
       <div className="space-y-1">
-        <p className={cn("font-medium text-foreground", compact ? "text-sm" : "text-base")}>
+        <p className={cn("display text-foreground", compact ? "text-base" : "text-2xl")}>
           {title}
         </p>
         {description && (
-          <p className="text-sm text-muted-foreground max-w-xs">{description}</p>
+          <p className="mx-auto max-w-xs text-sm text-muted-foreground">{description}</p>
         )}
       </div>
       {action && (

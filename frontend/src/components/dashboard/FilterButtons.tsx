@@ -26,6 +26,10 @@ export function FilterButtons({ setLanguageFilter, setOrderSort }: FilterButtons
           <Code2 className="size-3.5 mr-1.5" />
           PY
         </ToggleGroupItem>
+        <ToggleGroupItem value="java" aria-label="Filtrar por Java" className="text-xs">
+          <Code2 className="size-3.5 mr-1.5" />
+          JAVA
+        </ToggleGroupItem>
         <ToggleGroupItem value="sql" aria-label="Filtrar por SQL" className="text-xs">
           <Code2 className="size-3.5 mr-1.5" />
           SQL

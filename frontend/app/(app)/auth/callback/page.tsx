@@ -29,14 +29,14 @@ function OAuthCallbackHandler() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-      <p className="text-muted-foreground">Completando inicio de sesion...</p>
+      <p className="text-muted-foreground">Completando inicio de sesión…</p>
     </div>
   );
 }
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-4rem)] flex items-center justify-center"><p className="text-muted-foreground">Cargando...</p></div>}>
+    <Suspense fallback={<div className="min-h-[calc(100vh-4rem)] flex items-center justify-center"><p className="text-muted-foreground">Cargando…</p></div>}>
       <OAuthCallbackHandler />
     </Suspense>
   );

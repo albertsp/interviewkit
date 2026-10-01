@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { MotionProvider } from "@/components/motion/Motion";
 import "@/index.css";
 
 // Runs before paint to avoid a light/dark flash: the server can't know the
@@ -21,8 +22,8 @@ const THEME_INIT_SCRIPT = `
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://interviewkit.dev"),
-  title: "InterviewKit",
-  description: "Practica para tu próxima entrevista técnica",
+  title: "InterviewKit: ensaya tu entrevista técnica con IA",
+  description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -31,14 +32,14 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "InterviewKit",
-    description: "Practica para tu próxima entrevista técnica",
+    title: "InterviewKit: ensaya tu entrevista técnica con IA",
+    description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "InterviewKit",
-    description: "Practica para tu próxima entrevista técnica",
+    title: "InterviewKit: ensaya tu entrevista técnica con IA",
+    description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
   },
 };
 
@@ -56,7 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
         <ThemeProvider>
           <AuthProvider>
-            {children}
+            <MotionProvider>{children}</MotionProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

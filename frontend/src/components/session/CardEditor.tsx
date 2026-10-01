@@ -57,14 +57,9 @@ function CodePreview({ code, language }: { code?: string | null; language?: stri
   const label = language || "Code";
 
   return (
-    <div className="rounded-xl overflow-hidden border bg-code-bg shadow-sm">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-code-header border-b border-white/5">
-        <div className="flex gap-1.5">
-          <span className="size-3 rounded-full bg-[#ff5f56]" />
-          <span className="size-3 rounded-full bg-[#ffbd2e]" />
-          <span className="size-3 rounded-full bg-[#27c93f]" />
-        </div>
-        <span className="ml-3 text-[11px] font-medium tracking-wider text-white/40 uppercase">
+    <div className="overflow-hidden rounded-md bg-code-bg">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-code-header border-b border-code-text/10">
+        <span className="font-mono text-[11px] tracking-wider text-code-text/60 uppercase">
           {label}
         </span>
       </div>
@@ -86,7 +81,7 @@ function TagChips({ tags, onTagClick }: { tags?: string[] | null; onTagClick?: (
           key={i}
           type="button"
           onClick={() => onTagClick?.(tag)}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+          className="inline-flex items-center gap-1 rounded-sm border border-border bg-secondary px-2.5 py-1 font-mono text-xs text-secondary-foreground transition-colors hover:border-foreground/50"
         >
           <Tag className="size-3" />
           {tag}
@@ -100,9 +95,9 @@ type CellAccent = "neutral" | "green" | "red" | "amber";
 
 const CELL_ACCENT_STYLES: Record<CellAccent, { icon: string; label: string }> = {
   neutral: { icon: "text-muted-foreground", label: "text-muted-foreground" },
-  green: { icon: "text-green-600 dark:text-green-400", label: "text-green-700 dark:text-green-400" },
-  red: { icon: "text-red-600 dark:text-red-400", label: "text-red-700 dark:text-red-400" },
-  amber: { icon: "text-amber-600 dark:text-amber-400", label: "text-amber-700 dark:text-amber-400" },
+  green: { icon: "text-success", label: "text-success" },
+  red: { icon: "text-destructive", label: "text-destructive" },
+  amber: { icon: "text-warning", label: "text-foreground" },
 };
 
 // One compartment of the bento grid: a self-contained block with its own
@@ -125,7 +120,7 @@ function BentoCell({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-muted/30 p-4 space-y-1.5",
+        "rounded-md border border-border bg-muted/30 p-4 space-y-1.5",
         span === "full" && "sm:col-span-2"
       )}
     >
@@ -161,22 +156,22 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
     <div className="space-y-4">
       <div>
         <div className="flex items-start gap-2 flex-wrap">
-          <h3 className="text-2xl font-bold tracking-tight text-foreground">
-            {card.concept || "Sin titulo"}
+          <h3 className="display text-3xl font-extrabold text-foreground">
+            {card.concept || "Sin título"}
           </h3>
           {card.code_language && (
-            <Badge variant="outline" size="sm" className="uppercase tracking-wider border-primary/20 text-primary/80 mt-1.5">
+            <Badge variant="outline" size="sm" className="font-mono uppercase tracking-wider text-muted-foreground mt-2">
               {card.code_language}
             </Badge>
           )}
           {wasEdited && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 mt-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-sm bg-highlight text-highlight-foreground mt-2">
               Editado por ti
             </span>
           )}
         </div>
         {card.definition && (
-          <p className="text-base text-muted-foreground italic mt-1.5 leading-relaxed">
+          <p className="text-base text-muted-foreground mt-1.5 leading-relaxed">
             {card.definition}
           </p>
         )}
@@ -184,7 +179,7 @@ export function CardView({ card, wasEdited }: { card: EditableCard; wasEdited?: 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {card.explanation && (
-          <BentoCell icon={Lightbulb} label="Explicacion" span="full">
+          <BentoCell icon={Lightbulb} label="Explicación" span="full">
             <MarkdownContent text={card.explanation} className="text-sm" />
           </BentoCell>
         )}
@@ -258,7 +253,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
           value={card.concept || ""}
           onChange={(e) => updateField("concept", e.target.value)}
           maxLength={120}
-          placeholder="Nombre del concepto..."
+          placeholder="Nombre del concepto…"
         />
       </div>
 
@@ -272,7 +267,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
         <Input
           value={card.definition || ""}
           onChange={(e) => updateField("definition", e.target.value)}
-          placeholder="Definicion tecnica en una frase..."
+          placeholder="Definición técnica en una frase…"
         />
       </div>
 
@@ -284,8 +279,8 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
           value={card.explanation || ""}
           onChange={(e) => updateField("explanation", e.target.value)}
           rows={3}
-          placeholder="Aclaracion profunda del concepto..."
-          aria-label="Explicacion del concepto"
+          placeholder="Aclaración profunda del concepto…"
+          aria-label="Explicación del concepto"
           className={cn(
             "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-y transition-colors outline-none",
             "placeholder:text-muted-foreground",
@@ -295,7 +290,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-success uppercase tracking-wider flex items-center gap-1.5">
           <CheckCircle2 className="size-3.5" />
           Usar cuando
         </Label>
@@ -303,7 +298,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
           value={card.use_case || ""}
           onChange={(e) => updateField("use_case", e.target.value)}
           rows={2}
-          placeholder="Caso de uso practico..."
+          placeholder="Caso de uso práctico…"
           aria-label="Caso de uso"
           className={cn(
             "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-y transition-colors outline-none",
@@ -314,7 +309,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-destructive uppercase tracking-wider flex items-center gap-1.5">
           <XCircle className="size-3.5" />
           Evitar cuando
           <span className="text-muted-foreground/60 normal-case font-normal ml-1">
@@ -325,7 +320,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
           value={card.avoid_when || ""}
           onChange={(e) => updateField("avoid_when", e.target.value)}
           rows={2}
-          placeholder="Cuando NO usarlo..."
+          placeholder="Cuándo NO usarlo…"
           aria-label="Evitar cuando"
           className={cn(
             "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-y transition-colors outline-none",
@@ -346,7 +341,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
               value={card.code_language || "javascript"}
               onChange={(e) => updateField("code_language", e.target.value)}
               id="code-language-select"
-              aria-label="Lenguaje de programacion"
+              aria-label="Lenguaje de programación"
               className="px-2 py-1 rounded-md border border-input bg-background text-xs outline-none focus-visible:border-ring"
             >
               {LANGUAGE_OPTIONS.map((opt) => (
@@ -360,12 +355,12 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
         <CodeEditor
           value={card.code || ""}
           onChange={(value) => updateField("code", value)}
-          placeholder="Pega tu snippet de codigo aqui..."
+          placeholder="Pega tu snippet de código aquí…"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+        <Label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
           <Lightbulb className="size-3.5" />
           Mnemotecnia
           <span className="text-muted-foreground/60 normal-case font-normal ml-1">
@@ -376,7 +371,7 @@ function CardEdit<T extends EditableCard>({ card, onChange }: { card: T; onChang
           value={card.mnemonic || ""}
           onChange={(e) => updateField("mnemonic", e.target.value)}
           maxLength={200}
-          placeholder="Truco para recordar..."
+          placeholder="Truco para recordar…"
         />
       </div>
 
@@ -443,7 +438,7 @@ export default function CardEditor<T extends EditableCard>({ card, onChange, ori
   })();
 
   return (
-    <Card className="mb-6 border-primary/20 bg-primary/5">
+    <Card className="mb-6 border border-primary/40 bg-secondary/40">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
@@ -451,7 +446,7 @@ export default function CardEditor<T extends EditableCard>({ card, onChange, ori
               <motion.span
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400"
+                className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-sm bg-highlight text-highlight-foreground"
               >
                 <AlertTriangle className="size-3 inline mr-0.5" />
                 Editando
@@ -459,7 +454,7 @@ export default function CardEditor<T extends EditableCard>({ card, onChange, ori
             )}
           </div>
 
-          <div className="flex rounded-lg border border-border bg-background p-0.5">
+          <div className="isolate flex rounded-lg border border-border bg-background p-0.5">
             <button
               type="button"
               onClick={() => setIsEditing(false)}

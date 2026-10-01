@@ -29,10 +29,10 @@ function MiniBar({ correct, partially_correct, incorrect, total }: MiniBarProps)
   const iPct = (incorrect / total) * 100;
 
   return (
-    <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-muted">
-      <div className="bg-green-500 rounded-l-full" style={{ width: `${cPct}%` }} />
-      <div className="bg-amber-500" style={{ width: `${pPct}%` }} />
-      <div className="bg-red-500 rounded-r-full" style={{ width: `${iPct}%` }} />
+    <div className="flex h-1.5 w-full overflow-hidden bg-muted">
+      <div className="bg-success" style={{ width: `${cPct}%` }} />
+      <div className="bg-warning" style={{ width: `${pPct}%` }} />
+      <div className="bg-destructive" style={{ width: `${iPct}%` }} />
     </div>
   );
 }
@@ -42,10 +42,7 @@ export default function RecentSessions({ sessions }: { sessions: RecentSession[]
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="size-5 text-primary" />
-            Actividad reciente
-          </CardTitle>
+          <CardTitle>Actividad reciente</CardTitle>
         </CardHeader>
         <CardContent>
           <EmptyState
@@ -62,10 +59,7 @@ export default function RecentSessions({ sessions }: { sessions: RecentSession[]
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="size-5 text-primary" />
-          Actividad reciente
-        </CardTitle>
+        <CardTitle>Actividad reciente</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {sessions.slice(0, 5).map((session, i) => {
@@ -79,7 +73,7 @@ export default function RecentSessions({ sessions }: { sessions: RecentSession[]
           return (
             <motion.div
               key={session.created_at}
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              className="flex items-center gap-3 border-t border-border py-3 first:border-t-0"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 * i, duration: 0.25 }}
@@ -108,7 +102,7 @@ export default function RecentSessions({ sessions }: { sessions: RecentSession[]
                     total={session.total_questions}
                   />
                   <div className="flex justify-between text-[11px] text-muted-foreground mt-1 tabular-nums">
-                    <span className="text-green-500">{session.correct} correctas</span>
+                    <span>{session.correct} correctas</span>
                     <span>
                       {session.correct}/{session.total_questions} aciertos
                     </span>

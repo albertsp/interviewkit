@@ -11,7 +11,6 @@ import { phaseVariants, containerVariants, itemVariants } from "@/components/lay
 import {
   Trash2,
   Save,
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -34,22 +33,22 @@ const RESULT_CONFIG: Record<Result, ResultConfig> = {
   CORRECT: {
     label: "Correcto",
     icon: CheckCircle2,
-    classes: "bg-green-500/10 text-green-700 border-green-500/30 dark:text-green-400",
-    iconClasses: "text-green-600 dark:text-green-400",
+    classes: "bg-success/10 text-success border-success/40",
+    iconClasses: "text-success",
     xp: 100,
   },
   PARTIALLY_CORRECT: {
     label: "Parcial",
     icon: AlertTriangle,
-    classes: "bg-amber-500/10 text-amber-700 border-amber-500/30 dark:text-amber-400",
-    iconClasses: "text-amber-600 dark:text-amber-400",
+    classes: "bg-warning/15 text-foreground border-warning/60",
+    iconClasses: "text-warning",
     xp: 50,
   },
   INCORRECT: {
     label: "Incorrecto",
     icon: XCircle,
-    classes: "bg-red-500/10 text-red-700 border-red-500/30 dark:text-red-400",
-    iconClasses: "text-red-600 dark:text-red-400",
+    classes: "bg-destructive/10 text-destructive border-destructive/40",
+    iconClasses: "text-destructive",
     xp: 10,
   },
 };
@@ -64,13 +63,13 @@ function ResultBadge({ result }: { result: Result | null }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 220, damping: 18 }}
       className={cn(
-        "inline-flex items-center gap-2.5 rounded-full border-2 px-4 py-1.5 text-sm font-semibold",
+        "inline-flex items-center gap-2.5 rounded-sm border px-4 py-1.5 text-sm font-semibold",
         config.classes
       )}
     >
       <Icon className={cn("size-5", config.iconClasses)} />
       <span>{config.label}</span>
-      <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-0.5 text-xs">
+      <span className="ml-1 inline-flex items-center gap-1 rounded-sm bg-background/60 px-2 py-0.5 font-mono text-xs">
         <Star className={cn("size-3", config.iconClasses)} />
         +{config.xp} XP
       </span>
@@ -108,16 +107,15 @@ export default function FeedbackPhase({
       exit="exit"
     >
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants} className="mb-4 flex justify-center">
+        <motion.div variants={itemVariants} className="mb-4 flex">
           <ResultBadge result={result} />
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="mb-6">
+          <Card className="mb-6 border-l-[3px] border-l-primary">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Sparkles className="size-5 text-primary" />
-                Feedback
+              <CardTitle className="text-xl">
+                Corrección
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-6">

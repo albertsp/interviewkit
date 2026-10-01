@@ -57,21 +57,21 @@ function findLanguage(id: string): Language {
 // functions...) come from the theme itself.
 const githubTheme = githubDarkInit({
   settings: {
-    background: "var(--background)",
-    foreground: "var(--foreground)",
-    caret: "var(--foreground)",
-    selection: "var(--accent)",
-    selectionMatch: "var(--accent)",
+    background: "var(--code-bg)",
+    foreground: "var(--code-text)",
+    caret: "var(--code-text)",
+    selection: "oklch(1 0 0 / 0.16)",
+    selectionMatch: "oklch(1 0 0 / 0.1)",
     lineHighlight: "transparent",
-    gutterBackground: "var(--background)",
-    gutterForeground: "var(--muted-foreground)",
+    gutterBackground: "var(--code-bg)",
+    gutterForeground: "oklch(1 0 0 / 0.4)",
   },
 });
 
 // Editor chrome (borders, focus ring, typography) not covered by the syntax theme.
 const editorTheme = EditorView.theme({
   "&": {
-    borderRadius: "var(--radius-xl, 0.75rem)",
+    borderRadius: "var(--radius-md)",
     border: "1px solid var(--border)",
     fontSize: "0.875rem",
   },
@@ -81,7 +81,7 @@ const editorTheme = EditorView.theme({
     boxShadow: "0 0 0 3px var(--ring)",
   },
   ".cm-scroller": {
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+    fontFamily: "'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace",
     lineHeight: "1.6",
   },
   ".cm-content": {
@@ -108,7 +108,7 @@ export default function CodeEditor({
   value,
   onChange,
   placeholder = "",
-  ariaLabel = "Editor de codigo",
+  ariaLabel = "Editor de código",
   stack = "",
 }: CodeEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -193,7 +193,7 @@ export default function CodeEditor({
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            aria-label="Lenguaje del editor de codigo"
+            aria-label="Lenguaje del editor de código"
             className={cn(
               "appearance-none rounded-lg border border-input bg-background text-xs font-medium",
               "pl-3 pr-7 py-1.5 outline-none cursor-pointer",

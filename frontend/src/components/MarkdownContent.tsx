@@ -83,7 +83,7 @@ export default function MarkdownContent({ text, className }: MarkdownContentProp
         }
         return (
           <p key={idx} className="whitespace-pre-wrap leading-relaxed">
-            {block.content}
+            <InlineText text={block.content} />
           </p>
         );
       })}
@@ -91,18 +91,36 @@ export default function MarkdownContent({ text, className }: MarkdownContentProp
   );
 }
 
+// Renders `inline code` and **bold** inside a text block; anything else stays
+// plain text, so unexpected AI output can never inject markup.
+function InlineText({ text }: { text: string }) {
+  const parts = text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.length > 2 && part.startsWith("`") && part.endsWith("`")) {
+          return (
+            <code key={i} className="rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-[0.9em] text-foreground">
+              {part.slice(1, -1)}
+            </code>
+          );
+        }
+        if (part.length > 4 && part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      })}
+    </>
+  );
+}
+
 function CodeSnippet({ code, language }: { code: string; language: string }) {
   const label = LANG_LABELS[language.toLowerCase()] || language || "Code";
 
   return (
-    <div className="rounded-xl overflow-hidden border bg-code-bg shadow-sm">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-code-header border-b border-white/5">
-        <div className="flex gap-1.5">
-          <span className="size-3 rounded-full bg-[#ff5f56]" />
-          <span className="size-3 rounded-full bg-[#ffbd2e]" />
-          <span className="size-3 rounded-full bg-[#27c93f]" />
-        </div>
-        <span className="ml-3 text-[11px] font-medium tracking-wider text-white/40 uppercase">
+    <div className="overflow-hidden rounded-md bg-code-bg">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-code-header border-b border-code-text/10">
+        <span className="font-mono text-[11px] tracking-wider text-code-text/60 uppercase">
           {label}
         </span>
       </div>

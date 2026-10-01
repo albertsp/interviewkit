@@ -3,14 +3,14 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
-export const alt = "InterviewKit — Practica para tu próxima entrevista técnica";
+export const alt = "InterviewKit: ensaya tu entrevista técnica con IA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpengraphImage() {
-  const [bold, medium] = await Promise.all([
-    readFile(join(process.cwd(), "app/og-fonts/Geist-Bold.ttf")),
-    readFile(join(process.cwd(), "app/og-fonts/Geist-Medium.ttf")),
+  const [black, medium] = await Promise.all([
+    readFile(join(process.cwd(), "app/og-fonts/SchibstedGrotesk-900.ttf")),
+    readFile(join(process.cwd(), "app/og-fonts/SchibstedGrotesk-500.ttf")),
   ]);
 
   return new ImageResponse(
@@ -21,87 +21,42 @@ export default async function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#05070a",
-          backgroundImage:
-            "radial-gradient(circle at 50% 32%, rgba(0,198,201,0.22) 0%, rgba(0,198,201,0) 60%)",
-          position: "relative",
+          justifyContent: "space-between",
+          background: "#fbfbf8",
+          padding: "64px 72px",
+          fontFamily: "Schibsted Grotesk",
+          color: "#0a0a0a",
+          borderBottom: "28px solid #1f3bff",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            width: 132,
-            height: 132,
-            borderRadius: 28,
-            background: "#0b0f14",
-            border: "2px solid rgba(0,198,201,0.35)",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 40,
-          }}
-        >
-          <svg width="76" height="76" viewBox="0 0 24 24" fill="none">
-            <rect
-              x="3"
-              y="3"
-              width="18"
-              height="18"
-              rx="2"
-              ry="2"
-              stroke="#00c6c9"
-              strokeWidth="2"
-            />
-            <path
-              d="m7 11 2-2-2-2"
-              stroke="#00c6c9"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M11 13h4"
-              stroke="#00c6c9"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <div style={{ display: "flex", fontSize: 46, fontWeight: 900, letterSpacing: -3 }}>
+          Interview<span style={{ color: "#1f3bff" }}>/</span>Kit
         </div>
 
         <div
           style={{
             display: "flex",
-            fontSize: 88,
-            fontWeight: 700,
-            color: "#f8f8f8",
-            fontFamily: "Geist",
-            letterSpacing: -2,
+            flexWrap: "wrap",
+            fontSize: 108,
+            fontWeight: 900,
+            lineHeight: 0.95,
+            letterSpacing: -6,
+            maxWidth: 1040,
           }}
         >
-          Interview<span style={{ color: "#00c6c9" }}>Kit</span>
+          Ensaya la entrevista técnica antes de la real.
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            marginTop: 20,
-            fontSize: 32,
-            fontWeight: 500,
-            color: "rgba(248,248,248,0.6)",
-            fontFamily: "Geist",
-          }}
-        >
-          Practica para tu próxima entrevista técnica
+        <div style={{ display: "flex", fontSize: 30, fontWeight: 500, color: "#55554f" }}>
+          Cinco preguntas de código, corrección con IA y cards de repaso.
         </div>
       </div>
     ),
     {
       ...size,
       fonts: [
-        { name: "Geist", data: bold, weight: 700, style: "normal" },
-        { name: "Geist", data: medium, weight: 500, style: "normal" },
+        { name: "Schibsted Grotesk", data: black, weight: 900, style: "normal" },
+        { name: "Schibsted Grotesk", data: medium, weight: 500, style: "normal" },
       ],
     }
   );

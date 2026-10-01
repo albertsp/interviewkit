@@ -49,15 +49,15 @@ export default function QuestionPhase({
     >
       <Card className="mb-6">
         <CardContent className="p-8 md:p-10">
-          <MarkdownContent text={question} className="text-xl leading-relaxed" />
+          <MarkdownContent text={question} className="text-lg leading-relaxed sm:text-xl" />
         </CardContent>
       </Card>
 
       <div className="flex items-center justify-end gap-1 mb-3">
         <span className="text-xs text-muted-foreground mr-2">
-          {isCodeMode ? "Editor de codigo" : "Texto"}
+          {isCodeMode ? "Editor de código" : "Texto"}
         </span>
-        <div className="flex rounded-lg border border-border bg-muted p-0.5">
+        <div className="isolate flex rounded-lg border border-border bg-muted p-0.5">
           <button
             type="button"
             onClick={() => setIsCodeMode(false)}
@@ -92,7 +92,7 @@ export default function QuestionPhase({
               />
             )}
             <Code className="size-3.5" />
-            Codigo
+            Código
           </button>
         </div>
       </div>
@@ -101,19 +101,19 @@ export default function QuestionPhase({
         <CodeEditor
           value={answer}
           onChange={onAnswerChange}
-          placeholder="Escribe tu codigo aqui..."
-          ariaLabel="Editor de codigo para tu respuesta"
+          placeholder="Escribe tu código aquí…"
+          ariaLabel="Editor de código para tu respuesta"
           stack={stack}
         />
       ) : (
         <textarea
           className={cn(
-            "w-full min-h-[200px] rounded-xl border border-input bg-background px-5 py-4 text-base resize-y transition-colors outline-none",
+            "w-full min-h-[200px] rounded-md border border-input bg-background px-5 py-4 text-base resize-y transition-colors outline-none",
             "placeholder:text-muted-foreground",
             "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
             "disabled:pointer-events-none disabled:opacity-50"
           )}
-          placeholder="Escribe tu respuesta aqui..."
+          placeholder="Escribe tu respuesta aquí…"
           value={answer}
           onChange={(e) => onAnswerChange(e.target.value)}
           aria-label="Escribe tu respuesta"

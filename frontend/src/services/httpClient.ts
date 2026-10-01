@@ -26,7 +26,7 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     if (onUnauthorizedCallback) {
       onUnauthorizedCallback();
     }
-    throw new Error("Sesion expirada. Por favor, inicia sesion de nuevo.");
+    throw new Error("Tu sesión ha expirado. Inicia sesión de nuevo.");
   }
 
   let errorMsg;
