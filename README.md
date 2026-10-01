@@ -4,6 +4,7 @@
 
 🌐 **[interviewkit.dev](https://interviewkit.dev)** · [Repository](https://github.com/albertsp/interviewkit)
 
+[![Live demo](https://img.shields.io/badge/Live_demo-interviewkit.dev-2ea44f?style=flat&logo=vercel&logoColor=white)](https://interviewkit.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml/badge.svg)](https://github.com/albertsp/interviewkit/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
