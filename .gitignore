@@ -5,6 +5,9 @@ __pycache__/
 .env
 venv/
 *.db
+.coverage
+htmlcov/
+.pytest_cache/
 
 # Node
 node_modules/
@@ -12,6 +15,8 @@ dist/
 .env
 .env.local
 .env.production
+# Tracked on purpose: only holds the public API URL used by the Vercel build
+!frontend/.env.production
 *.tsbuildinfo
 # OS
 .DS_Store
