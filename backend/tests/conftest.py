@@ -60,6 +60,10 @@ def session_headers(client):
 
 @pytest.fixture(scope="function")
 def auth_headers(app, db):
+    """JWT auth headers for a fresh test user. Also exposes the created
+    user_id as an attribute on the returned dict, so tests that need to seed
+    other rows (sessions, cards, ...) owned by this same user don't have to
+    decode the JWT themselves."""
     from flask_jwt_extended import create_access_token
     with app.app_context():
         user = User(name="Test User", email="test@example.com")
@@ -67,11 +71,37 @@ def auth_headers(app, db):
         db.session.add(user)
         db.session.commit()
 
-        token = create_access_token(identity=str(user.user_id))
-    return {
+        user_id = user.user_id
+        token = create_access_token(identity=str(user_id))
+
+    headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
     }
+    headers["user_id"] = user_id
+    return headers
+
+
+@pytest.fixture(scope="function")
+def second_user_headers(app, db):
+    """A second, distinct user -- used across the suite for cross-user
+    isolation tests (user B must never see/edit/delete user A's data)."""
+    from flask_jwt_extended import create_access_token
+    with app.app_context():
+        user = User(name="User B", email="userb@example.com")
+        user.password = "hashed_password_here"
+        db.session.add(user)
+        db.session.commit()
+
+        user_id = user.user_id
+        token = create_access_token(identity=str(user_id))
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+    headers["user_id"] = user_id
+    return headers
 
 
 @pytest.fixture(scope="function")
