@@ -74,7 +74,7 @@ export default function Footer() {
               ))}
               <li>
                 <a
-                  href="https://github.com/albertsp/interview-prep-app"
+                  href="https://github.com/albertsp/interviewkit"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -89,7 +89,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 InterviewKit. Proyecto final de bootcamp.
+            &copy; 2026 InterviewKit.
           </p>
           <p className="text-sm text-muted-foreground">
             Hecho con Next.js, Flask y mucho café.
