@@ -9,7 +9,7 @@ from ..models.session import Session
 from ..models.question import Question
 from ..models.user import User
 from .. import db, limiter
-from ..services.ai_service import generate_questions, generate_feedback
+from ..services.ai_service import AIUnavailableError, generate_questions, generate_feedback
 
 sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 
@@ -19,17 +19,39 @@ sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 GROQ_GLOBAL_LIMIT = "20 per minute;40 per day"
 GROQ_GLOBAL_SCOPE = "groq_global"
 
+# A huge answer burns the shared Groq token quota (100K TPD).
+MAX_ANSWER_LENGTH = 4000
+
 
 def _groq_global_key():
     return "global"
 
 
+def _deduct_only_on_success(response):
+    """Failed requests (AI errors, validation) don't spend quota: the user
+    didn't get anything for them, and retrying would otherwise lock them out."""
+    return response.status_code < 400
+
+
+def _ai_error_response(error):
+    """Turns an AIUnavailableError into the API error response, forwarding
+    the provider's Retry-After when it gave one."""
+    response = jsonify({"error": error.message})
+    response.status_code = error.status
+    if error.retry_after is not None:
+        response.headers["Retry-After"] = str(error.retry_after)
+    return response
+
+
 @sessions.route('/', methods=['POST'])
 @jwt_required()
 # Per-user limit: keeps a single account from draining the shared budget
-@limiter.limit("5 per hour")
+@limiter.limit("5 per hour", deduct_when=_deduct_only_on_success)
 # Global limit: protects the actual Groq account budget (free tier)
-@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
+@limiter.shared_limit(
+    GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key,
+    deduct_when=_deduct_only_on_success,
+)
 def create_session():
 
     user_id = get_jwt_identity()
@@ -54,7 +76,12 @@ def create_session():
     db.session.commit()
 
     # Two question blocks: theory first, then code
-    questions = generate_questions(stack, level, topic)
+    try:
+        questions = generate_questions(stack, level, topic)
+    except AIUnavailableError as error:
+        db.session.delete(new_session)
+        db.session.commit()
+        return _ai_error_response(error)
     theory_questions = questions.get("theory", [])
     code_questions = questions.get("code", [])
 
@@ -89,8 +116,11 @@ def create_session():
 
 @sessions.route('/<int:session_id>/questions/<int:question_id>', methods=['PATCH'])
 @jwt_required()
-@limiter.limit("15 per hour")
-@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
+@limiter.limit("15 per hour", deduct_when=_deduct_only_on_success)
+@limiter.shared_limit(
+    GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key,
+    deduct_when=_deduct_only_on_success,
+)
 def answer_question(session_id, question_id):
     user_id = get_jwt_identity()
     data = request.get_json() or {}
@@ -104,12 +134,21 @@ def answer_question(session_id, question_id):
     if user_question is None:
         return jsonify({"msg": "La pregunta no existe"}), 404
 
-    user_question.answer = data.get("answer")
+    answer = data.get("answer")
+    if isinstance(answer, str) and len(answer) > MAX_ANSWER_LENGTH:
+        return jsonify({"error": f"La respuesta no puede superar los {MAX_ANSWER_LENGTH} caracteres"}), 400
+
+    user_question.answer = answer
     db.session.commit()
 
-    result = generate_feedback(
-        user_sesion.stack, user_question.question, data.get("answer"), user_question.question_type
-    )
+    # The answer is already saved: if the AI fails, `result` stays untouched
+    # (it earns no XP) and the user can simply resubmit.
+    try:
+        result = generate_feedback(
+            user_sesion.stack, user_question.question, answer, user_question.question_type
+        )
+    except AIUnavailableError as error:
+        return _ai_error_response(error)
     user_question.feedback = result["feedback"]
     user_question.result = result["result"]
     db.session.commit()
