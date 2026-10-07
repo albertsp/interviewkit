@@ -47,7 +47,7 @@ While learning to code and preparing for my first job, I realised that practisin
 
 I couldn't find a free tool that did all three, so I built one.
 
-**InterviewKit** generates 5 code questions tailored to your stack and level, evaluates your answers with AI, and saves every concept as a Q&A card you can review whenever you want.
+**InterviewKit** generates 5 questions (2 theory + 3 code) tailored to your stack and level, evaluates your answers with AI, and saves every concept as a Q&A card you can review whenever you want.
 
 ---
 
@@ -58,7 +58,7 @@ I couldn't find a free tool that did all three, so I built one.
 | ![Session setup: choose role, technology, topic and level](frontend/public/screenshots/session-setup.png) | ![Dashboard with the saved study cards, search and technology filters](frontend/public/screenshots/dashboard-cards.png) |
 | ![Stats: level, XP, results, stacks and recent sessions](frontend/public/screenshots/stats-overview.png) | ![A study card with explanation, when to use it, when to avoid it, and a code example](frontend/public/screenshots/card-detail.png) |
 
-- **Interview simulator**: choose a role (Frontend/Backend), a technology and a level. The AI generates 5 concrete code questions, not theoretical definitions.
+- **Interview simulator**: choose a role (Frontend/Backend), a technology and a level. The AI generates 5 questions: 2 short theory questions and 3 concrete code questions (read, write or fix code, not definitions).
 - **Real feedback**: every answer is evaluated with an explanation of what was right, what failed, and what the correct solution looks like.
 - **Q&A cards**: every question becomes a study card with the concept, a definition, a code example and use cases.
 - **Dashboard**: search and filter all your cards by technology or concept.
@@ -193,7 +193,7 @@ All endpoints except `/auth/*`, `/stacks` and the OAuth flow require a valid ses
 | `POST` | `/auth/logout` | Clear the session cookie |
 | `GET` | `/auth/google`, `/auth/github` | Start the OAuth flow (callbacks at `/auth/<provider>/callback`) |
 | `GET` | `/stacks/` | Available roles, technologies and levels |
-| `POST` | `/sessions/` | Start a session and generate 5 questions (AI) |
+| `POST` | `/sessions/` | Start a session and generate 5 questions: 2 theory + 3 code (AI) |
 | `PATCH` | `/sessions/<id>/questions/<qid>` | Submit an answer and get AI feedback |
 | `POST` | `/sessions/<id>/complete` | Complete a session and award XP |
 | `GET` | `/cards/` | List your study cards |
@@ -228,7 +228,7 @@ npm run test:watch               # watch mode
 
 The backend has tests for authentication, OAuth, models, sessions, cards, user stats and the AI service (with the Groq client mocked). The frontend has tests for the authentication context.
 
-**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push, with the backend and frontend jobs in parallel (Python 3.12 and Node 22, with dependency caching). Backend: `ruff` lint + `pytest` with coverage (minimum 85%, reported to Codecov). Frontend: `tsc` type-check + `next lint` + `vitest`. No secrets are required.
+**Continuous integration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and pull request, with the backend and frontend jobs in parallel (Python 3.12 and Node 22, with dependency caching). Backend: `ruff` lint + `pytest` with coverage (minimum 85%, reported to Codecov). Frontend: `tsc` type-check + `next lint` + `vitest`. No secrets are required.
 
 ---
 
@@ -294,6 +294,9 @@ Flask gave me full control over the structure without imposing patterns. For a R
 **Why Groq and not OpenAI?**
 Groq has a generous free tier and very low latency. When the user is waiting for questions in real time, speed matters, and the hosted open-weight model is capable enough to generate quality technical questions.
 
+**Which model, and why?**
+The app uses `openai/gpt-oss-120b` on Groq. It replaced `llama-3.3-70b-versatile`, which Groq retired on 2026-08-16 and listed `gpt-oss-120b` as its recommended replacement. It is a production-tier model (the other candidates are previews), fast enough for real-time use, and strong enough for technical questions and feedback. The model name is set in `backend/app/services/ai_service.py`. Keep in mind it is a reasoning model, so its reasoning tokens count against the free-tier token limits (8K tokens per minute, 200K per day).
+
 **Two-layer rate limiting**
 The Groq free tier has one budget shared by the whole app. I implemented two limits: per user (so one account can't drain it) and global (to protect the real budget). With only a per-user limit, a coordinated attack could still exhaust the quota.
 
@@ -317,7 +320,7 @@ Social login with Google and GitHub seemed simple until the details: cross-origi
 Coordinating session state between the server (httpOnly cookie) and the client (React Context) with the Next.js 15 App Router was the hardest frontend challenge. The protected layout has to handle the loading state correctly so it never shows protected content before the session is verified.
 
 **Designing the AI prompts**
-The quality of the generated questions depends entirely on the prompt. Early versions produced overly theoretical questions ("What is a closure?"). Iterating on the system prompt to force concrete code questions was trial and error that took much longer than I expected. LLM output also needs defensive parsing (stripping markdown fences, fixing double-escaped newlines in code).
+The quality of the generated questions depends entirely on the prompt. Early versions produced overly theoretical questions ("What is a closure?"). Iterating on the system prompt to force concrete code questions in the code block was trial and error that took much longer than I expected. LLM output also needs defensive parsing (stripping markdown fences, fixing double-escaped newlines in code).
 
 ---
 

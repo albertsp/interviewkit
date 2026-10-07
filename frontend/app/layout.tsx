@@ -23,7 +23,7 @@ const THEME_INIT_SCRIPT = `
 export const metadata: Metadata = {
   metadataBase: new URL("https://interviewkit.dev"),
   title: "InterviewKit: ensaya tu entrevista técnica con IA",
-  description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
+  description: "Cinco preguntas a tu medida (2 de teoría y 3 de código), corrección inmediata con IA y cards de estudio para repasar. Gratis.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "InterviewKit: ensaya tu entrevista técnica con IA",
-    description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
+    description: "Cinco preguntas a tu medida (2 de teoría y 3 de código), corrección inmediata con IA y cards de estudio para repasar. Gratis.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "InterviewKit: ensaya tu entrevista técnica con IA",
-    description: "Cinco preguntas de código a tu medida, corrección inmediata con IA y cards de estudio para repasar. Gratis.",
+    description: "Cinco preguntas a tu medida (2 de teoría y 3 de código), corrección inmediata con IA y cards de estudio para repasar. Gratis.",
   },
 };
 

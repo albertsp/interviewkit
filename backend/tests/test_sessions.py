@@ -13,7 +13,7 @@ from app import limiter
 
 FAKE_QUESTIONS = {
     "theory": ["t1", "t2"],
-    "code": ["q1", "q2"],
+    "code": ["q1", "q2", "q3"],
 }
 
 FAKE_FEEDBACK = {
@@ -59,8 +59,8 @@ class TestCreateSession:
         resp = _create_session(client, auth_headers)
         assert resp.status_code == 201
         data = resp.get_json()
-        assert len(data["questions"]) == 4
-        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code"]
+        assert len(data["questions"]) == 5
+        assert [q["type"] for q in data["questions"]] == ["theory", "theory", "code", "code", "code"]
 
     def test_create_session_invalid_stack_returns_400_before_calling_ai(self, client, auth_headers, monkeypatch):
         """An invalid stack must be rejected before the AI service is ever
@@ -230,24 +230,24 @@ class TestCompleteSession:
         return session_id, question_ids
 
     def test_complete_session_awards_xp_and_completion_bonus(self, client, auth_headers):
-        """4 questions, all mocked as CORRECT (100 XP each) = 400 XP, plus
+        """5 questions, all mocked as CORRECT (100 XP each) = 500 XP, plus
         the completion bonus (50 XP) since every question was answered."""
         session_id, _ = self._create_and_answer_all(client, auth_headers)
 
         resp = client.post(f"/sessions/{session_id}/complete", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.get_json()
-        assert data["xp_earned"] == 4 * 100 + 50
+        assert data["xp_earned"] == 5 * 100 + 50
         assert data["bonus_applied"] is True
         assert data["total_xp"] == data["xp_earned"]
-        assert len(data["breakdown"]) == 4
+        assert len(data["breakdown"]) == 5
 
     def test_complete_session_without_answering_everything_gets_no_bonus(self, client, auth_headers):
         created = _create_session(client, auth_headers)
         session_id = created.get_json()["session_id"]
         first_question_id = created.get_json()["questions"][0]["question_id"]
 
-        # Only answer one of the four questions
+        # Only answer one of the five questions
         client.patch(
             f"/sessions/{session_id}/questions/{first_question_id}",
             json={"answer": "x"},

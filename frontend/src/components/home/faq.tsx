@@ -4,7 +4,7 @@ import { Reveal } from "@/components/motion/Motion";
 const FAQS = [
   {
     q: "¿Cómo funciona InterviewKit?",
-    a: "Eliges rol, tecnología, tema y nivel. La IA genera cinco preguntas de código, respondes cada una y recibes una corrección con la solución explicada. Cada pregunta se guarda como una card de estudio.",
+    a: "Eliges rol, tecnología, tema y nivel. La IA genera cinco preguntas (dos de teoría y tres de código), respondes cada una y recibes una corrección con la solución explicada. Cada pregunta se guarda como una card de estudio.",
   },
   {
     q: "¿Es gratuito?",
