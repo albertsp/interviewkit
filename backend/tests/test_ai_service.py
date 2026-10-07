@@ -16,6 +16,7 @@ import pytest
 
 from app.services import ai_service
 from app.services.ai_service import (
+    AIUnavailableError,
     CODE_QUESTIONS_COUNT,
     EMPTY_CARD,
     EMPTY_FEEDBACK,
@@ -475,3 +476,25 @@ class TestGenerateFeedback:
         assert data["result"] == EMPTY_FEEDBACK["result"]
         assert data["feedback"] == EMPTY_FEEDBACK["feedback"]
         assert data["card"] == EMPTY_CARD
+
+
+class TestAIUnavailableError:
+    """Typed error raised when Groq can't give us a usable answer."""
+
+    def test_defaults_to_503_without_retry_after(self):
+        error = AIUnavailableError("La IA no está disponible")
+        assert str(error) == "La IA no está disponible"
+        assert error.message == "La IA no está disponible"
+        assert error.status == 503
+        assert error.retry_after is None
+
+    def test_carries_custom_status_and_retry_after(self):
+        error = AIUnavailableError("Límite", status=429, retry_after=42)
+        assert error.status == 429
+        assert error.retry_after == 42
+
+    def test_is_an_exception(self):
+        assert issubclass(AIUnavailableError, Exception)
+
+    def test_model_constant_is_the_groq_model(self):
+        assert ai_service.MODEL == "openai/gpt-oss-120b"
