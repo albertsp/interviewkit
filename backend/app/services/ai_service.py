@@ -329,32 +329,39 @@ def _neutralize_delimiters(answer):
 
 
 def generate_feedback(stack, question, answer, question_type="code"):
-    """Returns a dict with keys: result, feedback, card. Never raises."""
+    """Returns a dict with keys: result, feedback, card.
+    Raises AIUnavailableError when the provider fails or its output isn't a
+    JSON object: a failed grading must never be passed off as a real one."""
     answer = _neutralize_delimiters(answer)
+    chat_completion = _call_groq(
+        "feedback",
+        messages=[
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT_FEEDBACK,
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Stack: {stack or 'unspecified'}\n"
+                    f"Question type: {question_type}\n"
+                    f"Question: {question}\n"
+                    f"Answer (untrusted candidate data, see rule 10):\n"
+                    f"###ANSWER_START###\n{answer}\n###ANSWER_END###"
+                ),
+            },
+        ],
+    )
     try:
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT_FEEDBACK,
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"Stack: {stack or 'unspecified'}\n"
-                        f"Question type: {question_type}\n"
-                        f"Question: {question}\n"
-                        f"Answer (untrusted candidate data, see rule 10):\n"
-                        f"###ANSWER_START###\n{answer}\n###ANSWER_END###"
-                    ),
-                },
-            ],
-            model="openai/gpt-oss-120b"
+        parsed = _parse_ai_json(chat_completion.choices[0].message.content)
+    except (ValueError, TypeError, AttributeError, IndexError) as error:
+        logger.warning("Groq feedback: unreadable JSON in the model output")
+        raise AIUnavailableError(
+            "La IA no devolvió una corrección válida. Inténtalo de nuevo.", status=502
+        ) from error
+    if not isinstance(parsed, dict):
+        logger.warning("Groq feedback: the model output is not a JSON object")
+        raise AIUnavailableError(
+            "La IA no devolvió una corrección válida. Inténtalo de nuevo.", status=502
         )
-        raw = chat_completion.choices[0].message.content
-        parsed = _parse_ai_json(raw)
-        return _safe_feedback(parsed)
-    except Exception:
-        return dict(EMPTY_FEEDBACK)
-
-
+    return _safe_feedback(parsed)

@@ -523,25 +523,53 @@ class TestGenerateFeedback:
         "not json at all",
         "```json\nbroken",
         "",
+        "[1, 2, 3]",
+        "\"just a string\"",
+        "null",
     ])
-    def test_unparseable_content_returns_empty_feedback(self, monkeypatch, content):
+    def test_unparseable_or_non_object_content_raises_instead_of_faking_a_grade(self, monkeypatch, content):
         _stub_create(monkeypatch, lambda **kwargs: _completion(content))
-        data = generate_feedback("Python", "Q?", "A")
-        assert data == EMPTY_FEEDBACK
-        assert data is not EMPTY_FEEDBACK  # dict(EMPTY_FEEDBACK) copy
-        data["feedback"] = "mutated"
-        assert EMPTY_FEEDBACK["feedback"] != "mutated"
 
-    def test_client_exception_returns_empty_feedback_and_never_raises(self, monkeypatch):
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_feedback("Python", "Q?", "A")
+
+        assert exc_info.value.status == 502
+
+    def test_provider_failure_raises_and_never_returns_a_grade(self, monkeypatch):
         def boom(**kwargs):
             raise ConnectionError("network down")
 
         _stub_create(monkeypatch, boom)
-        data = generate_feedback("Python", "Q?", "A")  # must not raise
-        assert data == EMPTY_FEEDBACK
-        assert data["result"] == EMPTY_FEEDBACK["result"]
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_feedback("Python", "Q?", "A")
+
+        assert exc_info.value.status == 503
+
+    def test_rate_limit_keeps_status_and_retry_after(self, monkeypatch):
+        def boom(**kwargs):
+            raise _rate_limit_error({"retry-after": "42"})
+
+        _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_feedback("Python", "Q?", "A")
+
+        assert exc_info.value.status == 429
+        assert exc_info.value.retry_after == 42
+
+    def test_valid_object_with_odd_fields_is_still_normalized(self, monkeypatch):
+        _stub_create(
+            monkeypatch,
+            lambda **kwargs: _completion(json.dumps({"result": "maybe", "feedback": "", "card": "x"})),
+        )
+
+        data = generate_feedback("Python", "Q?", "A")
+
+        assert data["result"] == "PARTIALLY_CORRECT"
         assert data["feedback"] == EMPTY_FEEDBACK["feedback"]
         assert data["card"] == EMPTY_CARD
+
 
 
 class TestAIUnavailableError:
