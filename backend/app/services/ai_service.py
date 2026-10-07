@@ -263,40 +263,43 @@ MAX_QUESTION_ATTEMPTS = 2
 
 
 def _fetch_questions(stack, level, topic):
-    """One call to Groq. Returns the parsed JSON (dict), or None on failure."""
+    """One call to Groq. Returns the parsed JSON, or None if the model's output
+    isn't readable JSON. Provider failures propagate as AIUnavailableError."""
+    chat_completion = _call_groq(
+        "questions",
+        messages=[
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT_QUESTIONS,
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Generate interview questions for {stack} at {level} level, "
+                    f"focused on the topic: {topic or 'General / Mixto'}."
+                ),
+            }
+        ],
+        response_format={"type": "json_object"},
+    )
     try:
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT_QUESTIONS,
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"Generate interview questions for {stack} at {level} level, "
-                        f"focused on the topic: {topic or 'General / Mixto'}."
-                    ),
-                }
-            ],
-            model="openai/gpt-oss-120b",
-            response_format={"type": "json_object"},
-        )
-        raw = chat_completion.choices[0].message.content
-        return _parse_ai_json(raw)
-    except Exception:
+        return _parse_ai_json(chat_completion.choices[0].message.content)
+    except (ValueError, TypeError, AttributeError, IndexError):
+        logger.warning("Groq questions: unreadable JSON in the model output")
         return None
 
 
 def generate_questions(stack, level, topic):
     """Generates questions via AI: THEORY_QUESTIONS_COUNT theory + CODE_QUESTIONS_COUNT code.
-    Retries up to MAX_QUESTION_ATTEMPTS times if the response has fewer
-    questions than required in either block, to minimize how often the user
-    sees the generic fallback questions. Always returns exactly
-    THEORY_QUESTIONS_COUNT theory and CODE_QUESTIONS_COUNT code questions
-    as {"theory": [...], "code": [...]}. Never raises."""
+    Retries up to MAX_QUESTION_ATTEMPTS times if the model's output is unreadable
+    or has fewer questions than required in either block. Generic fallback
+    questions only fill gaps in an otherwise usable answer. Provider errors
+    are never retried (retrying a 429 only burns more quota).
+    Returns {"theory": [...], "code": [...]} with exactly the required counts.
+    Raises AIUnavailableError: the provider's own error, or 502 when no
+    attempt produced anything usable."""
     best = None
-    best_size = -1
+    best_size = 0
     for _ in range(MAX_QUESTION_ATTEMPTS):
         parsed = _fetch_questions(stack, level, topic)
         if not isinstance(parsed, dict):
@@ -305,10 +308,14 @@ def generate_questions(stack, level, topic):
         code = _clean_block(parsed.get("code"))
         if len(theory) >= THEORY_QUESTIONS_COUNT and len(code) >= CODE_QUESTIONS_COUNT:
             return _safe_questions(parsed)
-        # Keep the most complete incomplete attempt to complete it with fallbacks
+        # Keep the most complete incomplete attempt to fill its gaps with fallbacks
         size = min(len(theory), THEORY_QUESTIONS_COUNT) + min(len(code), CODE_QUESTIONS_COUNT)
         if size > best_size:
             best, best_size = parsed, size
+    if best is None:
+        raise AIUnavailableError(
+            "La IA no devolvió preguntas válidas. Inténtalo de nuevo.", status=502
+        )
     return _safe_questions(best)
 
 

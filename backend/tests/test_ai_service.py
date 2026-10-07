@@ -353,34 +353,98 @@ class TestGenerateQuestions:
         result = generate_questions("Python", "Básico", None)
         assert result == {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
 
-    def test_returns_normalized_fallback_after_exhausting_attempts(self, monkeypatch):
+    def test_raises_502_after_exhausting_attempts_without_usable_output(self, monkeypatch):
         calls = {"n": 0}
 
         def fake_fetch(stack, level, topic):
             calls["n"] += 1
-            return None  # never succeeds
+            return None  # unreadable JSON every time
 
         monkeypatch.setattr(ai_service, "_fetch_questions", fake_fetch)
-        result = generate_questions("Python", "Básico", "General / Mixto")
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_questions("Python", "Básico", "General / Mixto")
 
         assert calls["n"] == MAX_QUESTION_ATTEMPTS
-        assert result == FALLBACK_QUESTIONS
+        assert exc_info.value.status == 502
 
-    def test_never_throws_when_fetch_always_returns_none(self, monkeypatch):
-        monkeypatch.setattr(ai_service, "_fetch_questions", lambda *a: None)
-        result = generate_questions("Python", "Básico", None)  # must not raise
-        assert result == FALLBACK_QUESTIONS
+    @pytest.mark.parametrize("payload", [
+        {},
+        {"theory": [], "code": []},
+        {"theory": ["", "  "], "code": [None, 3]},
+        ["not", "a", "dict"],
+    ])
+    def test_empty_or_unusable_output_is_not_served_as_fallback(self, monkeypatch, payload):
+        monkeypatch.setattr(ai_service, "_fetch_questions", lambda *a: payload)
 
-    def test_never_throws_when_groq_client_raises(self, monkeypatch):
-        """End-to-end through the real `_fetch_questions`: the client raises,
-        `_fetch_questions` swallows it and returns None, and
-        `generate_questions` still returns the fallback instead of raising."""
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_questions("Python", "Básico", None)
+
+        assert exc_info.value.status == 502
+
+    def test_partial_output_is_still_completed_with_fallback_questions(self, monkeypatch):
+        monkeypatch.setattr(
+            ai_service, "_fetch_questions", lambda *a: {"theory": ["T1"], "code": []}
+        )
+
+        result = generate_questions("Python", "Básico", None)
+
+        assert result["theory"][0] == "T1"
+        assert len(result["theory"]) == THEORY_QUESTIONS_COUNT
+        assert result["code"] == FALLBACK_CODE_QUESTIONS
+
+    def test_provider_error_propagates_without_retrying(self, monkeypatch):
+        calls = {"n": 0}
+
+        def fake_fetch(stack, level, topic):
+            calls["n"] += 1
+            raise AIUnavailableError("limit", status=429, retry_after=7)
+
+        monkeypatch.setattr(ai_service, "_fetch_questions", fake_fetch)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_questions("Python", "Básico", None)
+
+        assert calls["n"] == 1  # retrying a 429 would only burn more quota
+        assert exc_info.value.status == 429
+        assert exc_info.value.retry_after == 7
+
+    def test_groq_client_failure_raises_503_after_a_single_call(self, monkeypatch):
+        """End-to-end through the real `_fetch_questions` and `_call_groq`."""
         def boom(**kwargs):
             raise RuntimeError("groq down")
 
+        create = _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            generate_questions("Python", "Básico", "General / Mixto")
+
+        assert exc_info.value.status == 503
+        assert create.call_count == 1
+
+
+class TestFetchQuestions:
+    def test_unreadable_json_returns_none(self, monkeypatch):
+        _stub_create(monkeypatch, lambda **kwargs: _completion("not json at all"))
+        assert ai_service._fetch_questions("Python", "Básico", None) is None
+
+    def test_valid_json_is_returned_parsed(self, monkeypatch):
+        payload = {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
+        create = _stub_create(monkeypatch, lambda **kwargs: _completion(json.dumps(payload)))
+
+        assert ai_service._fetch_questions("Python", "Básico", "async") == payload
+        assert create.call_args.kwargs["response_format"] == {"type": "json_object"}
+
+    def test_provider_error_propagates(self, monkeypatch):
+        def boom(**kwargs):
+            raise _rate_limit_error({"retry-after": "5"})
+
         _stub_create(monkeypatch, boom)
-        result = generate_questions("Python", "Básico", "General / Mixto")
-        assert result == FALLBACK_QUESTIONS
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            ai_service._fetch_questions("Python", "Básico", None)
+
+        assert exc_info.value.status == 429
 
 
 class TestGenerateFeedback:
