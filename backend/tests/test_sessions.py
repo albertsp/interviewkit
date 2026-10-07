@@ -471,3 +471,41 @@ class TestAIFailures:
         assert resp.headers["Retry-After"] == "30"
         from app.models.session import Session
         assert Session.query.count() == 0
+
+
+class TestQuotaOnAIFailures:
+    """Failed AI calls must not eat the user's hourly quota."""
+
+    def test_sixteen_failed_corrections_do_not_exhaust_the_hourly_limit(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback")
+
+        for _ in range(16):
+            assert _patch_answer(client, auth_headers, session_id, question_id).status_code == 503
+
+        _restore_feedback(monkeypatch)
+        assert _patch_answer(client, auth_headers, session_id, question_id).status_code == 200
+
+    def test_six_failed_session_creations_do_not_exhaust_the_hourly_limit(self, client, auth_headers, monkeypatch):
+        _ai_down(monkeypatch, "generate_questions")
+        for _ in range(6):
+            assert _create_session(client, auth_headers).status_code == 503
+
+        monkeypatch.setattr(
+            "app.routes.sessions.generate_questions", lambda stack, level, topic: dict(FAKE_QUESTIONS)
+        )
+        assert _create_session(client, auth_headers).status_code == 201
+
+    def test_failed_calls_do_not_drain_the_global_groq_budget(self, client, auth_headers, monkeypatch):
+        """The shared budget is 20/min: 25 failures in a row must all reach
+        the AI (503), none may be rejected by a limiter (429)."""
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback")
+
+        statuses = [_patch_answer(client, auth_headers, session_id, question_id).status_code for _ in range(25)]
+
+        assert set(statuses) == {503}

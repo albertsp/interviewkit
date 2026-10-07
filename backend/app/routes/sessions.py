@@ -27,6 +27,12 @@ def _groq_global_key():
     return "global"
 
 
+def _deduct_only_on_success(response):
+    """Failed requests (AI errors, validation) don't spend quota: the user
+    didn't get anything for them, and retrying would otherwise lock them out."""
+    return response.status_code < 400
+
+
 def _ai_error_response(error):
     """Turns an AIUnavailableError into the API error response, forwarding
     the provider's Retry-After when it gave one."""
@@ -40,9 +46,12 @@ def _ai_error_response(error):
 @sessions.route('/', methods=['POST'])
 @jwt_required()
 # Per-user limit: keeps a single account from draining the shared budget
-@limiter.limit("5 per hour")
+@limiter.limit("5 per hour", deduct_when=_deduct_only_on_success)
 # Global limit: protects the actual Groq account budget (free tier)
-@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
+@limiter.shared_limit(
+    GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key,
+    deduct_when=_deduct_only_on_success,
+)
 def create_session():
 
     user_id = get_jwt_identity()
@@ -107,8 +116,11 @@ def create_session():
 
 @sessions.route('/<int:session_id>/questions/<int:question_id>', methods=['PATCH'])
 @jwt_required()
-@limiter.limit("15 per hour")
-@limiter.shared_limit(GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key)
+@limiter.limit("15 per hour", deduct_when=_deduct_only_on_success)
+@limiter.shared_limit(
+    GROQ_GLOBAL_LIMIT, scope=GROQ_GLOBAL_SCOPE, key_func=_groq_global_key,
+    deduct_when=_deduct_only_on_success,
+)
 def answer_question(session_id, question_id):
     user_id = get_jwt_identity()
     data = request.get_json() or {}
