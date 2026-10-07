@@ -41,7 +41,7 @@ export default function Hero() {
             </h1>
 
             <p className="rise mt-8 max-w-lg text-lg leading-relaxed text-muted-foreground" style={delay(750)}>
-              InterviewKit genera cinco preguntas de código según tu rol y tu nivel, corrige cada
+              InterviewKit genera cinco preguntas (dos de teoría y tres de código) según tu rol y tu nivel, corrige cada
               respuesta con IA y guarda lo aprendido en cards de repaso.
             </p>
 

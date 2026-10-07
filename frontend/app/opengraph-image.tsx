@@ -48,7 +48,7 @@ export default async function OpengraphImage() {
         </div>
 
         <div style={{ display: "flex", fontSize: 30, fontWeight: 500, color: "#55554f" }}>
-          Cinco preguntas de código, corrección con IA y cards de repaso.
+          Cinco preguntas (teoría y código), corrección con IA y cards de repaso.
         </div>
       </div>
     ),

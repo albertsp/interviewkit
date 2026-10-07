@@ -3,7 +3,7 @@ import json
 import re
 
 THEORY_QUESTIONS_COUNT = 2
-CODE_QUESTIONS_COUNT = 2
+CODE_QUESTIONS_COUNT = 3
 
 SYSTEM_PROMPT_QUESTIONS = f"""
 You are an expert technical interviewer specializing in software engineering recruitment. Your task is to generate exactly {THEORY_QUESTIONS_COUNT} theoretical questions AND {CODE_QUESTIONS_COUNT} code-focused questions for a technical interview.
@@ -152,6 +152,7 @@ FALLBACK_THEORY_QUESTIONS = [
 FALLBACK_CODE_QUESTIONS = [
     "Escribe una función que recorra un array y devuelva un nuevo array transformado.",
     "Describe el patrón más común para manejar errores asíncronos en este stack con un ejemplo de código.",
+    "Escribe una función que reciba una lista de números y devuelva la suma de los pares.",
 ]
 
 FALLBACK_QUESTIONS = {
@@ -160,15 +161,33 @@ FALLBACK_QUESTIONS = {
 }
 
 
+def _clean_block(items):
+    """Keeps only the non-empty strings of a block (anything else is discarded)."""
+    if not isinstance(items, list):
+        return []
+    return [item.strip() for item in items if isinstance(item, str) and item.strip()]
+
+
+def _fit_block(items, count, fallback):
+    """Returns exactly `count` questions: extras are dropped and any missing
+    ones are filled in from the generic fallback questions."""
+    block = _clean_block(items)[:count]
+    for question in fallback:
+        if len(block) >= count:
+            break
+        if question not in block:
+            block.append(question)
+    return block
+
+
 def _safe_questions(data):
-    """Normalizes the AI response to {"theory": [...], "code": [...]}, with a per-block fallback."""
+    """Normalizes the AI response to exactly THEORY_QUESTIONS_COUNT theory +
+    CODE_QUESTIONS_COUNT code questions, filling gaps from the fallback."""
     if not isinstance(data, dict):
         return dict(FALLBACK_QUESTIONS)
-    theory = data.get("theory")
-    code = data.get("code")
     return {
-        "theory": theory if isinstance(theory, list) and theory else list(FALLBACK_THEORY_QUESTIONS),
-        "code": code if isinstance(code, list) and code else list(FALLBACK_CODE_QUESTIONS),
+        "theory": _fit_block(data.get("theory"), THEORY_QUESTIONS_COUNT, FALLBACK_THEORY_QUESTIONS),
+        "code": _fit_block(data.get("code"), CODE_QUESTIONS_COUNT, FALLBACK_CODE_QUESTIONS),
     }
 
 
@@ -202,20 +221,27 @@ def _fetch_questions(stack, level, topic):
 
 
 def generate_questions(stack, level, topic):
-    """Generates questions via AI: {THEORY_QUESTIONS_COUNT} theory + {CODE_QUESTIONS_COUNT} code.
-    Retries up to MAX_QUESTION_ATTEMPTS times if the response is missing either
-    block, to minimize how often the user sees the generic fallback questions.
-    Returns {"theory": [...], "code": [...]}. Never raises."""
-    last_parsed = None
+    """Generates questions via AI: THEORY_QUESTIONS_COUNT theory + CODE_QUESTIONS_COUNT code.
+    Retries up to MAX_QUESTION_ATTEMPTS times if the response has fewer
+    questions than required in either block, to minimize how often the user
+    sees the generic fallback questions. Always returns exactly
+    THEORY_QUESTIONS_COUNT theory and CODE_QUESTIONS_COUNT code questions
+    as {"theory": [...], "code": [...]}. Never raises."""
+    best = None
+    best_size = -1
     for _ in range(MAX_QUESTION_ATTEMPTS):
         parsed = _fetch_questions(stack, level, topic)
-        last_parsed = parsed
-        if isinstance(parsed, dict):
-            theory = parsed.get("theory")
-            code = parsed.get("code")
-            if isinstance(theory, list) and theory and isinstance(code, list) and code:
-                return {"theory": theory, "code": code}
-    return _safe_questions(last_parsed)
+        if not isinstance(parsed, dict):
+            continue
+        theory = _clean_block(parsed.get("theory"))
+        code = _clean_block(parsed.get("code"))
+        if len(theory) >= THEORY_QUESTIONS_COUNT and len(code) >= CODE_QUESTIONS_COUNT:
+            return _safe_questions(parsed)
+        # Keep the most complete incomplete attempt to complete it with fallbacks
+        size = min(len(theory), THEORY_QUESTIONS_COUNT) + min(len(code), CODE_QUESTIONS_COUNT)
+        if size > best_size:
+            best, best_size = parsed, size
+    return _safe_questions(best)
 
 
 def generate_feedback(stack, question, answer, question_type="code"):

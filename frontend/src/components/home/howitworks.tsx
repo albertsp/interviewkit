@@ -7,9 +7,9 @@ const STEPS = [
       "Elige rol, tecnología, tema y nivel. Cada pregunta se genera a partir de esa combinación.",
   },
   {
-    title: "Responde cinco preguntas de código",
+    title: "Responde cinco preguntas",
     description:
-      "Escribe tu solución en un editor integrado o redacta la respuesta. Sin teoría de manual: lees, escribes o corriges código.",
+      "Dos de teoría y tres de código. Redacta la respuesta o escribe tu solución en un editor integrado: lees, escribes o corriges código.",
   },
   {
     title: "Recibe la corrección",

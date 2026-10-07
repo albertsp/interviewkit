@@ -16,12 +16,14 @@ import pytest
 
 from app.services import ai_service
 from app.services.ai_service import (
+    CODE_QUESTIONS_COUNT,
     EMPTY_CARD,
     EMPTY_FEEDBACK,
     FALLBACK_CODE_QUESTIONS,
     FALLBACK_QUESTIONS,
     FALLBACK_THEORY_QUESTIONS,
     MAX_QUESTION_ATTEMPTS,
+    THEORY_QUESTIONS_COUNT,
     _parse_ai_json,
     _safe_card,
     _safe_feedback,
@@ -203,30 +205,54 @@ class TestSafeQuestions:
         assert _safe_questions({}) == FALLBACK_QUESTIONS
 
     def test_missing_code_block_uses_fallback_for_code_only(self):
-        result = _safe_questions({"theory": ["Q1"]})
-        assert result["theory"] == ["Q1"]
+        result = _safe_questions({"theory": ["T1", "T2"]})
+        assert result["theory"] == ["T1", "T2"]
         assert result["code"] == FALLBACK_CODE_QUESTIONS
 
     def test_empty_code_list_uses_fallback_for_code_only(self):
-        result = _safe_questions({"theory": ["Q1"], "code": []})
-        assert result["theory"] == ["Q1"]
+        result = _safe_questions({"theory": ["T1", "T2"], "code": []})
+        assert result["theory"] == ["T1", "T2"]
         assert result["code"] == FALLBACK_CODE_QUESTIONS
 
     def test_valid_both_blocks_are_returned_as_is(self):
-        data = {"theory": ["T1", "T2"], "code": ["C1", "C2"]}
+        data = {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
         assert _safe_questions(data) == data
 
     def test_non_list_block_uses_fallback(self):
-        result = _safe_questions({"theory": "not-a-list", "code": ["C1"]})
+        result = _safe_questions({"theory": "not-a-list", "code": ["C1", "C2", "C3"]})
         assert result["theory"] == FALLBACK_THEORY_QUESTIONS
-        assert result["code"] == ["C1"]
+        assert result["code"] == ["C1", "C2", "C3"]
+
+    def test_short_block_is_completed_from_fallback(self):
+        result = _safe_questions({"theory": ["T1"], "code": ["C1"]})
+        assert len(result["theory"]) == THEORY_QUESTIONS_COUNT
+        assert len(result["code"]) == CODE_QUESTIONS_COUNT
+        assert result["theory"][0] == "T1"
+        assert result["code"][0] == "C1"
+        assert result["code"][1:] == FALLBACK_CODE_QUESTIONS[:CODE_QUESTIONS_COUNT - 1]
+
+    def test_extra_questions_are_dropped(self):
+        result = _safe_questions({
+            "theory": ["T1", "T2", "T3"],
+            "code": ["C1", "C2", "C3", "C4"],
+        })
+        assert result["theory"] == ["T1", "T2"]
+        assert result["code"] == ["C1", "C2", "C3"]
+
+    def test_blank_and_non_string_items_are_discarded(self):
+        result = _safe_questions({
+            "theory": ["T1", "  ", None, 5, "T2"],
+            "code": ["C1", "", {"a": 1}, "C2", "C3"],
+        })
+        assert result["theory"] == ["T1", "T2"]
+        assert result["code"] == ["C1", "C2", "C3"]
 
 
 class TestGenerateQuestions:
     """Tests for generate_questions (req. 6) -- mocks `_fetch_questions`."""
 
     def test_success_on_first_attempt_calls_fetch_once(self, monkeypatch):
-        good = {"theory": ["T1", "T2"], "code": ["C1", "C2"]}
+        good = {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
         calls = []
 
         def fake_fetch(stack, level, topic):
@@ -243,7 +269,7 @@ class TestGenerateQuestions:
     def test_retries_when_first_attempt_is_incomplete(self, monkeypatch):
         responses = [
             None,  # first attempt fails entirely
-            {"theory": ["T1"], "code": []},  # second: missing non-empty code
+            {"theory": ["T1", "T2"], "code": []},  # second: missing code
         ]
         calls = {"n": 0}
 
@@ -258,13 +284,13 @@ class TestGenerateQuestions:
         result = generate_questions("Python", "Básico", None)
 
         assert calls["n"] == MAX_QUESTION_ATTEMPTS
-        assert result["theory"] == ["T1"]
+        assert result["theory"] == ["T1", "T2"]
         assert result["code"] == FALLBACK_CODE_QUESTIONS
 
     def test_success_on_second_attempt(self, monkeypatch):
         responses = [
             {"theory": [], "code": []},  # empty blocks -> not good enough
-            {"theory": ["T1", "T2"], "code": ["C1", "C2"]},
+            {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]},
         ]
         calls = {"n": 0}
 
@@ -276,8 +302,53 @@ class TestGenerateQuestions:
         monkeypatch.setattr(ai_service, "_fetch_questions", fake_fetch)
         result = generate_questions("JavaScript", "Avanzado", "async")
 
-        assert result == {"theory": ["T1", "T2"], "code": ["C1", "C2"]}
+        assert result == {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
         assert calls["n"] == 2
+
+    def test_retries_when_a_block_has_fewer_questions_than_required(self, monkeypatch):
+        responses = [
+            {"theory": ["T1", "T2"], "code": ["C1", "C2"]},  # one code question short
+            {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]},
+        ]
+        calls = {"n": 0}
+
+        def fake_fetch(stack, level, topic):
+            idx = calls["n"]
+            calls["n"] += 1
+            return responses[idx]
+
+        monkeypatch.setattr(ai_service, "_fetch_questions", fake_fetch)
+        result = generate_questions("Python", "Básico", None)
+
+        assert calls["n"] == 2
+        assert result == {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
+
+    def test_incomplete_attempts_are_completed_with_the_best_one(self, monkeypatch):
+        responses = [
+            {"theory": ["T1"], "code": ["C1"]},
+            {"theory": ["T1", "T2"], "code": ["C1", "C2"]},  # more complete
+        ]
+        calls = {"n": 0}
+
+        def fake_fetch(stack, level, topic):
+            idx = calls["n"]
+            calls["n"] += 1
+            return responses[idx]
+
+        monkeypatch.setattr(ai_service, "_fetch_questions", fake_fetch)
+        result = generate_questions("Python", "Básico", None)
+
+        assert len(result["theory"]) == THEORY_QUESTIONS_COUNT
+        assert len(result["code"]) == CODE_QUESTIONS_COUNT
+        assert result["code"][:2] == ["C1", "C2"]
+
+    def test_extra_questions_from_the_ai_are_trimmed(self, monkeypatch):
+        monkeypatch.setattr(
+            ai_service, "_fetch_questions",
+            lambda *a: {"theory": ["T1", "T2", "T3"], "code": ["C1", "C2", "C3", "C4"]},
+        )
+        result = generate_questions("Python", "Básico", None)
+        assert result == {"theory": ["T1", "T2"], "code": ["C1", "C2", "C3"]}
 
     def test_returns_normalized_fallback_after_exhausting_attempts(self, monkeypatch):
         calls = {"n": 0}
