@@ -244,8 +244,18 @@ def generate_questions(stack, level, topic):
     return _safe_questions(best)
 
 
+_ANSWER_DELIMITER_RE = re.compile(r"#{3}\s*ANSWER_(?:START|END)\s*#{3}", re.IGNORECASE)
+
+
+def _neutralize_delimiters(answer):
+    """Removes any forged ###ANSWER_START### / ###ANSWER_END### marker from the
+    candidate's answer so it can't close the untrusted block early."""
+    return _ANSWER_DELIMITER_RE.sub("[delimiter removed]", answer or "")
+
+
 def generate_feedback(stack, question, answer, question_type="code"):
     """Returns a dict with keys: result, feedback, card. Never raises."""
+    answer = _neutralize_delimiters(answer)
     try:
         chat_completion = client.chat.completions.create(
             messages=[

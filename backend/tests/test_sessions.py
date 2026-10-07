@@ -181,6 +181,22 @@ class TestAnswerQuestion:
         assert saved_question.answer == "my answer"
         assert saved_question.result == "CORRECT"
 
+    def test_answer_question_over_max_length_returns_400_without_calling_ai(self, client, auth_headers, monkeypatch):
+        def fail_if_called(*args, **kwargs):
+            raise AssertionError("generate_feedback should not be called for an oversized answer")
+        monkeypatch.setattr("app.routes.sessions.generate_feedback", fail_if_called)
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+
+        resp = client.patch(
+            f"/sessions/{session_id}/questions/{question_id}",
+            json={"answer": "a" * 4001},
+            headers=auth_headers,
+        )
+
+        assert resp.status_code == 400
+
     def test_answer_question_nonexistent_session_returns_404(self, client, auth_headers):
         resp = client.patch(
             "/sessions/99999/questions/1", json={"answer": "x"}, headers=auth_headers

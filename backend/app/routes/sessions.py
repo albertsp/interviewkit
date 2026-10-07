@@ -19,6 +19,9 @@ sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 GROQ_GLOBAL_LIMIT = "20 per minute;40 per day"
 GROQ_GLOBAL_SCOPE = "groq_global"
 
+# A huge answer burns the shared Groq token quota (100K TPD).
+MAX_ANSWER_LENGTH = 4000
+
 
 def _groq_global_key():
     return "global"
@@ -104,7 +107,11 @@ def answer_question(session_id, question_id):
     if user_question is None:
         return jsonify({"msg": "La pregunta no existe"}), 404
 
-    user_question.answer = data.get("answer")
+    answer = data.get("answer")
+    if isinstance(answer, str) and len(answer) > MAX_ANSWER_LENGTH:
+        return jsonify({"error": f"La respuesta no puede superar los {MAX_ANSWER_LENGTH} caracteres"}), 400
+
+    user_question.answer = answer
     db.session.commit()
 
     result = generate_feedback(
