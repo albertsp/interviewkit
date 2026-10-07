@@ -9,6 +9,7 @@ and reset before/after every test so tests don't bleed into each other.
 """
 import pytest
 from app import limiter
+from app.services.ai_service import AIUnavailableError
 
 
 FAKE_QUESTIONS = {
@@ -355,3 +356,118 @@ class TestRateLimiting:
 
         still_allowed = _create_session(client, second_user_headers)
         assert still_allowed.status_code == 201
+
+
+def _ai_down(monkeypatch, name, status=503, retry_after=None):
+    """Make the given AI function (generate_questions / generate_feedback)
+    fail the way a Groq outage does."""
+    def boom(*args, **kwargs):
+        raise AIUnavailableError("IA caída", status=status, retry_after=retry_after)
+    monkeypatch.setattr(f"app.routes.sessions.{name}", boom)
+
+
+def _restore_feedback(monkeypatch):
+    monkeypatch.setattr(
+        "app.routes.sessions.generate_feedback",
+        lambda stack, question, answer, question_type="code": dict(FAKE_FEEDBACK),
+    )
+
+
+def _patch_answer(client, headers, session_id, question_id, answer="my answer"):
+    return client.patch(
+        f"/sessions/{session_id}/questions/{question_id}", json={"answer": answer}, headers=headers
+    )
+
+
+class TestAIFailures:
+    """A Groq failure must surface as a typed error, never as a fake grade."""
+
+    def test_rate_limited_feedback_returns_429_with_retry_after_and_no_result(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback", status=429, retry_after=42)
+
+        resp = _patch_answer(client, auth_headers, session_id, question_id)
+
+        assert resp.status_code == 429
+        assert resp.headers["Retry-After"] == "42"
+        assert resp.get_json() == {"error": "IA caída"}
+        from app.models.question import Question
+        saved = Question.query.filter_by(question_id=question_id).first()
+        assert saved.result is None
+        assert saved.feedback is None
+
+    def test_failed_feedback_without_retry_after_has_no_retry_after_header(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback", status=503)
+
+        resp = _patch_answer(client, auth_headers, session_id, question_id)
+
+        assert resp.status_code == 503
+        assert "Retry-After" not in resp.headers
+
+    def test_failed_feedback_keeps_the_saved_answer(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback")
+
+        _patch_answer(client, auth_headers, session_id, question_id, answer="mi respuesta")
+
+        from app.models.question import Question
+        assert Question.query.filter_by(question_id=question_id).first().answer == "mi respuesta"
+
+    def test_failed_feedback_earns_zero_xp_when_completing_the_session(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        _ai_down(monkeypatch, "generate_feedback")
+        for q in created.get_json()["questions"]:
+            assert _patch_answer(client, auth_headers, session_id, q["question_id"]).status_code == 503
+
+        resp = client.post(f"/sessions/{session_id}/complete", headers=auth_headers)
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["xp_earned"] == 0
+        assert data["bonus_applied"] is False
+        assert data["breakdown"] == []
+
+    def test_same_answer_can_be_retried_after_a_failure(self, client, auth_headers, monkeypatch):
+        created = _create_session(client, auth_headers)
+        session_id = created.get_json()["session_id"]
+        question_id = created.get_json()["questions"][0]["question_id"]
+        _ai_down(monkeypatch, "generate_feedback")
+        assert _patch_answer(client, auth_headers, session_id, question_id).status_code == 503
+
+        _restore_feedback(monkeypatch)
+        resp = _patch_answer(client, auth_headers, session_id, question_id)
+
+        assert resp.status_code == 200
+        assert resp.get_json()["result"] == "CORRECT"
+        from app.models.question import Question
+        assert Question.query.filter_by(question_id=question_id).first().result == "CORRECT"
+
+    def test_create_session_with_ai_down_returns_503_and_leaves_no_session(self, client, auth_headers, monkeypatch):
+        _ai_down(monkeypatch, "generate_questions")
+
+        resp = _create_session(client, auth_headers)
+
+        assert resp.status_code == 503
+        assert resp.get_json() == {"error": "IA caída"}
+        from app.models.session import Session
+        from app.models.question import Question
+        assert Session.query.count() == 0
+        assert Question.query.count() == 0
+
+    def test_create_session_rate_limited_by_the_provider_returns_429_with_retry_after(self, client, auth_headers, monkeypatch):
+        _ai_down(monkeypatch, "generate_questions", status=429, retry_after=30)
+
+        resp = _create_session(client, auth_headers)
+
+        assert resp.status_code == 429
+        assert resp.headers["Retry-After"] == "30"
+        from app.models.session import Session
+        assert Session.query.count() == 0

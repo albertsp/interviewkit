@@ -9,7 +9,7 @@ from ..models.session import Session
 from ..models.question import Question
 from ..models.user import User
 from .. import db, limiter
-from ..services.ai_service import generate_questions, generate_feedback
+from ..services.ai_service import AIUnavailableError, generate_questions, generate_feedback
 
 sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 
@@ -25,6 +25,16 @@ MAX_ANSWER_LENGTH = 4000
 
 def _groq_global_key():
     return "global"
+
+
+def _ai_error_response(error):
+    """Turns an AIUnavailableError into the API error response, forwarding
+    the provider's Retry-After when it gave one."""
+    response = jsonify({"error": error.message})
+    response.status_code = error.status
+    if error.retry_after is not None:
+        response.headers["Retry-After"] = str(error.retry_after)
+    return response
 
 
 @sessions.route('/', methods=['POST'])
@@ -57,7 +67,12 @@ def create_session():
     db.session.commit()
 
     # Two question blocks: theory first, then code
-    questions = generate_questions(stack, level, topic)
+    try:
+        questions = generate_questions(stack, level, topic)
+    except AIUnavailableError as error:
+        db.session.delete(new_session)
+        db.session.commit()
+        return _ai_error_response(error)
     theory_questions = questions.get("theory", [])
     code_questions = questions.get("code", [])
 
@@ -114,9 +129,14 @@ def answer_question(session_id, question_id):
     user_question.answer = answer
     db.session.commit()
 
-    result = generate_feedback(
-        user_sesion.stack, user_question.question, data.get("answer"), user_question.question_type
-    )
+    # The answer is already saved: if the AI fails, `result` stays untouched
+    # (it earns no XP) and the user can simply resubmit.
+    try:
+        result = generate_feedback(
+            user_sesion.stack, user_question.question, answer, user_question.question_type
+        )
+    except AIUnavailableError as error:
+        return _ai_error_response(error)
     user_question.feedback = result["feedback"]
     user_question.result = result["result"]
     db.session.commit()
