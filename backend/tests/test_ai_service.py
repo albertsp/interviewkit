@@ -12,6 +12,8 @@ import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import groq
+import httpx
 import pytest
 
 from app.services import ai_service
@@ -498,3 +500,117 @@ class TestAIUnavailableError:
 
     def test_model_constant_is_the_groq_model(self):
         assert ai_service.MODEL == "openai/gpt-oss-120b"
+
+
+# --- Groq error builders ---
+
+
+def _groq_request():
+    return httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
+
+
+def _rate_limit_error(headers=None):
+    response = httpx.Response(429, headers=headers or {}, request=_groq_request())
+    return groq.RateLimitError("provider error", response=response, body=None)
+
+
+def _status_error(status=500):
+    response = httpx.Response(status, request=_groq_request())
+    return groq.APIStatusError("provider error", response=response, body=None)
+
+
+class TestCallGroq:
+    """_call_groq is the single place that talks to Groq and translates
+    provider failures into AIUnavailableError."""
+
+    def test_returns_the_completion_and_forwards_kwargs_with_the_model(self, monkeypatch):
+        completion = _completion("{}")
+        create = _stub_create(monkeypatch, lambda **kwargs: completion)
+
+        result = ai_service._call_groq("questions", messages=[{"role": "user", "content": "hi"}])
+
+        assert result is completion
+        assert create.call_args.kwargs["model"] == ai_service.MODEL
+        assert create.call_args.kwargs["messages"] == [{"role": "user", "content": "hi"}]
+
+    def test_rate_limit_maps_to_429_and_reads_retry_after_header(self, monkeypatch):
+        def boom(**kwargs):
+            raise _rate_limit_error({"retry-after": "42"})
+
+        _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            ai_service._call_groq("feedback", messages=[])
+
+        assert exc_info.value.status == 429
+        assert exc_info.value.retry_after == 42
+
+    def test_rate_limit_without_retry_after_header_leaves_it_none(self, monkeypatch):
+        def boom(**kwargs):
+            raise _rate_limit_error()
+
+        _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            ai_service._call_groq("feedback", messages=[])
+
+        assert exc_info.value.status == 429
+        assert exc_info.value.retry_after is None
+
+    def test_rate_limit_with_garbage_retry_after_leaves_it_none(self, monkeypatch):
+        def boom(**kwargs):
+            raise _rate_limit_error({"retry-after": "mañana"})
+
+        _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            ai_service._call_groq("feedback", messages=[])
+
+        assert exc_info.value.retry_after is None
+
+    @pytest.mark.parametrize("error", [
+        groq.APITimeoutError(request=_groq_request()),
+        groq.APIConnectionError(request=_groq_request()),
+        _status_error(500),
+        _status_error(401),
+    ], ids=["timeout", "connection", "status-500", "status-401"])
+    def test_provider_errors_map_to_503(self, monkeypatch, error):
+        def boom(**kwargs):
+            raise error
+
+        _stub_create(monkeypatch, boom)
+
+        with pytest.raises(AIUnavailableError) as exc_info:
+            ai_service._call_groq("questions", messages=[])
+
+        assert exc_info.value.status == 503
+        assert exc_info.value.retry_after is None
+
+    def test_unexpected_exception_is_logged_and_maps_to_503(self, monkeypatch, caplog):
+        def boom(**kwargs):
+            raise RuntimeError("something odd")
+
+        _stub_create(monkeypatch, boom)
+
+        with caplog.at_level("ERROR", logger="app.services.ai_service"):
+            with pytest.raises(AIUnavailableError) as exc_info:
+                ai_service._call_groq("questions", messages=[])
+
+        assert exc_info.value.status == 503
+        assert "something odd" in caplog.text
+
+    def test_success_logs_latency_kind_and_token_usage(self, monkeypatch, caplog):
+        completion = _completion("{}")
+        completion.usage = SimpleNamespace(prompt_tokens=11, completion_tokens=22, total_tokens=33)
+        _stub_create(monkeypatch, lambda **kwargs: completion)
+
+        with caplog.at_level("INFO", logger="app.services.ai_service"):
+            ai_service._call_groq("feedback", messages=[])
+
+        assert "feedback" in caplog.text
+        assert "11" in caplog.text and "22" in caplog.text and "33" in caplog.text
+        assert "ms" in caplog.text
+
+    def test_success_without_usage_does_not_break(self, monkeypatch):
+        _stub_create(monkeypatch, lambda **kwargs: _completion("{}"))
+        ai_service._call_groq("feedback", messages=[])  # _completion has no .usage

@@ -1,7 +1,9 @@
+import groq
 from groq import Groq
 import json
 import logging
 import re
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +105,55 @@ EMPTY_FEEDBACK = {
     "feedback": "La IA no devolvio una respuesta valida. Por favor, intentalo de nuevo.",
     "card": EMPTY_CARD,
 }
+
+
+def _retry_after_seconds(error):
+    """Seconds from the provider's retry-after header, or None if absent/invalid."""
+    try:
+        return int(float(error.response.headers.get("retry-after")))
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
+def _log_usage(kind, started, completion):
+    usage = getattr(completion, "usage", None)
+    logger.info(
+        "Groq %s ok in %.0f ms (tokens: prompt=%s completion=%s total=%s)",
+        kind,
+        (time.perf_counter() - started) * 1000,
+        getattr(usage, "prompt_tokens", None),
+        getattr(usage, "completion_tokens", None),
+        getattr(usage, "total_tokens", None),
+    )
+
+
+def _call_groq(kind, **kwargs):
+    """The single call point to Groq. Returns the completion, or raises
+    AIUnavailableError (429 when rate limited, 503 for any other failure).
+    `kind` only labels the logs ("questions" / "feedback")."""
+    started = time.perf_counter()
+    try:
+        completion = client.chat.completions.create(model=MODEL, **kwargs)
+    # RateLimitError subclasses APIStatusError: it must be caught first.
+    except groq.RateLimitError as error:
+        logger.warning("Groq %s rate limited", kind)
+        raise AIUnavailableError(
+            "Se alcanzó el límite de uso de la IA. Inténtalo de nuevo en un momento.",
+            status=429,
+            retry_after=_retry_after_seconds(error),
+        ) from error
+    except (groq.APITimeoutError, groq.APIConnectionError, groq.APIStatusError) as error:
+        logger.warning("Groq %s failed: %s", kind, error)
+        raise AIUnavailableError(
+            "La IA no está disponible ahora mismo. Inténtalo de nuevo."
+        ) from error
+    except Exception as error:
+        logger.exception("Unexpected error calling Groq (%s)", kind)
+        raise AIUnavailableError(
+            "La IA no está disponible ahora mismo. Inténtalo de nuevo."
+        ) from error
+    _log_usage(kind, started, completion)
+    return completion
 
 
 def fix_literal_escapes(text):
