@@ -1,3 +1,8 @@
+import logging
+import os
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
@@ -27,7 +32,42 @@ db = SQLAlchemy()
 jwt = JWTManager()
 limiter = Limiter(key_func=_rate_limit_key)
 
+
+def _configure_logging():
+    """Gunicorn doesn't configure the root logger, so without this every
+    logger.info of the app is dropped. Only touches the root when it has no
+    handlers yet (keeps pytest's caplog and any host-provided setup intact)."""
+    level_name = os.getenv("LOG_LEVEL", "INFO").strip().upper()
+    level = logging.getLevelName(level_name)
+    if not isinstance(level, int):
+        level = logging.INFO
+    root = logging.getLogger()
+    if not root.handlers:
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        )
+    root.setLevel(level)
+
+
+def _init_sentry():
+    """Error reporting is opt-in: nothing is initialized without SENTRY_DSN.
+    No PII and no request bodies ever leave the app."""
+    dsn = os.getenv("SENTRY_DSN")
+    if not dsn:
+        return
+    sentry_sdk.init(
+        dsn=dsn,
+        integrations=[FlaskIntegration()],
+        environment=os.getenv("FLASK_ENV", "production"),
+        send_default_pii=False,
+        max_request_body_size="never",
+    )
+
+
 def create_app():
+    _configure_logging()
+    _init_sentry()
     app = Flask(__name__)
     app.config.from_object(Config)
 
@@ -52,12 +92,14 @@ def create_app():
     from .models.question import Question
     from .models.card import Card
     from .models.oauth_account import OAuthAccount
+    from .models.ai_call import AICall
     from .routes.auth import auth
     from .routes.oauth import oauth_bp, oauth
     from .routes.stacks import stacks
     from .routes.sessions import sessions
     from .routes.cards import cards
     from .routes.user import user
+    from .routes.health import health
 
     Migrate(app, db)
 
@@ -121,6 +163,7 @@ def create_app():
     app.register_blueprint(sessions)
     app.register_blueprint(cards)
     app.register_blueprint(user)
+    app.register_blueprint(health)
 
     if Config.FLASK_ENV != "production":
         from .routes.debug import debug
