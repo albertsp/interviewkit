@@ -9,7 +9,7 @@ from ..models.session import Session
 from ..models.question import Question
 from ..models.user import User
 from .. import db, limiter
-from ..services.ai_service import AIUnavailableError, generate_questions, generate_feedback
+from ..services.ai_service import AIUnavailableError, ai_call_context, generate_questions, generate_feedback
 
 sessions = Blueprint('sessions', __name__, url_prefix='/sessions')
 
@@ -77,7 +77,8 @@ def create_session():
 
     # Two question blocks: theory first, then code
     try:
-        questions = generate_questions(stack, level, topic)
+        with ai_call_context(user_id=int(user_id), session_id=new_session.session_id):
+            questions = generate_questions(stack, level, topic)
     except AIUnavailableError as error:
         db.session.delete(new_session)
         db.session.commit()
@@ -144,9 +145,10 @@ def answer_question(session_id, question_id):
     # The answer is already saved: if the AI fails, `result` stays untouched
     # (it earns no XP) and the user can simply resubmit.
     try:
-        result = generate_feedback(
-            user_sesion.stack, user_question.question, answer, user_question.question_type
-        )
+        with ai_call_context(user_id=int(user_id), session_id=session_id):
+            result = generate_feedback(
+                user_sesion.stack, user_question.question, answer, user_question.question_type
+            )
     except AIUnavailableError as error:
         return _ai_error_response(error)
     user_question.feedback = result["feedback"]

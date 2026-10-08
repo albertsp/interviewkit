@@ -52,6 +52,7 @@ def create_app():
     from .models.question import Question
     from .models.card import Card
     from .models.oauth_account import OAuthAccount
+    from .models.ai_call import AICall
     from .routes.auth import auth
     from .routes.oauth import oauth_bp, oauth
     from .routes.stacks import stacks

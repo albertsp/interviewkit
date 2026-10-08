@@ -1,9 +1,15 @@
+import contextvars
 import groq
 from groq import Groq
+from contextlib import contextmanager
+from flask import has_app_context
 import json
 import logging
 import re
 import time
+
+from .. import db
+from ..models.ai_call import AICall
 
 logger = logging.getLogger(__name__)
 
@@ -127,16 +133,93 @@ def _log_usage(kind, started, completion):
     )
 
 
+# Who/what a Groq call is for (stack, level, topic, user_id, session_id,
+# attempt). Carried in a ContextVar so the public signatures stay untouched.
+_call_context = contextvars.ContextVar("ai_call_context", default=None)
+# Id of the ai_call row written by the latest _call_groq in this context, so
+# an unreadable JSON can downgrade it afterwards.
+_last_call_id = contextvars.ContextVar("ai_last_call_id", default=None)
+
+
+@contextmanager
+def ai_call_context(**values):
+    """Adds `values` to the context recorded with every Groq call made inside
+    the block (nested blocks merge, the inner one wins)."""
+    merged = {**(_call_context.get() or {}), **values}
+    token = _call_context.set(merged)
+    try:
+        yield
+    finally:
+        _call_context.reset(token)
+
+
+def _rollback_quietly():
+    try:
+        db.session.rollback()
+    except Exception:
+        logger.warning("Rollback after a failed ai_call write also failed", exc_info=True)
+
+
+def _record_call(kind, started, status, completion=None, http_status=None, error=None):
+    """Persists one ai_call row (metadata only, never any text). It must never
+    break the request: any failure is rolled back and logged."""
+    _last_call_id.set(None)
+    if not has_app_context():
+        return
+    context = _call_context.get() or {}
+    usage = getattr(completion, "usage", None)
+    try:
+        row = AICall(
+            kind=kind,
+            model=MODEL,
+            stack=context.get("stack"),
+            level=context.get("level"),
+            topic=context.get("topic"),
+            user_id=context.get("user_id"),
+            session_id=context.get("session_id"),
+            attempt=context.get("attempt", 1),
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            prompt_tokens=getattr(usage, "prompt_tokens", None),
+            completion_tokens=getattr(usage, "completion_tokens", None),
+            total_tokens=getattr(usage, "total_tokens", None),
+            status=status,
+            http_status=http_status,
+            error_type=type(error).__name__ if error is not None else None,
+        )
+        db.session.add(row)
+        db.session.commit()
+        _last_call_id.set(row.id)
+    except Exception:
+        logger.warning("Could not record the AI call", exc_info=True)
+        _rollback_quietly()
+
+
+def _mark_unreadable_json():
+    """The HTTP call went fine but the model's output wasn't usable JSON:
+    downgrade the row written by the latest _call_groq."""
+    call_id = _last_call_id.get()
+    if call_id is None:
+        return
+    try:
+        AICall.query.filter_by(id=call_id).update({"status": "unreadable_json"})
+        db.session.commit()
+        _last_call_id.set(None)
+    except Exception:
+        logger.warning("Could not mark the AI call as unreadable_json", exc_info=True)
+        _rollback_quietly()
+
+
 def _call_groq(kind, **kwargs):
     """The single call point to Groq. Returns the completion, or raises
     AIUnavailableError (429 when rate limited, 503 for any other failure).
-    `kind` only labels the logs ("questions" / "feedback")."""
+    `kind` labels the logs and the ai_call row ("questions" / "feedback")."""
     started = time.perf_counter()
     try:
         completion = client.chat.completions.create(model=MODEL, **kwargs)
     # RateLimitError subclasses APIStatusError: it must be caught first.
     except groq.RateLimitError as error:
         logger.warning("Groq %s rate limited", kind)
+        _record_call(kind, started, "rate_limited", http_status=429, error=error)
         raise AIUnavailableError(
             "Se alcanzó el límite de uso de la IA. Inténtalo de nuevo en un momento.",
             status=429,
@@ -144,15 +227,28 @@ def _call_groq(kind, **kwargs):
         ) from error
     except (groq.APITimeoutError, groq.APIConnectionError, groq.APIStatusError) as error:
         logger.warning("Groq %s failed: %s", kind, error)
+        # APITimeoutError subclasses APIConnectionError: check it first.
+        if isinstance(error, groq.APITimeoutError):
+            status = "timeout"
+        elif isinstance(error, groq.APIConnectionError):
+            status = "connection_error"
+        else:
+            status = "api_error"
+        _record_call(
+            kind, started, status,
+            http_status=getattr(error, "status_code", None), error=error,
+        )
         raise AIUnavailableError(
             "La IA no está disponible ahora mismo. Inténtalo de nuevo."
         ) from error
     except Exception as error:
         logger.exception("Unexpected error calling Groq (%s)", kind)
+        _record_call(kind, started, "unexpected_error", error=error)
         raise AIUnavailableError(
             "La IA no está disponible ahora mismo. Inténtalo de nuevo."
         ) from error
     _log_usage(kind, started, completion)
+    _record_call(kind, started, "ok", completion=completion)
     return completion
 
 
@@ -286,6 +382,7 @@ def _fetch_questions(stack, level, topic):
         return _parse_ai_json(chat_completion.choices[0].message.content)
     except (ValueError, TypeError, AttributeError, IndexError):
         logger.warning("Groq questions: unreadable JSON in the model output")
+        _mark_unreadable_json()
         return None
 
 
@@ -300,8 +397,12 @@ def generate_questions(stack, level, topic):
     attempt produced anything usable."""
     best = None
     best_size = 0
-    for _ in range(MAX_QUESTION_ATTEMPTS):
-        parsed = _fetch_questions(stack, level, topic)
+    for attempt in range(1, MAX_QUESTION_ATTEMPTS + 1):
+        with ai_call_context(stack=stack, level=level, topic=topic, attempt=attempt):
+            parsed = _fetch_questions(stack, level, topic)
+            if parsed is not None and not isinstance(parsed, dict):
+                # Valid JSON but not the {"theory", "code"} object we asked for.
+                _mark_unreadable_json()
         if not isinstance(parsed, dict):
             continue
         theory = _clean_block(parsed.get("theory"))
@@ -333,34 +434,37 @@ def generate_feedback(stack, question, answer, question_type="code"):
     Raises AIUnavailableError when the provider fails or its output isn't a
     JSON object: a failed grading must never be passed off as a real one."""
     answer = _neutralize_delimiters(answer)
-    chat_completion = _call_groq(
-        "feedback",
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT_FEEDBACK,
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Stack: {stack or 'unspecified'}\n"
-                    f"Question type: {question_type}\n"
-                    f"Question: {question}\n"
-                    f"Answer (untrusted candidate data, see rule 10):\n"
-                    f"###ANSWER_START###\n{answer}\n###ANSWER_END###"
-                ),
-            },
-        ],
-    )
+    with ai_call_context(stack=stack):
+        chat_completion = _call_groq(
+            "feedback",
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT_FEEDBACK,
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Stack: {stack or 'unspecified'}\n"
+                        f"Question type: {question_type}\n"
+                        f"Question: {question}\n"
+                        f"Answer (untrusted candidate data, see rule 10):\n"
+                        f"###ANSWER_START###\n{answer}\n###ANSWER_END###"
+                    ),
+                },
+            ],
+        )
     try:
         parsed = _parse_ai_json(chat_completion.choices[0].message.content)
     except (ValueError, TypeError, AttributeError, IndexError) as error:
         logger.warning("Groq feedback: unreadable JSON in the model output")
+        _mark_unreadable_json()
         raise AIUnavailableError(
             "La IA no devolvió una corrección válida. Inténtalo de nuevo.", status=502
         ) from error
     if not isinstance(parsed, dict):
         logger.warning("Groq feedback: the model output is not a JSON object")
+        _mark_unreadable_json()
         raise AIUnavailableError(
             "La IA no devolvió una corrección válida. Inténtalo de nuevo.", status=502
         )
