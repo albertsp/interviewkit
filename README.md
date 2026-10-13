@@ -53,10 +53,10 @@ I couldn't find a free tool that did all three, so I built one.
 
 ## Features
 
-| | |
-|---|---|
-| ![Session setup: choose role, technology, topic and level](frontend/public/screenshots/session-setup.png) | ![Dashboard with the saved study cards, search and technology filters](frontend/public/screenshots/dashboard-cards.png) |
-| ![Stats: level, XP, results, stacks and recent sessions](frontend/public/screenshots/stats-overview.png) | ![A study card with explanation, when to use it, when to avoid it, and a code example](frontend/public/screenshots/card-detail.png) |
+|                                                                                                           |                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ![Session setup: choose role, technology, topic and level](frontend/public/screenshots/session-setup.png) | ![Dashboard with the saved study cards, search and technology filters](frontend/public/screenshots/dashboard-cards.png)             |
+| ![Stats: level, XP, results, stacks and recent sessions](frontend/public/screenshots/stats-overview.png)  | ![A study card with explanation, when to use it, when to avoid it, and a code example](frontend/public/screenshots/card-detail.png) |
 
 - **Interview simulator**: choose a role (Frontend/Backend), a technology and a level. The AI generates 5 questions: 2 short theory questions and 3 concrete code questions (read, write or fix code, not definitions).
 - **Real feedback**: every answer is evaluated with an explanation of what was right, what failed, and what the correct solution looks like.
@@ -71,21 +71,21 @@ I couldn't find a free tool that did all three, so I built one.
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 15 + React 19 + TypeScript |
-| Styling | Tailwind CSS v4 + shadcn/ui |
-| Animations | Framer Motion |
-| Code editor | CodeMirror |
-| Backend | Flask 3 (Python 3.12) |
-| Database | PostgreSQL 16 + SQLAlchemy |
-| Migrations | Alembic (Flask-Migrate) |
-| Auth | JWT in httpOnly cookies + OAuth 2.0 (Authlib) |
-| Rate limiting | Flask-Limiter |
-| AI | Groq API (`openai/gpt-oss-120b`) |
-| Testing | pytest (backend), Vitest + Testing Library (frontend) |
-| CI | GitHub Actions |
-| Deployment | Vercel (frontend) + Fly.io (backend) |
+| Layer         | Technology                                            |
+| ------------- | ----------------------------------------------------- |
+| Frontend      | Next.js 15 + React 19 + TypeScript                    |
+| Styling       | Tailwind CSS v4 + shadcn/ui                           |
+| Animations    | Framer Motion                                         |
+| Code editor   | CodeMirror                                            |
+| Backend       | Flask 3 (Python 3.12)                                 |
+| Database      | PostgreSQL 16 + SQLAlchemy                            |
+| Migrations    | Alembic (Flask-Migrate)                               |
+| Auth          | JWT in httpOnly cookies + OAuth 2.0 (Authlib)         |
+| Rate limiting | Flask-Limiter                                         |
+| AI            | Groq API (`openai/gpt-oss-120b`)                      |
+| Testing       | pytest (backend), Vitest + Testing Library (frontend) |
+| CI            | GitHub Actions                                        |
+| Deployment    | Vercel (frontend) + Fly.io (backend)                  |
 
 ---
 
@@ -103,7 +103,7 @@ I couldn't find a free tool that did all three, so I built one.
                                           └──────────────────┘
 ```
 
-1. The frontend calls the API with `credentials: include`, so the JWT travels in an httpOnly cookie and never reaches JavaScript.
+1. The frontend calls the API with credentials: include. The JWT is sent in an httpOnly cookie and, because some browsers block third-party cookies between Vercel and Fly.io, it is also stored in localStorage and sent as an Authorization: Bearer header.
 2. The backend generates questions and evaluates answers through Groq, behind per-user and global rate limits.
 3. Every evaluated question is stored and can be turned into a study card.
 
@@ -160,22 +160,22 @@ The database container started in the setup step keeps running in the background
 
 **`backend/.env`**
 
-| Variable | Required | Description |
-|---|---|---|
-| `JWT_SECRET_KEY` | Yes | Secret used to sign JWTs. The app refuses to start without it. |
-| `DATABASE_URL` | Yes | e.g. `postgresql://admin:admin@localhost:5432/interview_prep` (matches `docker-compose.yml`). |
-| `GROQ_API_KEY` | Yes, for AI features | Groq API key used to generate and evaluate questions. |
-| `FLASK_ENV` | No | `development` locally, `production` when deployed. The `/debug` routes are only registered when it is not `production`. |
-| `JWT_ACCESS_TOKEN_EXPIRES_HOURS` | No | Lifetime of the access token. |
-| `CORS_ORIGINS` | Yes | Allowed frontend origins, e.g. `http://localhost:3000`. |
-| `FRONTEND_URL` | Yes | Where OAuth callbacks redirect the user. |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | For Google login | OAuth credentials. |
-| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | For GitHub login | OAuth credentials. |
+| Variable                                    | Required             | Description                                                                                                             |
+| ------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET_KEY`                            | Yes                  | Secret used to sign JWTs. The app refuses to start without it.                                                          |
+| `DATABASE_URL`                              | Yes                  | e.g. `postgresql://admin:admin@localhost:5432/interview_prep` (matches `docker-compose.yml`).                           |
+| `GROQ_API_KEY`                              | Yes, for AI features | Groq API key used to generate and evaluate questions.                                                                   |
+| `FLASK_ENV`                                 | No                   | `development` locally, `production` when deployed. The `/debug` routes are only registered when it is not `production`. |
+| `JWT_ACCESS_TOKEN_EXPIRES_HOURS`            | No                   | Lifetime of the access token.                                                                                           |
+| `CORS_ORIGINS`                              | Yes                  | Allowed frontend origins, e.g. `http://localhost:3000`.                                                                 |
+| `FRONTEND_URL`                              | Yes                  | Where OAuth callbacks redirect the user.                                                                                |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | For Google login     | OAuth credentials.                                                                                                      |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | For GitHub login     | OAuth credentials.                                                                                                      |
 
 **`frontend/.env`**
 
-| Variable | Description |
-|---|---|
+| Variable              | Description                                            |
+| --------------------- | ------------------------------------------------------ |
 | `NEXT_PUBLIC_API_URL` | Base URL of the backend, e.g. `http://localhost:5000`. |
 
 > Never commit real secrets. Use `.env.example` as the template and keep `.env` files out of git.
@@ -184,24 +184,26 @@ The database container started in the setup step keeps running in the background
 
 ## API overview
 
-All endpoints except `/auth/*`, `/stacks` and the OAuth flow require a valid session cookie.
+All endpoints except `/auth/*`, `/stacks` and the OAuth flow require a valid JWT, sent as a cookie or as an Authorization: Bearer header.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/auth/register` | Create an account with email and password |
-| `POST` | `/auth/login` | Log in and set the session cookie |
-| `POST` | `/auth/logout` | Clear the session cookie |
-| `GET` | `/auth/google`, `/auth/github` | Start the OAuth flow (callbacks at `/auth/<provider>/callback`) |
-| `GET` | `/stacks/` | Available roles, technologies and levels |
-| `POST` | `/sessions/` | Start a session and generate 5 questions: 2 theory + 3 code (AI) |
-| `PATCH` | `/sessions/<id>/questions/<qid>` | Submit an answer and get AI feedback |
-| `POST` | `/sessions/<id>/complete` | Complete a session and award XP |
-| `GET` | `/cards/` | List your study cards |
-| `POST` | `/cards/` | Create a card from a question |
-| `PATCH` / `DELETE` | `/cards/<id>` | Edit or delete a card |
-| `GET` | `/me/stats` | Aggregated statistics, XP and level |
-| `GET` / `PATCH` | `/me/profile` | Read or update your profile |
-| `GET` | `/debug/db` | Database diagnostics (non-production only) |
+| Method             | Endpoint                         | Description                                                      |
+| ------------------ | -------------------------------- | ---------------------------------------------------------------- |
+| `POST`             | `/auth/register`                 | Create an account with email and password                        |
+| `POST`             | `/auth/login`                    | Log in and set the session cookie                                |
+| `POST`             | `/auth/logout`                   | Clear the session cookie                                         |
+| `GET`              | `/auth/google`, `/auth/github`   | Start the OAuth flow (callbacks at `/auth/<provider>/callback`)  |
+| `GET`              | `/stacks/`                       | Available roles, technologies and levels                         |
+| `POST`             | `/sessions/`                     | Start a session and generate 5 questions: 2 theory + 3 code (AI) |
+| `PATCH`            | `/sessions/<id>/questions/<qid>` | Submit an answer and get AI feedback                             |
+| `POST`             | `/sessions/<id>/complete`        | Complete a session and award XP                                  |
+| `GET`              | `/cards/`                        | List your study cards                                            |
+| `POST`             | `/cards/`                        | Create a card from a question                                    |
+| `PATCH` / `DELETE` | `/cards/<id>`                    | Edit or delete a card                                            |
+| `GET`              | `/me/stats`                      | Aggregated statistics, XP and level                              |
+| `GET` / `PATCH`    | `/me/profile`                    | Read or update your profile                                      |
+| `GET`              | `/debug/db`                      | Database diagnostics (non-production only)                       |
+| `POST`             | `/auth/oauth/exchange`           | Exchange the one-time OAuth code for an access token             |
+| `GET`              | `/health`                        | Liveness and database check (no auth)                            |
 
 **Rate limits** (AI endpoints): 5 session creations per hour and 15 answer evaluations per hour per user, plus a global shared limit of 20 per minute and 40 per day to protect the Groq free-tier budget.
 
@@ -300,8 +302,8 @@ The app uses `openai/gpt-oss-120b` on Groq. It replaced `llama-3.3-70b-versatile
 **Two-layer rate limiting**
 The Groq free tier has one budget shared by the whole app. I implemented two limits: per user (so one account can't drain it) and global (to protect the real budget). With only a per-user limit, a coordinated attack could still exhaust the quota.
 
-**JWT in httpOnly cookies for OAuth**
-The OAuth flow redirects from the backend to the frontend. Instead of exposing the token in the URL (visible in browser history and server logs), the backend sets an httpOnly cookie directly. The frontend never touches the token; the browser sends it on every request via `credentials: include`.
+**OAuth login with a one-time exchange code**
+The OAuth flow redirects from the backend to the frontend. Instead of putting the token in the URL (visible in history and logs), the backend sends a signed, one-time code (valid for 60 seconds) in the URL fragment, which browsers never send to a server. The frontend reads it, clears the address bar and exchanges it at POST /auth/oauth/exchange for the token. The token is stored in localStorage and also set as an httpOnly cookie. This is a compromise: some browsers (Safari, Brave) block the cross-site cookie, so the header is needed, at the cost of some XSS protection. Serving the API from a subdomain of the same site would let me drop localStorage.
 
 **Prompt injection mitigation**
 User answers go straight to the AI model for evaluation. I wrapped user input in `###ANSWER_START###` / `###ANSWER_END###` delimiters and added explicit instructions to the system prompt to treat that block as data, not as instructions.
@@ -326,14 +328,14 @@ The quality of the generated questions depends entirely on the prompt. Early ver
 
 ## Troubleshooting
 
-| Problem | Likely cause and fix |
-|---|---|
-| `RuntimeError` about `JWT_SECRET_KEY` on startup | The variable is missing in `backend/.env`. |
-| `connection refused` on port 5432 | The database container isn't running: `docker compose up -d`. |
-| Login works but you're immediately logged out | `CORS_ORIGINS` doesn't match the frontend origin, or cookies are blocked cross-origin. Check `SameSite`/`Secure` settings in production. |
-| `429 Too Many Requests` when starting a session | You hit a rate limit (see [API overview](#api-overview)). Wait and retry. |
-| AI requests fail with 401 | `GROQ_API_KEY` is missing or invalid. |
-| `pip install` fails locally | Use Python 3.12 (the version used in the Dockerfile and CI). |
+| Problem                                          | Likely cause and fix                                                                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `RuntimeError` about `JWT_SECRET_KEY` on startup | The variable is missing in `backend/.env`.                                                                                               |
+| `connection refused` on port 5432                | The database container isn't running: `docker compose up -d`.                                                                            |
+| Login works but you're immediately logged out    | `CORS_ORIGINS` doesn't match the frontend origin, or cookies are blocked cross-origin. Check `SameSite`/`Secure` settings in production. |
+| `429 Too Many Requests` when starting a session  | You hit a rate limit (see [API overview](#api-overview)). Wait and retry.                                                                |
+| AI requests fail with 401                        | `GROQ_API_KEY` is missing or invalid.                                                                                                    |
+| `pip install` fails locally                      | Use Python 3.12 (the version used in the Dockerfile and CI).                                                                             |
 
 ---
 
